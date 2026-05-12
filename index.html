@@ -225,7 +225,9 @@ function renderizar(lista){
         <button class="btn btn-primary btn-sm" onclick="abrirCrono('${s.id}')">▶ Abrir</button>
         <button class="btn btn-ghost btn-sm" onclick="editarSim('${s.id}',event)" title="Editar" style="font-size:15px;">✎</button>
         <button class="btn btn-ghost btn-sm" onclick="duplicarSim('${s.id}',event)" title="Duplicar" style="font-size:15px;">⧉</button>
-        ${!isFrz?`<button class="btn btn-sm" style="background:rgba(0,185,80,.1);color:#00A048;border:1px solid rgba(0,185,80,.25);" onclick="pedirFreeze('${s.id}',event)">❄ Congelar</button>`:`<span style="font-size:9px;color:#00A048;letter-spacing:.06em;text-transform:uppercase;">❄ Aprovado</span>`}
+        ${!isFrz
+          ?`<button class="btn btn-sm" style="background:rgba(0,185,80,.1);color:#00A048;border:1px solid rgba(0,185,80,.25);" onclick="pedirFreeze('${s.id}',event)">❄ Congelar</button>`
+          :`<button class="btn btn-sm" style="background:rgba(210,153,34,.1);color:#D29922;border:1px solid rgba(210,153,34,.25);" onclick="descongelar('${s.id}',event)" title="Descongelar para testes">↺ Descongelar</button>`}
         <button class="btn btn-ghost btn-sm btn-danger" onclick="pedirDel('${s.id}','${(s.nome||'').replace(/'/g,"\\'")}',event)" style="margin-left:16px;font-size:15px;" title="Excluir">🗑</button>
       </div>
     </div>`;
@@ -281,6 +283,20 @@ async function confirmarFreeze(){if(!_frzId)return;await sbAtualizar(_frzId,{sta
 // ── Excluir ───────────────────────────────────────────────
 function pedirDel(id,nome,evt){evt&&evt.stopPropagation();_delId=id;document.getElementById('del-msg').textContent=`"${nome}" será removida permanentemente.`;document.getElementById('modal-del').classList.add('open');}
 function fecharDel(){document.getElementById('modal-del').classList.remove('open');_delId=null;}
+async function descongelar(id, evt){
+  evt&&evt.stopPropagation();
+  const s=_todos.find(x=>x.id===id);
+  if(!s)return;
+  if(!confirm('Descongelar "'+s.nome+'"? O status voltará para Simulação.'))return;
+  const ok=await sbAtualizar(id,{status:'sim'});
+  if(ok){
+    const idx=_todos.findIndex(x=>x.id===id);
+    if(idx>=0)_todos[idx].status='sim';
+    renderizar(_todos);
+    toast('Cronograma descongelado');
+  }
+}
+
 async function confirmarDel(){if(!_delId)return;await sbDeletar(_delId);_todos=_todos.filter(x=>x.id!==_delId);fecharDel();renderizar(_todos);toast('Simulação excluída');}
 
 // ── Abrir cronograma ──────────────────────────────────────
