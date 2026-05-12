@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A|W · Simulações de Cronograma</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&family=Barlow+Condensed:wght@300;400;500;600;700&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--accent:#00DEDB;--font:'Oswald',sans-serif;--body:'Barlow',sans-serif;--cond:'Barlow Condensed',sans-serif;}
+[data-theme="light"]{--bg:#F2F3F5;--bg-panel:#fff;--bg-surface:#F7F8FA;--bg-surface2:#ECEEF2;--border:#D8DCE4;--border-md:#C4C9D4;--txt:#1A1D23;--txt-muted:#5A6275;--txt-dim:#9AA0AF;--hdr-bg:#1A2535;--shadow:0 2px 12px rgba(0,0,0,.08);--shadow-md:0 8px 32px rgba(0,0,0,.12);}
+[data-theme="dark"]{--bg:#0F1117;--bg-panel:#191E2B;--bg-surface:#1E2536;--bg-surface2:#242B3D;--border:rgba(255,255,255,.08);--border-md:rgba(255,255,255,.14);--txt:#E8EBF2;--txt-muted:#7D8599;--txt-dim:#4A5168;--hdr-bg:#0D1117;--shadow:0 2px 12px rgba(0,0,0,.3);--shadow-md:0 8px 32px rgba(0,0,0,.5);}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{width:100%;min-height:100vh;background:var(--bg);color:var(--txt);font-family:var(--body);transition:background .18s,color .18s;}
+.hdr{height:52px;display:flex;align-items:center;padding:0 28px;background:var(--hdr-bg);border-bottom:2px solid var(--accent);position:sticky;top:0;z-index:200;}
+.hdr-brand{display:flex;align-items:center;gap:10px;font-family:var(--font);font-size:10px;font-weight:400;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.45);}
+.hdr-brand b{color:var(--accent);font-weight:700;font-size:14px;letter-spacing:.04em;}
+.hdr-sep{width:1px;height:22px;background:rgba(255,255,255,.12);margin:0 20px;}
+.hdr-title{font-family:var(--font);font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.75);flex:1;}
+.theme-btn{width:32px;height:32px;border-radius:7px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.07);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:background .15s;}
+.theme-btn:hover{background:rgba(255,255,255,.14);}
+.main{max-width:900px;margin:0 auto;padding:36px 28px 60px;}
+.page-eyebrow{font-family:var(--cond);font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;}
+.page-h1{font-family:var(--font);font-size:28px;font-weight:700;text-transform:uppercase;letter-spacing:.02em;color:var(--txt);line-height:1.1;}
+.page-h1 em{color:var(--accent);font-style:normal;}
+.page-sub{font-size:12px;color:var(--txt-muted);margin-top:6px;line-height:1.5;}
+.page-hdr{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:28px;gap:16px;flex-wrap:wrap;}
+.btn{display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 18px;border-radius:7px;border:none;font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;white-space:nowrap;}
+.btn-primary{background:var(--accent);color:#0D1117;}
+.btn-primary:hover{background:#00F5F2;transform:translateY(-1px);}
+.btn-ghost{background:transparent;color:var(--txt-muted);border:1px solid var(--border-md);}
+.btn-ghost:hover{color:var(--txt);border-color:var(--accent);}
+.btn-sm{height:28px;padding:0 12px;font-size:9px;border-radius:5px;}
+.btn-danger{background:rgba(220,53,53,.1);color:#DC3535;border:1px solid rgba(220,53,53,.25);}
+.btn-danger:hover{background:rgba(220,53,53,.18);}
+.toolbar{display:flex;align-items:center;gap:10px;margin-bottom:20px;}
+.search-wrap{flex:1;display:flex;align-items:center;gap:8px;background:var(--bg-panel);border:1px solid var(--border);border-radius:7px;padding:0 12px;height:38px;transition:border-color .15s;}
+.search-wrap:focus-within{border-color:var(--accent);}
+.search-wrap svg{opacity:.4;flex-shrink:0;}
+.search-wrap input{flex:1;background:none;border:none;outline:none;font-family:var(--body);font-size:13px;color:var(--txt);}
+.search-wrap input::placeholder{color:var(--txt-dim);}
+.list-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.list-count{font-family:var(--font);font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--txt-dim);}
+.sim-list{display:flex;flex-direction:column;gap:1px;}
+.sim-row{display:flex;align-items:center;background:var(--bg-panel);border:1px solid var(--border);border-radius:9px;overflow:hidden;transition:border-color .15s,box-shadow .15s;}
+.sim-row:hover{border-color:var(--border-md);box-shadow:var(--shadow);}
+.sim-row.frozen{border-color:rgba(0,185,80,.25);}
+.sim-bar{width:4px;align-self:stretch;flex-shrink:0;background:var(--accent);opacity:.5;}
+.sim-bar.frozen{background:#00B950;opacity:1;}
+.sim-content{flex:1;padding:14px 18px;min-width:0;cursor:pointer;}
+.sim-top{display:flex;align-items:center;gap:10px;margin-bottom:4px;flex-wrap:wrap;}
+.sim-codigo{font-family:var(--cond);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);}
+.sim-status{font-size:8px;font-weight:700;padding:2px 8px;border-radius:8px;letter-spacing:.07em;text-transform:uppercase;}
+.sim-status.sim{background:rgba(0,174,223,.1);color:#009EC7;border:1px solid rgba(0,174,223,.2);}
+.sim-status.frozen{background:rgba(0,185,80,.1);color:#00A048;border:1px solid rgba(0,185,80,.2);}
+.sim-date{font-size:10px;color:var(--txt-dim);margin-left:auto;}
+.sim-nome{font-family:var(--font);font-size:15px;font-weight:700;color:var(--txt);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sim-desc{font-size:11px;color:var(--txt-muted);line-height:1.4;}
+.sim-actions{display:flex;padding:12px 14px;flex-shrink:0;align-items:center;gap:6px;}
+.empty{text-align:center;padding:72px 24px;border:1.5px dashed var(--border-md);border-radius:12px;background:var(--bg-panel);}
+.empty-icon{font-size:40px;margin-bottom:14px;opacity:.5;}
+.empty-t{font-family:var(--font);font-size:16px;font-weight:700;color:var(--txt-muted);margin-bottom:6px;}
+.empty-s{font-size:12px;color:var(--txt-dim);margin-bottom:20px;}
+.loading{text-align:center;padding:40px;color:var(--txt-dim);font-size:13px;}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9000;display:none;align-items:center;justify-content:center;padding:16px;}
+.overlay.open{display:flex;}
+.modal{background:var(--bg-panel);border:1px solid var(--border-md);border-radius:12px;width:100%;max-width:500px;box-shadow:var(--shadow-md);}
+.modal-hdr{display:flex;align-items:center;gap:10px;padding:16px 20px;border-bottom:1px solid var(--border);}
+.modal-hdr-title{font-family:var(--font);font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--txt);flex:1;}
+.modal-close{width:28px;height:28px;background:var(--bg-surface2);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:13px;color:var(--txt-muted);}
+.modal-body{padding:20px;display:flex;flex-direction:column;gap:14px;}
+.field label{display:block;font-family:var(--font);font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--txt-muted);margin-bottom:5px;}
+.field input,.field textarea{width:100%;background:var(--bg-surface);border:1px solid var(--border);border-radius:7px;padding:9px 12px;font-family:var(--body);font-size:13px;color:var(--txt);outline:none;transition:border-color .15s;resize:vertical;}
+.field input:focus,.field textarea:focus{border-color:var(--accent);}
+.field input::placeholder,.field textarea::placeholder{color:var(--txt-dim);}
+.modal-footer{display:flex;gap:8px;padding:14px 20px;border-top:1px solid var(--border);justify-content:flex-end;}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.freeze-box{background:var(--bg-panel);border:1px solid rgba(0,185,80,.3);border-radius:12px;padding:24px;max-width:420px;width:100%;box-shadow:var(--shadow-md);}
+.freeze-title{font-family:var(--font);font-size:16px;font-weight:700;color:var(--txt);margin-bottom:8px;}
+.freeze-sub{font-size:12px;color:var(--txt-muted);line-height:1.6;margin-bottom:20px;}
+.freeze-btns{display:flex;gap:8px;justify-content:flex-end;}
+.btn-freeze{background:#00B950;color:#fff;border:none;}
+.btn-freeze:hover{background:#00D45C;}
+.del-box{background:var(--bg-panel);border:1px solid rgba(220,53,53,.2);border-radius:10px;padding:22px;max-width:380px;width:100%;box-shadow:var(--shadow-md);}
+.del-title{font-family:var(--font);font-size:14px;font-weight:700;color:var(--txt);margin-bottom:8px;}
+.del-sub{font-size:12px;color:var(--txt-muted);margin-bottom:18px;line-height:1.5;}
+.del-btns{display:flex;gap:8px;justify-content:flex-end;}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#1A2535;color:#fff;font-family:var(--font);font-size:11px;font-weight:600;padding:10px 20px;border-radius:8px;z-index:99999;transition:transform .25s;pointer-events:none;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div id="toast" class="toast"></div>
+<header class="hdr">
+  <div class="hdr-brand"><b>A|W</b> Athié Wohnrath</div>
+  <div class="hdr-sep"></div>
+  <div class="hdr-title">Simulações de Cronograma · DNN</div>
+  <button class="theme-btn" onclick="toggleTheme()" id="theme-btn" title="Alternar tema">🌙</button>
+</header>
+<main class="main">
+  <div class="page-hdr">
+    <div>
+      <div class="page-eyebrow">Desenvolvimento de Novos Negócios</div>
+      <h1 class="page-h1">Cronogramas<br><em>Simulados</em></h1>
+      <p class="page-sub">Crie e compare versões de cronograma. Congele a versão aprovada para avançar.</p>
+    </div>
+    <button class="btn btn-primary" onclick="abrirModalNovo()">+ Nova Simulação</button>
+  </div>
+  <div class="toolbar">
+    <div class="search-wrap">
+      <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="6.5" cy="6.5" r="5.5"/><path d="m11.5 11.5 3 3"/></svg>
+      <input id="search" type="text" placeholder="Buscar por código, nome…" oninput="filtrar()">
+    </div>
+  </div>
+  <div class="list-meta"><span class="list-count" id="list-count"></span></div>
+  <div class="sim-list" id="sim-list"><div class="loading">Carregando…</div></div>
+</main>
+
+<!-- Modal Novo/Editar -->
+<div class="overlay" id="modal-form" onclick="if(event.target===this)fecharForm()">
+  <div class="modal">
+    <div class="modal-hdr">
+      <span class="modal-hdr-title" id="form-titulo">Nova Simulação</span>
+      <button class="modal-close" onclick="fecharForm()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field-row">
+        <div class="field"><label>Código do projeto</label><input id="f-codigo" type="text" placeholder="ex: 2024-0123" maxlength="30"></div>
+        <div class="field"><label>GI Responsável</label><input id="f-gi" type="text" placeholder="Nome do GI" maxlength="50"></div>
+      </div>
+      <div class="field"><label>Nome do projeto *</label><input id="f-nome" type="text" placeholder="ex: Escritório Exemplo S.A." maxlength="80"></div>
+      <div class="field"><label>Descrição / observações</label><textarea id="f-desc" rows="2" placeholder="Cenário, premissas, variações…"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="fecharForm()">Cancelar</button>
+      <button class="btn btn-primary" id="form-salvar-btn" onclick="salvarForm()">Criar simulação</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Congelar -->
+<div class="overlay" id="modal-freeze" onclick="if(event.target===this)fecharFreeze()">
+  <div class="freeze-box">
+    <div style="font-size:32px;margin-bottom:12px;">❄️</div>
+    <div class="freeze-title">Congelar simulação?</div>
+    <p class="freeze-sub" id="freeze-msg"></p>
+    <div class="freeze-btns">
+      <button class="btn btn-ghost" onclick="fecharFreeze()">Cancelar</button>
+      <button class="btn btn-freeze" onclick="confirmarFreeze()">❄ Congelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Excluir -->
+<div class="overlay" id="modal-del" onclick="if(event.target===this)fecharDel()">
+  <div class="del-box">
+    <div class="del-title">⚠ Excluir simulação?</div>
+    <p class="del-sub" id="del-msg"></p>
+    <div class="del-btns">
+      <button class="btn btn-ghost" onclick="fecharDel()">Cancelar</button>
+      <button class="btn btn-danger" onclick="confirmarDel()">Excluir</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SB_URL = 'https://ejneanfveoctdlltjnrs.supabase.co';
+const SB_KEY = 'sb_publishable_vZApDmF_C-heCrm8fXJ_XA_ATmMO3YP';
+const SB_HDR = {'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
+
+let _todos=[], _editId=null, _delId=null, _frzId=null, _toastTimer=null;
+
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(_toastTimer);_toastTimer=setTimeout(()=>t.classList.remove('show'),2500);}
+
+// ── Tema ──────────────────────────────────────────────────
+function toggleTheme(){const cur=document.documentElement.getAttribute('data-theme');const next=cur==='light'?'dark':'light';document.documentElement.setAttribute('data-theme',next);document.getElementById('theme-btn').textContent=next==='dark'?'☀':'🌙';localStorage.setItem('aw_theme',next);}
+(function(){const s=localStorage.getItem('aw_theme')||'light';document.documentElement.setAttribute('data-theme',s);document.getElementById('theme-btn').textContent=s==='dark'?'☀':'🌙';})();
+
+// ── Supabase ──────────────────────────────────────────────
+async function sbListar(){
+  try{const r=await fetch(SB_URL+'/rest/v1/cronogramas?select=*&order=atualizado_em.desc',{headers:SB_HDR});return await r.json();}
+  catch(e){console.error(e);return[];}
+}
+async function sbSalvar(id,dados){
+  try{const r=await fetch(SB_URL+'/rest/v1/cronogramas',{method:'POST',headers:{...SB_HDR,'Prefer':'resolution=merge-duplicates'},body:JSON.stringify({...dados,id,atualizado_em:new Date().toISOString()})});return r.ok;}
+  catch(e){console.error(e);return false;}
+}
+async function sbAtualizar(id,patch){
+  try{const r=await fetch(SB_URL+'/rest/v1/cronogramas?id=eq.'+id,{method:'PATCH',headers:SB_HDR,body:JSON.stringify({...patch,atualizado_em:new Date().toISOString()})});return r.ok;}
+  catch(e){return false;}
+}
+async function sbDeletar(id){
+  try{const r=await fetch(SB_URL+'/rest/v1/cronogramas?id=eq.'+id,{method:'DELETE',headers:SB_HDR});return r.ok;}
+  catch(e){return false;}
+}
+
+// ── Carregar ──────────────────────────────────────────────
+async function carregar(){
+  document.getElementById('sim-list').innerHTML='<div class="loading">Carregando…</div>';
+  _todos=await sbListar();
+  renderizar(_todos);
+}
+
+function renderizar(lista){
+  const el=document.getElementById('sim-list');
+  const cnt=document.getElementById('list-count');
+  const n=lista.length;
+  cnt.textContent=n+' simulaç'+(n===1?'ão':'ões');
+  if(!n){el.innerHTML='<div class="empty"><div class="empty-icon">📋</div><div class="empty-t">Nenhuma simulação</div><div class="empty-s">Crie a primeira simulação de cronograma</div><button class="btn btn-primary" onclick="abrirModalNovo()">+ Nova Simulação</button></div>';return;}
+  el.innerHTML=lista.map(s=>{
+    const dt=new Date(s.atualizado_em).toLocaleDateString('pt-BR');
+    const isFrz=s.status==='frozen';
+    return `<div class="sim-row ${isFrz?'frozen':''}" ondblclick="abrirCrono('${s.id}')">
+      <div class="sim-bar ${isFrz?'frozen':''}"></div>
+      <div class="sim-content" onclick="abrirCrono('${s.id}')">
+        <div class="sim-top">
+          <span class="sim-codigo">${s.codigo||'—'}</span>
+          <span class="sim-status ${s.status}">${isFrz?'❄ Congelado':'⚡ Simulação'}</span>
+          <span class="sim-date">${dt}</span>
+        </div>
+        <div class="sim-nome">${s.nome||'Sem nome'}</div>
+        ${s.descricao?`<div class="sim-desc">${s.descricao}</div>`:''}
+      </div>
+      <div class="sim-actions">
+        <button class="btn btn-primary btn-sm" onclick="abrirCrono('${s.id}')">▶ Abrir</button>
+        <button class="btn btn-ghost btn-sm" onclick="editarSim('${s.id}',event)" title="Editar" style="font-size:15px;">✎</button>
+        <button class="btn btn-ghost btn-sm" onclick="duplicarSim('${s.id}',event)" title="Duplicar" style="font-size:15px;">⧉</button>
+        ${!isFrz?`<button class="btn btn-sm" style="background:rgba(0,185,80,.1);color:#00A048;border:1px solid rgba(0,185,80,.25);" onclick="pedirFreeze('${s.id}',event)">❄ Congelar</button>`:`<span style="font-size:9px;color:#00A048;letter-spacing:.06em;text-transform:uppercase;">❄ Aprovado</span>`}
+        <button class="btn btn-ghost btn-sm btn-danger" onclick="pedirDel('${s.id}','${(s.nome||'').replace(/'/g,"\\'")}',event)" style="margin-left:16px;font-size:15px;" title="Excluir">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function filtrar(){const q=document.getElementById('search').value.toLowerCase().trim();renderizar(q?_todos.filter(s=>(s.nome||'').toLowerCase().includes(q)||(s.codigo||'').toLowerCase().includes(q)||(s.descricao||'').toLowerCase().includes(q)):_todos);}
+
+// ── Form novo/editar ──────────────────────────────────────
+function abrirModalNovo(){_editId=null;document.getElementById('form-titulo').textContent='Nova Simulação';document.getElementById('form-salvar-btn').textContent='Criar simulação';['f-codigo','f-nome','f-gi','f-desc'].forEach(id=>document.getElementById(id).value='');document.getElementById('modal-form').classList.add('open');setTimeout(()=>document.getElementById('f-codigo').focus(),50);}
+function editarSim(id,evt){evt&&evt.stopPropagation();const s=_todos.find(x=>x.id===id);if(!s)return;_editId=id;document.getElementById('form-titulo').textContent='Editar Simulação';document.getElementById('form-salvar-btn').textContent='Salvar alterações';document.getElementById('f-codigo').value=s.codigo||'';document.getElementById('f-nome').value=s.nome||'';document.getElementById('f-gi').value=s.gi||'';document.getElementById('f-desc').value=s.descricao||'';document.getElementById('modal-form').classList.add('open');setTimeout(()=>document.getElementById('f-nome').focus(),50);}
+function fecharForm(){document.getElementById('modal-form').classList.remove('open');_editId=null;}
+
+async function salvarForm(){
+  const codigo=document.getElementById('f-codigo').value.trim();
+  const nome=document.getElementById('f-nome').value.trim();
+  const gi=document.getElementById('f-gi').value.trim();
+  const desc=document.getElementById('f-desc').value.trim();
+  if(!nome){document.getElementById('f-nome').focus();return;}
+  const btn=document.getElementById('form-salvar-btn');
+  btn.disabled=true;btn.textContent='Salvando…';
+  if(_editId){
+    await sbAtualizar(_editId,{codigo,nome,gi,descricao:desc});
+    const idx=_todos.findIndex(x=>x.id===_editId);
+    if(idx>=0)_todos[idx]={..._todos[idx],codigo,nome,gi,descricao:desc};
+    fecharForm();renderizar(_todos);toast('Simulação atualizada');
+  }else{
+    const id='crono_'+Date.now();
+    const estado={meta:{codigo,nome,gi,gp:''},cfg:{nProj:1,nObra:1,dnn:'',visita:'',kickoffTec:'',preObra:false,preObraDias:10,vinculoObraProj:false,limiteArq:5,projFases:[{etapas:{ep1:true,ep2:true,ap:true,ex:true,cond:false},andares:''}],obraFases:[{inicio:'',prazo:'56',andares:''}]},alocacaoARQ:{}};
+    const ok=await sbSalvar(id,{codigo,nome,gi,gp:'',status:'sim',descricao:desc,estado_json:JSON.stringify({ts:Date.now(),estado})});
+    if(ok){fecharForm();abrirCrono(id);}else{toast('Erro ao salvar. Tente novamente.');btn.disabled=false;btn.textContent='Criar simulação';}
+  }
+  btn.disabled=false;
+}
+
+// ── Duplicar ──────────────────────────────────────────────
+async function duplicarSim(id,evt){
+  evt&&evt.stopPropagation();
+  const src=_todos.find(x=>x.id===id);if(!src)return;
+  const newId='crono_'+Date.now();
+  const newNome=(src.nome||'Simulação')+' (cópia)';
+  let estadoJson=src.estado_json;
+  try{const d=JSON.parse(estadoJson);if(d.estado&&d.estado.meta)d.estado.meta.nome=newNome;estadoJson=JSON.stringify(d);}catch{}
+  const ok=await sbSalvar(newId,{codigo:src.codigo,nome:newNome,gi:src.gi,gp:src.gp,status:'sim',descricao:src.descricao,estado_json:estadoJson});
+  if(ok){toast('Simulação duplicada');carregar();}else toast('Erro ao duplicar');
+}
+
+// ── Congelar ──────────────────────────────────────────────
+function pedirFreeze(id,evt){evt&&evt.stopPropagation();_frzId=id;const s=_todos.find(x=>x.id===id);document.getElementById('freeze-msg').innerHTML=`A simulação <b>"${s?.nome||''}"</b> será marcada como <b>Congelada</b> — versão aprovada com o cliente.`;document.getElementById('modal-freeze').classList.add('open');}
+function fecharFreeze(){document.getElementById('modal-freeze').classList.remove('open');_frzId=null;}
+async function confirmarFreeze(){if(!_frzId)return;await sbAtualizar(_frzId,{status:'frozen'});const idx=_todos.findIndex(x=>x.id===_frzId);if(idx>=0)_todos[idx].status='frozen';fecharFreeze();renderizar(_todos);toast('Simulação congelada ❄');}
+
+// ── Excluir ───────────────────────────────────────────────
+function pedirDel(id,nome,evt){evt&&evt.stopPropagation();_delId=id;document.getElementById('del-msg').textContent=`"${nome}" será removida permanentemente.`;document.getElementById('modal-del').classList.add('open');}
+function fecharDel(){document.getElementById('modal-del').classList.remove('open');_delId=null;}
+async function confirmarDel(){if(!_delId)return;await sbDeletar(_delId);_todos=_todos.filter(x=>x.id!==_delId);fecharDel();renderizar(_todos);toast('Simulação excluída');}
+
+// ── Abrir cronograma ──────────────────────────────────────
+function abrirCrono(id){sessionStorage.setItem('aw_crono_id',id);window.location.href='app.html';}
+
+carregar();
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){fecharForm();fecharFreeze();fecharDel();}if(e.key==='Enter'&&document.getElementById('modal-form').classList.contains('open'))salvarForm();});
+</script>
+</body>
+</html>
