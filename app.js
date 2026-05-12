@@ -29,21 +29,37 @@ async function salvarDados(){
 
 async function carregarDadosSB(){
   if(!_CRONO_ID)return false;
+  // Tentar cache da sessão primeiro
   const cached=sessionStorage.getItem('aw_estado_atual');
   if(cached){try{const d=JSON.parse(cached);if(d.estado){ESTADO=d.estado;window.__AW_ESTADO=ESTADO;estadoParaUI();return true;}}catch{}}
+  // Buscar do Supabase
   try{
-    const r=await fetch(SB_URL+'/rest/v1/cronogramas?id=eq.'+_CRONO_ID+'&select=estado_json,atualizado_em',{headers:SB_HDR});
+    const r=await fetch(SB_URL+'/rest/v1/cronogramas?id=eq.'+_CRONO_ID+'&select=*',{headers:SB_HDR});
     const data=await r.json();
-    if(data&&data[0]&&data[0].estado_json){
-      const d=JSON.parse(data[0].estado_json);
-      if(d.estado){
-        ESTADO=d.estado;window.__AW_ESTADO=ESTADO;estadoParaUI();
-        sessionStorage.setItem('aw_estado_atual',data[0].estado_json);
-        const dt=new Date(data[0].atualizado_em);
-        const el=document.getElementById('save-info');
-        if(el)el.textContent='Último save: '+dt.toLocaleDateString('pt-BR')+' '+dt.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-        return true;
+    if(data&&data[0]){
+      const row=data[0];
+      // Se tem estado salvo, usar
+      if(row.estado_json){
+        try{
+          const d=JSON.parse(row.estado_json);
+          if(d.estado){
+            ESTADO=d.estado;window.__AW_ESTADO=ESTADO;estadoParaUI();
+            sessionStorage.setItem('aw_estado_atual',row.estado_json);
+            const dt=new Date(row.atualizado_em);
+            const el=document.getElementById('save-info');
+            if(el)el.textContent='Último save: '+dt.toLocaleDateString('pt-BR')+' '+dt.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+            return true;
+          }
+        }catch{}
       }
+      // Se não tem estado, inicializar com os metadados do cronograma
+      ESTADO.meta.codigo=row.codigo||'';
+      ESTADO.meta.nome=row.nome||'';
+      ESTADO.meta.gi=row.gi||'';
+      ESTADO.meta.gp=row.gp||'';
+      window.__AW_ESTADO=ESTADO;
+      estadoParaUI();
+      return true;
     }
   }catch(e){console.error('carregarDadosSB',e);}
   return false;
