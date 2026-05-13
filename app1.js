@@ -14,12 +14,7 @@ async function salvarDados(){
       if(el)el.textContent='Salvando…';
       const r=await fetch(SB_URL+'/rest/v1/cronogramas?id=eq.'+_CRONO_ID,{
         method:'PATCH',headers:SB_HDR,
-        body:JSON.stringify({
-          codigo:ESTADO.meta.codigo||'',nome:ESTADO.meta.nome||'',
-          gi:ESTADO.meta.gi||'',gp:ESTADO.meta.gp||'',
-          estado_json:JSON.stringify(payload),
-          atualizado_em:new Date().toISOString()
-        })
+        body:JSON.stringify({codigo:ESTADO.meta.codigo||'',nome:ESTADO.meta.nome||'',gi:ESTADO.meta.gi||'',gp:ESTADO.meta.gp||'',estado_json:JSON.stringify(payload),atualizado_em:new Date().toISOString()})
       });
       const dt=new Date(ts).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
       if(el)el.textContent=r.ok?'Salvo às '+dt:'Erro ao salvar';
@@ -38,30 +33,14 @@ async function carregarDadosSB(){
       const row=data[0];
       sessionStorage.setItem('aw_crono_status',row.status||'sim');
       sessionStorage.setItem('aw_crono_nome',row.nome||'');
-      if(row.estado_json){
-        try{
-          const d=JSON.parse(row.estado_json);
-          if(d.estado){
-            ESTADO=d.estado;window.__AW_ESTADO=ESTADO;estadoParaUI();
-            sessionStorage.setItem('aw_estado_atual',row.estado_json);
-            const dt=new Date(row.atualizado_em);
-            const el=document.getElementById('save-info');
-            if(el)el.textContent='Último save: '+dt.toLocaleDateString('pt-BR')+' '+dt.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-            return true;
-          }
-        }catch{}
-      }
-      ESTADO.meta.codigo=row.codigo||'';
-      ESTADO.meta.nome=row.nome||'';
-      ESTADO.meta.gi=row.gi||'';
-      ESTADO.meta.gp=row.gp||'';
-      window.__AW_ESTADO=ESTADO;
-      estadoParaUI();
-      return true;
+      if(row.estado_json){try{const d=JSON.parse(row.estado_json);if(d.estado){ESTADO=d.estado;window.__AW_ESTADO=ESTADO;estadoParaUI();sessionStorage.setItem('aw_estado_atual',row.estado_json);const dt=new Date(row.atualizado_em);const el=document.getElementById('save-info');if(el)el.textContent='Último save: '+dt.toLocaleDateString('pt-BR')+' '+dt.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});return true;}}catch{}}
+      ESTADO.meta.codigo=row.codigo||'';ESTADO.meta.nome=row.nome||'';ESTADO.meta.gi=row.gi||'';ESTADO.meta.gp=row.gp||'';
+      window.__AW_ESTADO=ESTADO;estadoParaUI();return true;
     }
   }catch(e){console.error('carregarDadosSB',e);}
   return false;
 }
+const _CRONO_ID=sessionStorage.getItem('aw_crono_ativo')||'aw_planejamento_v1';
 const LS_KEY=_CRONO_ID.startsWith('crono_')||_CRONO_ID==='migrado_v1'?'aw_crono_'+_CRONO_ID:'aw_planejamento_v1';
 const LS_INDEX='aw_crono_index';let ESTADO={meta:{codigo:"",nome:"",gi:"",gp:""},cfg:{nProj:1,nObra:1,dnn:"",visita:"",kickoffTec:"",preObra:!1,preObraDias:10,vinculoObraProj:!1,limiteArq:5,projFases:[{etapas:{ep1:!0,ep2:!0,ap:!0,ex:!0,cond:!1},andares:""}],obraFases:[{inicio:"",prazo:"56",andares:""}]},alocacaoARQ:{}};function salvarDados(){try{lerUIparaEstado();const t={ts:Date.now(),estado:ESTADO};localStorage.setItem(LS_KEY,JSON.stringify(t));
     // Atualizar índice de cronogramas
