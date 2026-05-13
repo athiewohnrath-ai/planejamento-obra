@@ -1,3 +1,4 @@
+console.log('[AW] app1.js carregado');
 const SB_URL='https://ejneanfveoctdlltjnrs.supabase.co';
 const SB_KEY='sb_publishable_vZApDmF_C-heCrm8fXJ_XA_ATmMO3YP';
 const SB_HDR={'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
@@ -6,16 +7,12 @@ const _CRONO_ID=sessionStorage.getItem('aw_crono_id')||'';
 async function salvarDados(){
   try{
     lerUIparaEstado();
-    const ts=Date.now();
-    const payload={ts,estado:ESTADO};
+    const ts=Date.now(),payload={ts,estado:ESTADO};
     sessionStorage.setItem('aw_estado_atual',JSON.stringify(payload));
     if(_CRONO_ID){
       const el=document.getElementById('save-info');
       if(el)el.textContent='Salvando…';
-      const r=await fetch(SB_URL+'/rest/v1/cronogramas?id=eq.'+_CRONO_ID,{
-        method:'PATCH',headers:SB_HDR,
-        body:JSON.stringify({codigo:ESTADO.meta.codigo||'',nome:ESTADO.meta.nome||'',gi:ESTADO.meta.gi||'',gp:ESTADO.meta.gp||'',estado_json:JSON.stringify(payload),atualizado_em:new Date().toISOString()})
-      });
+      const r=await fetch(SB_URL+'/rest/v1/cronogramas?id=eq.'+_CRONO_ID,{method:'PATCH',headers:SB_HDR,body:JSON.stringify({codigo:ESTADO.meta.codigo||'',nome:ESTADO.meta.nome||'',gi:ESTADO.meta.gi||'',gp:ESTADO.meta.gp||'',estado_json:JSON.stringify(payload),atualizado_em:new Date().toISOString()})});
       const dt=new Date(ts).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
       if(el)el.textContent=r.ok?'Salvo às '+dt:'Erro ao salvar';
     }
@@ -40,9 +37,7 @@ async function carregarDadosSB(){
   }catch(e){console.error('carregarDadosSB',e);}
   return false;
 }
-const _CRONO_ID=sessionStorage.getItem('aw_crono_ativo')||'aw_planejamento_v1';
-const LS_KEY=_CRONO_ID.startsWith('crono_')||_CRONO_ID==='migrado_v1'?'aw_crono_'+_CRONO_ID:'aw_planejamento_v1';
-const LS_INDEX='aw_crono_index';let ESTADO={meta:{codigo:"",nome:"",gi:"",gp:""},cfg:{nProj:1,nObra:1,dnn:"",visita:"",kickoffTec:"",preObra:!1,preObraDias:10,vinculoObraProj:!1,limiteArq:5,projFases:[{etapas:{ep1:!0,ep2:!0,ap:!0,ex:!0,cond:!1},andares:""}],obraFases:[{inicio:"",prazo:"56",andares:""}]},alocacaoARQ:{}};function salvarDados(){try{lerUIparaEstado();const t={ts:Date.now(),estado:ESTADO};localStorage.setItem(LS_KEY,JSON.stringify(t));
+// credenciais gerenciadas pelo módulo Supabase
     // Atualizar índice de cronogramas
     try{
       const _idx=JSON.parse(localStorage.getItem(LS_INDEX)||'[]');
