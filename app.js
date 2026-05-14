@@ -2100,24 +2100,25 @@ function _pfResumo(){
   const nomeProj=ESTADO.meta?.nome||'Planejamento de Obra';
   const gi=ESTADO.meta?.gi||'';
   const gp=ESTADO.meta?.gp||'';
-  const hoje=new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});
-  const fmtD=d=>new Date(d).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});
+  const hoje=new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
   const fmtDc=d=>new Date(d).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
+  const fmtDl=d=>new Date(d).toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
 
-  // Calcular totais
+  // Totais
   const totalDU=subIds.reduce((s,sid)=>{const sub=fase?.rows?.arq?.subs?.[sid];return sub?s+CALENDARIO.contarDU(new Date(sub.start),new Date(sub.end)):s;},0);
   const arqSet=new Set(Object.values(_pfDados.etapas||{}).flatMap(e=>e.arquitetos||[]));
   const primeiroSub=subIds.find(id=>fase?.rows?.arq?.subs?.[id]?.start);
   const ultimoSub=[...subIds].reverse().find(id=>fase?.rows?.arq?.subs?.[id]?.end);
-  const periodoIni=primeiroSub?fmtD(fase.rows.arq.subs[primeiroSub].start):'—';
-  const periodoFim=ultimoSub?fmtD(fase.rows.arq.subs[ultimoSub].end):'—';
+  const dataIni=primeiroSub?new Date(fase.rows.arq.subs[primeiroSub].start):new Date();
+  const dataFim=ultimoSub?new Date(fase.rows.arq.subs[ultimoSub].end):new Date();
 
-  // Calendário
+  // Calendário — todos os meses do período
   function renderCalMes(ano,mes){
     const nomeMes=new Date(ano,mes,1).toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
     const primeiroDia=new Date(ano,mes,1).getDay();
     const ultimoDia=new Date(ano,mes+1,0).getDate();
     const total=Math.ceil((primeiroDia+ultimoDia)/7)*7;
+    // Mapear dias de etapas
     const etapasDoDia={};
     subIds.forEach((sid,idx2)=>{
       const sub=fase?.rows?.arq?.subs?.[sid];if(!sub)return;
@@ -2133,45 +2134,53 @@ function _pfResumo(){
     for(let cel=0;cel<total;cel++){
       if(cel%7===0)cells+='<tr>';
       const dow=cel%7;
+      const fds=dow===0||dow===6;
       if(cel<primeiroDia||dia>ultimoDia){cells+='<td></td>';}
       else{
         const d2=new Date(ano,mes,dia);
         const iso=G.fmtISO(d2);
         const et=etapasDoDia[iso];
-        const fds=dow===0||dow===6;
         if(et){
-          const aprStar=et.isAprova?'★':'';
-          cells+=`<td><div style="background:${et.cor};border-radius:2px;color:white;font-size:7px;font-weight:700;text-align:center;padding:1px 0;position:relative;">${dia}${aprStar?'<span style="position:absolute;top:-1px;right:0;font-size:7px;color:#FFD600;">★</span>':''}</div></td>`;
+          const aprStar=et.isAprova?'<span style="position:absolute;top:-1px;right:0;font-size:6px;color:#FFD600;line-height:1;">★</span>':'';
+          cells+=`<td><div style="background:${et.cor};border-radius:1px;color:white;font-size:7px;font-weight:700;text-align:center;padding:1px 0;position:relative;">${dia}${aprStar}</div></td>`;
         }else{
-          cells+=`<td style="text-align:center;font-size:7px;color:${fds?'#CCC':'#555'};">${dia}</td>`;
+          cells+=`<td style="text-align:center;font-size:7px;color:${fds?'#CCC':'#888'};">${dia}</td>`;
         }
         dia++;
       }
       if(cel%7===6)cells+='</tr>';
     }
-    return `<div style="margin-bottom:12px;">
-      <div style="font-size:8px;font-weight:700;text-transform:capitalize;color:#5A6275;margin-bottom:4px;letter-spacing:.04em;">${nomeMes}</div>
+    return `<div style="margin-bottom:10px;break-inside:avoid;">
+      <div style="font-size:8px;font-weight:700;text-transform:capitalize;color:#1A2535;margin-bottom:3px;padding-bottom:2px;border-bottom:1px solid #E8ECF0;">${nomeMes}</div>
       <table style="width:100%;border-collapse:collapse;table-layout:fixed;">
-        <thead><tr>${'DSTQQSS'.split('').map((d,i)=>`<th style="text-align:center;font-size:6px;color:${i===0||i===6?'#CCC':'#999'};padding:1px 0;">${d}</th>`).join('')}</tr></thead>
+        <thead><tr>${'DSTQQSS'.split('').map((d,i)=>`<th style="text-align:center;font-size:6px;color:${i===0||i===6?'#CCC':'#AAA'};padding:1px 0;font-weight:400;">${d}</th>`).join('')}</tr></thead>
         <tbody>${cells}</tbody>
       </table></div>`;
   }
 
-  const fase0Ini=primeiroSub?new Date(fase.rows.arq.subs[primeiroSub].start):new Date();
-  const calAno=fase0Ini.getFullYear();
-  const calMes=fase0Ini.getMonth();
-  let calAno2=calAno,calMes2=calMes+1;
-  if(calMes2>11){calMes2=0;calAno2++;}
-  const calHTML=renderCalMes(calAno,calMes)+renderCalMes(calAno2,calMes2);
+  // Calcular meses do período
+  const meses=[];
+  let mCur=new Date(dataIni.getFullYear(),dataIni.getMonth(),1);
+  const mFim=new Date(dataFim.getFullYear(),dataFim.getMonth(),1);
+  while(G.ms(mCur)<=G.ms(mFim)){
+    meses.push({ano:mCur.getFullYear(),mes:mCur.getMonth()});
+    mCur=new Date(mCur.getFullYear(),mCur.getMonth()+1,1);
+  }
+  const calHTML=meses.map(m=>renderCalMes(m.ano,m.mes)).join('');
 
   // Legenda
   const legendaHTML=subIds.map((sid,i)=>{
     const sub=fase?.rows?.arq?.subs?.[sid];if(!sub)return'';
     const etCor=(_pfCoresCustom&&_pfCoresCustom[sid])||PF_CORES[i%PF_CORES.length];
-    return `<div style="display:flex;align-items:center;gap:3px;margin-bottom:3px;"><div style="width:8px;height:8px;border-radius:1px;background:${etCor};flex-shrink:0;"></div><span style="font-size:7px;color:#5A6275;">${subNames[sid]||sid}</span></div>`;
+    const du=CALENDARIO.contarDU(new Date(sub.start),new Date(sub.end));
+    return `<div style="display:flex;align-items:center;gap:4px;margin-bottom:3px;">
+      <div style="width:10px;height:10px;border-radius:1px;background:${etCor};flex-shrink:0;"></div>
+      <span style="font-size:8px;color:#1A2535;font-weight:600;">${subNames[sid]||sid}</span>
+      <span style="font-size:7px;color:#9AA0AF;">${du}DU · ${fmtDc(sub.start)}–${fmtDc(sub.end)}</span>
+    </div>`;
   }).join('');
 
-  // Linhas da tabela
+  // Tabela de etapas
   let rows='';
   subIds.forEach((sid,idx2)=>{
     const sub=fase?.rows?.arq?.subs?.[sid];if(!sub)return;
@@ -2184,110 +2193,121 @@ function _pfResumo(){
     const ad=getDiasAprovacao(sid);
     const adIni=ad.length>0?fmtDc(ad[0]):'';
     const adFim=ad.length>0?fmtDc(ad[ad.length-1]):'';
-    const aprHTML=ac.ativo?`<div style="margin-top:3px;padding:2px 4px;background:#FFF8E1;border-left:2px solid #D4A017;border-radius:1px;font-size:7px;font-weight:700;color:#B8860B;">★ Aprov. cliente: ${ac.dias} dia${ac.dias>1?'s':''}${adIni?' ('+adIni+(adFim&&adFim!==adIni?' – '+adFim:'')+')':''}</div>`:'';
-    rows+=`<tr style="border-bottom:0.5px solid #E8ECF0;">
-      <td style="padding:6px 8px;vertical-align:top;width:130px;">
-        <div style="font-family:Oswald,sans-serif;font-size:11px;font-weight:700;color:${etCor};">${subNames[sid]||sid}</div>
-        <div style="font-size:8px;color:#6A7585;margin-top:1px;">${fmtDc(sub.start)} – ${fmtDc(sub.end)}</div>
-        <div style="font-size:8px;font-weight:600;color:#1A2535;">${du} DU</div>
+    const aprHTML=ac.ativo?`<div style="margin-top:3px;padding:2px 5px;background:#FFF8E1;border-left:2px solid #D4A017;font-size:8px;font-weight:700;color:#B8860B;">★ Aprov. cliente: ${ac.dias}d${adIni?' ('+adIni+(adFim&&adFim!==adIni?' – '+adFim:'')+')':''}</div>`:'';
+
+    const zebra=idx2%2===0?'#FAFAFA':'#FFFFFF';
+    rows+=`<tr style="background:${zebra};">
+      <td style="padding:6px 8px;vertical-align:top;border-bottom:0.5px solid #E8ECF0;">
+        <div style="display:flex;align-items:center;gap:5px;">
+          <div style="width:8px;height:8px;border-radius:1px;background:${etCor};flex-shrink:0;"></div>
+          <span style="font-family:Oswald,sans-serif;font-size:11px;font-weight:700;color:${etCor};">${subNames[sid]||sid}</span>
+        </div>
+        <div style="font-size:9px;color:#6A7585;margin-top:2px;">${fmtDc(sub.start)} – ${fmtDc(sub.end)} · <strong>${du} DU</strong></div>
         ${aprHTML}
       </td>
-      <td style="padding:6px 8px;vertical-align:top;width:140px;">
-        ${arqsNaEtapa.map(a=>`<div style="font-size:8px;color:#1A2535;margin-bottom:1px;">• ${a.nome}${a.cargo?' <span style="color:#9AA0AF;">(${a.cargo})</span>':''}</div>`).join('')||'<span style="color:#9AA0AF;font-size:8px;">Não definido</span>'}
+      <td style="padding:6px 8px;vertical-align:top;border-bottom:0.5px solid #E8ECF0;">
+        ${arqsNaEtapa.length?arqsNaEtapa.map(a=>`<div style="font-size:9px;color:#1A2535;margin-bottom:2px;">• ${a.nome}${a.cargo?` <em style="color:#9AA0AF;font-size:8px;">(${a.cargo})</em>`:''}</div>`).join(''):'<span style="color:#9AA0AF;font-size:9px;">Não definido</span>'}
       </td>
-      <td style="padding:6px 8px;vertical-align:top;">
-        ${tarefasAtivas.map(t=>`<div style="font-size:8px;color:#1A2535;margin-bottom:1px;">☑ ${t}</div>`).join('')||'<span style="color:#9AA0AF;font-size:8px;">—</span>'}
+      <td style="padding:6px 8px;vertical-align:top;border-bottom:0.5px solid #E8ECF0;">
+        ${tarefasAtivas.length?tarefasAtivas.map(t=>`<div style="font-size:9px;color:#1A2535;margin-bottom:2px;">☑ ${t}</div>`).join(''):'<span style="color:#9AA0AF;font-size:9px;">—</span>'}
       </td>
     </tr>`;
   });
 
   const html=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">
   <title>Plano Fino ARQ — ${nomeProj}</title>
-  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;600;700&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     *{box-sizing:border-box;margin:0;padding:0;}
-    body{font-family:'Barlow',sans-serif;color:#1A2535;background:#fff;font-size:10px;}
-    @page{size:A4 landscape;margin:12mm 14mm;}
-    @media print{.no-print{display:none!important;}body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}
-    .page{width:100%;padding:0;}
-    table{border-collapse:collapse;width:100%;}
-    td,th{padding:0;}
+    body{font-family:'Barlow',sans-serif;color:#1A2535;background:#fff;font-size:10px;line-height:1.4;}
+    @page{size:A4 portrait;margin:14mm 16mm 14mm 16mm;}
+    @media print{
+      .no-print{display:none!important;}
+      body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+      .page-break{page-break-before:always;}
+    }
   </style>
   </head><body>
-  <div class="page">
 
-    <!-- CABEÇALHO -->
-    <div style="display:flex;align-items:flex-end;justify-content:space-between;padding-bottom:8px;border-bottom:2px solid #00DEDB;margin-bottom:12px;">
-      <div>
-        <div style="font-family:Oswald,sans-serif;font-size:8px;font-weight:400;letter-spacing:.18em;text-transform:uppercase;color:#9AA0AF;margin-bottom:3px;">Athié Wohnrath · Planejamento de Obra</div>
-        <div style="font-family:Oswald,sans-serif;font-size:20px;font-weight:700;text-transform:uppercase;color:#1A2535;line-height:1;">Plano Fino <span style="color:#00DEDB;">ARQ</span></div>
-        <div style="font-size:9px;color:#5A6275;margin-top:3px;">${cod?cod+' · ':''}${nomeProj}</div>
-      </div>
-      <div style="text-align:right;font-size:8px;color:#9AA0AF;line-height:1.9;">
-        ${gi?`<div><strong style="color:#1A2535;">GI:</strong> ${gi}</div>`:''}
-        ${gp?`<div><strong style="color:#1A2535;">GP:</strong> ${gp}</div>`:''}
-        <div><strong style="color:#1A2535;">Período:</strong> ${periodoIni} a ${periodoFim}</div>
-        <div><strong style="color:#1A2535;">Emitido em:</strong> ${hoje}</div>
-      </div>
+  <!-- CABEÇALHO -->
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;padding-bottom:10px;border-bottom:2.5px solid #00DEDB;margin-bottom:14px;">
+    <div>
+      <div style="font-family:Oswald,sans-serif;font-size:9px;font-weight:400;letter-spacing:.2em;text-transform:uppercase;color:#9AA0AF;margin-bottom:4px;">Athié Wohnrath · Planejamento de Obra</div>
+      <div style="font-family:Oswald,sans-serif;font-size:26px;font-weight:700;text-transform:uppercase;color:#1A2535;line-height:1;">Plano Fino <span style="color:#00DEDB;">ARQ</span></div>
+      <div style="font-size:11px;color:#5A6275;margin-top:4px;">${cod?cod+' · ':''}${nomeProj}</div>
     </div>
-
-    <!-- CORPO: 2 colunas -->
-    <div style="display:grid;grid-template-columns:160px 1fr;gap:16px;align-items:start;">
-
-      <!-- COL ESQUERDA: calendário + legenda + resumo -->
-      <div>
-        <!-- Calendário -->
-        <div style="margin-bottom:10px;">
-          <div style="font-family:Oswald,sans-serif;font-size:7px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#9AA0AF;margin-bottom:6px;">Calendário</div>
-          ${calHTML}
-        </div>
-        <!-- Legenda -->
-        <div style="margin-bottom:10px;">
-          <div style="font-family:Oswald,sans-serif;font-size:7px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#9AA0AF;margin-bottom:4px;">Etapas</div>
-          ${legendaHTML}
-          <div style="display:flex;align-items:center;gap:3px;margin-top:4px;padding-top:4px;border-top:0.5px solid #E8ECF0;">
-            <span style="font-size:8px;color:#D4A017;">★</span>
-            <span style="font-size:7px;color:#9AA0AF;">Aprovação do cliente</span>
-          </div>
-        </div>
-        <!-- Resumo -->
-        <div style="background:#F4F6F8;border-radius:4px;padding:8px;">
-          <div style="font-family:Oswald,sans-serif;font-size:7px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#9AA0AF;margin-bottom:6px;">Resumo</div>
-          <div style="font-family:Oswald,sans-serif;font-size:16px;font-weight:700;color:#00DEDB;">${totalDU}</div>
-          <div style="font-size:7px;color:#9AA0AF;margin-bottom:6px;">dias úteis totais</div>
-          <div style="font-family:Oswald,sans-serif;font-size:16px;font-weight:700;color:#1A2535;">${arqSet.size}</div>
-          <div style="font-size:7px;color:#9AA0AF;">arquitetos alocados</div>
-        </div>
-      </div>
-
-      <!-- COL DIREITA: tabela de etapas -->
-      <div>
-        <div style="font-family:Oswald,sans-serif;font-size:7px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#9AA0AF;margin-bottom:6px;">Plano detalhado por etapa</div>
-        <table style="width:100%;border-collapse:collapse;">
-          <thead>
-            <tr style="background:#1A2535;">
-              <th style="padding:5px 8px;text-align:left;font-family:Oswald,sans-serif;font-size:7px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#9AA0AF;width:130px;">Etapa</th>
-              <th style="padding:5px 8px;text-align:left;font-family:Oswald,sans-serif;font-size:7px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#9AA0AF;width:140px;">Responsáveis</th>
-              <th style="padding:5px 8px;text-align:left;font-family:Oswald,sans-serif;font-size:7px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#9AA0AF;">Tarefas previstas</th>
-            </tr>
-          </thead>
-          <tbody>${rows}</tbody>
-        </table>
-      </div>
+    <div style="text-align:right;font-size:9px;color:#9AA0AF;line-height:2;">
+      ${gi?`<div><strong style="color:#1A2535;">GI:</strong> ${gi}</div>`:''}
+      ${gp?`<div><strong style="color:#1A2535;">GP:</strong> ${gp}</div>`:''}
+      <div><strong style="color:#1A2535;">Período:</strong> ${fmtDl(dataIni)} a ${fmtDl(dataFim)}</div>
+      <div><strong style="color:#1A2535;">Emitido em:</strong> ${hoje}</div>
     </div>
-
-    <!-- RODAPÉ -->
-    <div style="margin-top:12px;padding-top:8px;border-top:0.5px solid #E8ECF0;display:flex;justify-content:space-between;font-size:7px;color:#9AA0AF;">
-      <div>Athié Wohnrath · Plano Fino ARQ · ${hoje}</div>
-      <div>${cod||nomeProj} · Documento gerado automaticamente</div>
-    </div>
-
   </div>
 
-  <div class="no-print" style="position:fixed;bottom:20px;right:20px;display:flex;gap:10px;z-index:999;">
+  <!-- CARDS DE RESUMO -->
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;">
+    <div style="background:#F4F6F8;border-radius:6px;padding:10px 14px;border-left:3px solid #00DEDB;">
+      <div style="font-family:Oswald,sans-serif;font-size:8px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#9AA0AF;margin-bottom:4px;">Total de Dias Úteis</div>
+      <div style="font-family:Oswald,sans-serif;font-size:22px;font-weight:700;color:#1A2535;">${totalDU}</div>
+      <div style="font-size:9px;color:#9AA0AF;margin-top:1px;">dias úteis de projeto</div>
+    </div>
+    <div style="background:#F4F6F8;border-radius:6px;padding:10px 14px;border-left:3px solid #00DEDB;">
+      <div style="font-family:Oswald,sans-serif;font-size:8px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#9AA0AF;margin-bottom:4px;">Etapas ARQ</div>
+      <div style="font-family:Oswald,sans-serif;font-size:22px;font-weight:700;color:#1A2535;">${subIds.filter(id=>fase?.rows?.arq?.subs?.[id]).length}</div>
+      <div style="font-size:9px;color:#9AA0AF;margin-top:1px;">etapas de arquitetura</div>
+    </div>
+    <div style="background:#F4F6F8;border-radius:6px;padding:10px 14px;border-left:3px solid #00DEDB;">
+      <div style="font-family:Oswald,sans-serif;font-size:8px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#9AA0AF;margin-bottom:4px;">Equipe Alocada</div>
+      <div style="font-family:Oswald,sans-serif;font-size:22px;font-weight:700;color:#1A2535;">${arqSet.size}</div>
+      <div style="font-size:9px;color:#9AA0AF;margin-top:1px;">arquitetos alocados</div>
+    </div>
+  </div>
+
+  <!-- CORPO: calendário + legenda | tabela -->
+  <div style="display:grid;grid-template-columns:180px 1fr;gap:16px;align-items:start;">
+
+    <!-- COL ESQUERDA: calendário e legenda -->
+    <div>
+      <div style="font-family:Oswald,sans-serif;font-size:8px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#9AA0AF;margin-bottom:8px;">Calendário do Projeto</div>
+      ${calHTML}
+      <div style="margin-top:10px;padding-top:10px;border-top:1px solid #E8ECF0;">
+        <div style="font-family:Oswald,sans-serif;font-size:8px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#9AA0AF;margin-bottom:6px;">Legenda</div>
+        ${legendaHTML}
+        <div style="display:flex;align-items:center;gap:4px;margin-top:6px;padding-top:6px;border-top:0.5px solid #E8ECF0;">
+          <span style="font-size:10px;color:#FFD600;">★</span>
+          <span style="font-size:8px;color:#9AA0AF;">Aprovação do cliente</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- COL DIREITA: tabela de etapas -->
+    <div>
+      <div style="font-family:Oswald,sans-serif;font-size:8px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#9AA0AF;margin-bottom:8px;">Plano Detalhado</div>
+      <table style="width:100%;border-collapse:collapse;">
+        <thead>
+          <tr style="background:#1A2535;">
+            <th style="padding:7px 8px;text-align:left;font-family:Oswald,sans-serif;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#9AA0AF;width:120px;">Etapa / Período</th>
+            <th style="padding:7px 8px;text-align:left;font-family:Oswald,sans-serif;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#9AA0AF;width:130px;">Responsáveis</th>
+            <th style="padding:7px 8px;text-align:left;font-family:Oswald,sans-serif;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#9AA0AF;">Tarefas Previstas</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- RODAPÉ -->
+  <div style="margin-top:16px;padding-top:10px;border-top:0.5px solid #E8ECF0;display:flex;justify-content:space-between;font-size:8px;color:#9AA0AF;">
+    <div>Athié Wohnrath · Plano Fino ARQ · ${hoje}</div>
+    <div>${cod||nomeProj} · Documento gerado automaticamente pelo sistema de Planejamento de Obra A|W</div>
+  </div>
+
+  <!-- BOTÕES (não impressos) -->
+  <div class="no-print" style="position:fixed;bottom:20px;right:20px;display:flex;gap:10px;">
     <button onclick="window.close()" style="height:36px;padding:0 16px;background:#F4F6F8;border:1px solid #D8DCE4;border-radius:6px;font-family:Oswald,sans-serif;font-size:10px;font-weight:700;color:#5A6275;cursor:pointer;letter-spacing:.06em;text-transform:uppercase;">Fechar</button>
     <button onclick="window.print()" style="height:36px;padding:0 20px;background:#00DEDB;border:none;border-radius:6px;font-family:Oswald,sans-serif;font-size:10px;font-weight:700;color:#0D1117;cursor:pointer;letter-spacing:.06em;text-transform:uppercase;">🖨 Imprimir / PDF</button>
   </div>
+
   </body></html>`;
 
   const win=window.open('','_blank');
