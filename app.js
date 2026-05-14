@@ -1921,6 +1921,7 @@ function _pfResumo(){
   const subIds=G.SUB_IDS||[];const subNames=G.SUB_NAMES||{};
   const fase=gSt.projFases[0];
   const cod=ESTADO.meta?.codigo||'';const nomeProj=ESTADO.meta?.nome||'Planejamento de Obra';
+  const gi=ESTADO.meta?.gi||'';const hoje=new Date().toLocaleDateString('pt-BR');
 
   let rows='';
   subIds.forEach((subId,idx)=>{
@@ -1930,46 +1931,116 @@ function _pfResumo(){
     const tarefasAtivas=Object.entries(etDados.tarefas||{}).filter(([,v])=>v).map(([k])=>k);
     const du=CALENDARIO.contarDU(new Date(sub.start),new Date(sub.end));
     const etCor=PF_CORES[idx%PF_CORES.length];
-    rows+=`<tr style="border-bottom:1px solid #E8ECF0;">
-      <td style="padding:8px 10px;vertical-align:top;">
-        <div style="font-family:Oswald,sans-serif;font-size:12px;font-weight:700;color:${etCor};">${subNames[subId]||subId}</div>
-        <div style="font-size:10px;color:#6A7585;">${_pfFmtD(sub.start)} – ${_pfFmtD(sub.end)} · ${du} DU</div>
+    const fmtD=d=>new Date(d).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});
+    rows+=`<tr>
+      <td style="padding:10px 12px;vertical-align:top;border-bottom:1px solid #E8ECF0;">
+        <div style="font-family:Oswald,sans-serif;font-size:13px;font-weight:700;color:${etCor};margin-bottom:3px;">${subNames[subId]||subId}</div>
+        <div style="font-size:10px;color:#6A7585;">${fmtD(sub.start)} a ${fmtD(sub.end)}</div>
+        <div style="font-size:10px;font-weight:600;color:#1A2535;margin-top:2px;">${du} dias úteis</div>
       </td>
-      <td style="padding:8px 10px;vertical-align:top;">
-        ${arqsNaEtapa.map(a=>`<div style="font-size:11px;color:#1A2535;margin-bottom:2px;">${a.nome}</div>`).join('')||'<span style="color:#9AA0AF;font-size:11px;">—</span>'}
+      <td style="padding:10px 12px;vertical-align:top;border-bottom:1px solid #E8ECF0;">
+        ${arqsNaEtapa.map(a=>`<div style="font-size:11px;color:#1A2535;margin-bottom:3px;">• ${a.nome}${a.cargo?' <span style=\"color:#9AA0AF;font-size:10px;\">('+a.cargo+')</span>':''}</div>`).join('')||'<span style="color:#9AA0AF;font-size:11px;">Não definido</span>'}
       </td>
-      <td style="padding:8px 10px;vertical-align:top;">
-        ${tarefasAtivas.map(t=>`<div style="font-size:11px;color:#1A2535;margin-bottom:2px;">• ${t}</div>`).join('')||'<span style="color:#9AA0AF;font-size:11px;">—</span>'}
+      <td style="padding:10px 12px;vertical-align:top;border-bottom:1px solid #E8ECF0;">
+        ${tarefasAtivas.map(t=>`<div style="font-size:11px;color:#1A2535;margin-bottom:3px;">☑ ${t}</div>`).join('')||'<span style="color:#9AA0AF;font-size:11px;">Nenhuma selecionada</span>'}
       </td>
     </tr>`;
   });
 
-  const d=document.createElement('div');
-  d.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9950;display:flex;align-items:center;justify-content:center;padding:20px;';
-  d.addEventListener('click',e=>{if(e.target===d)d.remove();});
-  d.innerHTML=`<div style="background:#fff;border-radius:10px;width:100%;max-width:820px;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;">
-    <div style="display:flex;align-items:center;padding:14px 20px;border-bottom:1px solid #E8ECF0;background:#1A2535;">
-      <span style="font-family:Oswald,sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.5);flex:1;">Plano Fino · Arquitetura</span>
-      <span style="font-family:Oswald,sans-serif;font-size:13px;font-weight:700;color:#00DEDB;">${cod?cod+' — ':''}${nomeProj}</span>
-      <button onclick="this.closest('[style*=fixed]').remove()" style="width:28px;height:28px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:5px;cursor:pointer;font-size:13px;color:rgba(255,255,255,.6);margin-left:14px;">✕</button>
-    </div>
-    <div style="flex:1;overflow:auto;">
-      <table style="width:100%;border-collapse:collapse;">
-        <thead><tr style="background:#F4F6F8;">
-          <th style="padding:8px 10px;text-align:left;font-family:Oswald,sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#8A95A8;border-bottom:1px solid #E8ECF0;width:160px;">Etapa</th>
-          <th style="padding:8px 10px;text-align:left;font-family:Oswald,sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#8A95A8;border-bottom:1px solid #E8ECF0;width:170px;">Responsáveis</th>
-          <th style="padding:8px 10px;text-align:left;font-family:Oswald,sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#8A95A8;border-bottom:1px solid #E8ECF0;">Tarefas</th>
-        </tr></thead>
-        <tbody>${rows}</tbody>
-      </table>
-    </div>
-    <div style="padding:12px 20px;border-top:1px solid #E8ECF0;display:flex;justify-content:space-between;align-items:center;">
-      <span style="font-size:11px;color:#9AA0AF;">Gerado em ${new Date().toLocaleDateString('pt-BR')}</span>
-      <div style="display:flex;gap:8px;">
-        <button onclick="this.closest('[style*=fixed]').remove()" style="height:32px;padding:0 16px;background:#F4F6F8;border:1px solid #D8DCE4;border-radius:6px;font-family:Oswald,sans-serif;font-size:10px;font-weight:700;color:#5A6275;cursor:pointer;">Fechar</button>
-        <button onclick="window.print()" style="height:32px;padding:0 20px;background:#00DEDB;border:none;border-radius:6px;font-family:Oswald,sans-serif;font-size:10px;font-weight:700;color:#0D1117;cursor:pointer;">🖨 Imprimir A4</button>
+  const totalDU = subIds.reduce((sum,subId)=>{
+    const sub=fase?.rows?.arq?.subs?.[subId];
+    return sub?sum+CALENDARIO.contarDU(new Date(sub.start),new Date(sub.end)):sum;
+  },0);
+  const primeiroSub=subIds.find(id=>fase?.rows?.arq?.subs?.[id]?.start);
+  const ultimoSub=[...subIds].reverse().find(id=>fase?.rows?.arq?.subs?.[id]?.end);
+  const fmtD2=d=>new Date(d).toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
+  const periodoInicio=primeiroSub?fmtD2(fase.rows.arq.subs[primeiroSub].start):'—';
+  const periodoFim=ultimoSub?fmtD2(fase.rows.arq.subs[ultimoSub].end):'—';
+
+  const html=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">
+  <title>Plano Fino ARQ — ${nomeProj}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;600;700&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Barlow',sans-serif;color:#1A2535;background:#fff;padding:0;}
+    @page{size:A4;margin:20mm 18mm;}
+    @media print{body{padding:0;}.no-print{display:none!important;}}
+    .page{max-width:210mm;margin:0 auto;padding:20mm 18mm;}
+    .header{display:flex;align-items:flex-start;justify-content:space-between;padding-bottom:16px;border-bottom:3px solid #00DEDB;margin-bottom:24px;}
+    .header-left{}
+    .brand{font-family:'Oswald',sans-serif;font-size:10px;font-weight:400;letter-spacing:.18em;text-transform:uppercase;color:#9AA0AF;margin-bottom:4px;}
+    .title{font-family:'Oswald',sans-serif;font-size:22px;font-weight:700;text-transform:uppercase;color:#1A2535;line-height:1.1;}
+    .title span{color:#00DEDB;}
+    .subtitle{font-size:12px;color:#5A6275;margin-top:6px;}
+    .header-right{text-align:right;}
+    .meta-block{font-size:10px;color:#9AA0AF;line-height:1.8;}
+    .meta-block strong{color:#1A2535;font-weight:600;}
+    .summary{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px;}
+    .summary-card{background:#F4F6F8;border-radius:6px;padding:12px 14px;border-left:3px solid #00DEDB;}
+    .summary-card .label{font-family:'Oswald',sans-serif;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#9AA0AF;margin-bottom:4px;}
+    .summary-card .value{font-family:'Oswald',sans-serif;font-size:20px;font-weight:700;color:#1A2535;}
+    .summary-card .sub{font-size:10px;color:#9AA0AF;margin-top:2px;}
+    table{width:100%;border-collapse:collapse;}
+    thead tr{background:#1A2535;}
+    thead th{padding:9px 12px;text-align:left;font-family:'Oswald',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#9AA0AF;}
+    thead th:first-child{color:#00DEDB;}
+    tbody tr:nth-child(even){background:#F9FAFB;}
+    .footer{margin-top:24px;padding-top:12px;border-top:1px solid #E8ECF0;display:flex;justify-content:space-between;align-items:center;}
+    .footer-left{font-size:10px;color:#9AA0AF;}
+    .footer-right{font-size:10px;color:#9AA0AF;}
+    .print-btn{position:fixed;bottom:24px;right:24px;background:#00DEDB;color:#0D1117;border:none;border-radius:8px;padding:12px 24px;font-family:'Oswald',sans-serif;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;box-shadow:0 4px 20px rgba(0,222,219,.4);}
+  </style>
+  </head><body>
+  <div class="page">
+    <div class="header">
+      <div class="header-left">
+        <div class="brand">Athié Wohnrath · Plano Fino ARQ</div>
+        <div class="title">Plano de<br><span>Arquitetura</span></div>
+        <div class="subtitle">${cod?cod+' · ':''}${nomeProj}</div>
+      </div>
+      <div class="header-right">
+        <div class="meta-block">
+          <div><strong>GI Responsável:</strong> ${gi||'—'}</div>
+          <div><strong>Período:</strong> ${periodoInicio}</div>
+          <div><strong>Término:</strong> ${periodoFim}</div>
+          <div><strong>Gerado em:</strong> ${hoje}</div>
+        </div>
       </div>
     </div>
-  </div>`;
-  document.body.appendChild(d);
+    <div class="summary">
+      <div class="summary-card">
+        <div class="label">Total de Etapas</div>
+        <div class="value">${subIds.filter(id=>fase?.rows?.arq?.subs?.[id]).length}</div>
+        <div class="sub">etapas de projeto ARQ</div>
+      </div>
+      <div class="summary-card">
+        <div class="label">Total de Dias Úteis</div>
+        <div class="value">${totalDU}</div>
+        <div class="sub">dias úteis de projeto</div>
+      </div>
+      <div class="summary-card">
+        <div class="label">Equipe Definida</div>
+        <div class="value">${new Set(Object.values(_pfDados.etapas||{}).flatMap(e=>e.arquitetos||[])).size}</div>
+        <div class="sub">arquitetos alocados</div>
+      </div>
+    </div>
+    <table>
+      <thead><tr>
+        <th style="width:22%;">Etapa</th>
+        <th style="width:30%;">Responsáveis</th>
+        <th>Tarefas Previstas</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <div class="footer">
+      <div class="footer-left">Athié Wohnrath · Planejamento de Obra · ${hoje}</div>
+      <div class="footer-right">${cod||nomeProj}</div>
+    </div>
+  </div>
+  <button class="print-btn no-print" onclick="window.print()">🖨 Imprimir / Salvar PDF</button>
+  </body></html>`;
+
+  const win=window.open('','_blank');
+  win.document.write(html);
+  win.document.close();
 }
