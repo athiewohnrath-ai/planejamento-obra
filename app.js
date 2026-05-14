@@ -1675,8 +1675,7 @@ const PF_ARQUITETOS_DEFAULT = [
 ];
 
 const PF_CORES = [
-  '#1A6FD4','#D4351A','#1AD435','#D4B01A',
-  '#8B1AD4','#1AD4C8','#D4681A','#1A4CD4'
+  '#1A5C8A','#1D7FB0','#2AAFD4','#4DC4E0','#F4A261','#E07B3F','#C9552A','#A83510','#7A2000'
 ];
 
 const PF_TAREFAS_DEFAULT = {
@@ -1695,7 +1694,8 @@ let _pfDados = null;
 let _pfEtapaSel = null;
 let _pfArqDrag = null;
 let _pfCalMes = null;
-let _pfEtapaDestaque = null; // etapa em destaque no calendário
+let _pfEtapaDestaque = null;
+let _pfCoresCustom = {}; // etapa em destaque no calendário
 
 function _pfInicializar() {
   if (ESTADO.planoFino) {
@@ -1712,6 +1712,7 @@ function _pfInicializar() {
     };
   }
   _pfEtapaSel = null; _pfArqDrag = null; _pfEtapaDestaque = null;
+  _pfCoresCustom = (_pfDados&&_pfDados.coresCustom)||{};
   const fase = gSt.projFases[0];
   let primeiraData = null;
   for (const id of (G.SUB_IDS||[])) {
@@ -1722,6 +1723,14 @@ function _pfInicializar() {
   _pfCalMes = { ano: ref.getFullYear(), mes: ref.getMonth() };
 }
 
+
+function _pfSetCor(subId, cor) {
+  _pfCoresCustom[subId] = cor;
+  if (!_pfDados) return;
+  _pfDados.coresCustom = _pfCoresCustom;
+  _pfSalvar();
+  _pfRender();
+}
 function _pfSalvar() { ESTADO.planoFino = _pfDados; salvarDados(); }
 
 function abrirPlanoFino() {
@@ -1749,7 +1758,7 @@ function _pfRender() {
   subIds.forEach((subId,idx) => {
     const sub = fase?.rows?.arq?.subs?.[subId];
     if (!sub) return;
-    const etCor = PF_CORES[idx%PF_CORES.length];
+    const etCor = (_pfCoresCustom&&_pfCoresCustom[subId])||PF_CORES[idx%PF_CORES.length];
     let cur = new Date(sub.start);
     const fim = new Date(sub.end);
     while (cur <= fim) {
@@ -1803,7 +1812,7 @@ function _pfRender() {
     const etDados = _pfDados.etapas[subId]||{arquitetos:[],tarefas:{}};
     const arqsNaEtapa = (etDados.arquitetos||[]).map(aid=>_pfDados.arquitetos.find(a=>a.id===aid)).filter(Boolean);
     const isSel = _pfEtapaSel === subId;
-    const etCor = PF_CORES[idx%PF_CORES.length];
+    const etCor = (_pfCoresCustom&&_pfCoresCustom[subId])||PF_CORES[idx%PF_CORES.length];
     const du = CALENDARIO.contarDU(new Date(sub.start), new Date(sub.end));
 
     // Chips de arquitetos — clique remove
@@ -1967,11 +1976,14 @@ function _pfRender() {
   const legenda = subIds.map((subId,idx) => {
     const sub = fase?.rows?.arq?.subs?.[subId];
     if (!sub) return '';
-    const etCor = PF_CORES[idx%PF_CORES.length];
+    const etCor = (_pfCoresCustom&&_pfCoresCustom[subId])||PF_CORES[idx%PF_CORES.length];
     const isAtivo = _pfEtapaDestaque===subId;
-    return `<div onclick="_pfToggleDestaque('${subId}')" style="display:flex;align-items:center;gap:5px;margin-bottom:4px;cursor:pointer;padding:2px 4px;border-radius:4px;background:${isAtivo?etCor+'18':'transparent'};border:0.5px solid ${isAtivo?etCor:'transparent'};">
-      <div style="width:10px;height:10px;border-radius:2px;background:${etCor};flex-shrink:0;"></div>
-      <span style="font-size:10px;color:${isAtivo?etCor:'var(--txt-muted)'};">${subNames[subId]||subId}</span>
+    return `<div style="display:flex;align-items:center;gap:5px;margin-bottom:4px;padding:2px 4px;border-radius:4px;background:${isAtivo?etCor+'18':'transparent'};border:0.5px solid ${isAtivo?etCor:'transparent'};">
+      <div onclick="_pfToggleDestaque('${subId}')" style="flex:1;display:flex;align-items:center;gap:5px;cursor:pointer;">
+        <div style="width:12px;height:12px;border-radius:2px;background:${etCor};flex-shrink:0;position:relative;overflow:hidden;">
+          <input type="color" value="${etCor}" title="Editar cor" onchange="_pfSetCor('${subId}',this.value)" onclick="event.stopPropagation()" style="position:absolute;inset:0;width:100%;height:100%;border:none;padding:0;cursor:pointer;opacity:0;"></div>
+        <span style="font-size:10px;color:${isAtivo?etCor:'var(--txt-muted)'};">${subNames[subId]||subId}</span>
+      </div>
     </div>`;
   }).join('');
 
@@ -2101,6 +2113,7 @@ function _pfResumo(){
       <td style="padding:8px 10px;vertical-align:top;">
         <div style="font-family:Oswald,sans-serif;font-size:12px;font-weight:700;color:${etCor};">${subNames[subId]||subId}</div>
         <div style="font-size:10px;color:#6A7585;">${_pfFmtD(sub.start)} – ${_pfFmtD(sub.end)} · ${du} DU</div>
+        ${(()=>{const _ac=getAprovaConfig(subId);if(!_ac.ativo)return'';const _ad=getDiasAprovacao(subId);const _ai=_ad.length>0?new Date(_ad[0]).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}):'';const _af=_ad.length>0?new Date(_ad[_ad.length-1]).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}):'';return'<div style="margin-top:4px;padding:2px 5px;background:#FFF3E0;border-left:2px solid #D4A017;border-radius:2px;"><span style="font-size:9px;font-weight:700;color:#B8860B;">★ Aprov. cliente: '+_ac.dias+' dia'+(_ac.dias>1?'s':'')+(_ai?' ('+_ai+(_af&&_af!==_ai?' – '+_af:'')+')':'')+'</span></div>';})()} 
       </td>
       <td style="padding:8px 10px;vertical-align:top;">
         ${arqsNaEtapa.map(a=>`<div style="font-size:11px;color:#1A2535;margin-bottom:2px;">${a.nome}</div>`).join('')||'<span style="color:#9AA0AF;font-size:11px;">—</span>'}
