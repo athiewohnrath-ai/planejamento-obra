@@ -184,13 +184,13 @@ function renderObraFases(){
   if (!cont) return;
   const n = ESTADO.cfg.nObra || 1;
   const todos = typeof tplGetTodos === 'function' ? tplGetTodos() : OBRA_TEMPLATES;
+  const todosPreObra = typeof _preObraGetTodos === 'function' ? _preObraGetTodos() : PREOBRA_TEMPLATES_DEFAULT;
 
   // Garantir estrutura mínima
   for (let i = 0; i < n; i++) {
     if (!ESTADO.cfg.obraFases[i]) ESTADO.cfg.obraFases[i] = {};
     const cfg = ESTADO.cfg.obraFases[i];
     if (!cfg.preObra) cfg.preObra = {ativo:false,templateId:'pre-obra-padrao',du:5};
-    // Aplicar template padrão se ainda não tem
     if (!cfg.templateId) {
       cfg.templateId = 'escritorio-padrao';
       const faseGst = gSt.obraFases[i];
@@ -201,13 +201,12 @@ function renderObraFases(){
     }
   }
 
-  // Tabela compacta
-  let html = `<table style="width:100%;border-collapse:collapse;font-size:11px;">
+  let html = `<table style="width:100%;border-collapse:collapse;font-size:12px;">
     <thead>
       <tr style="background:var(--bg-surface2);">
-        <th style="padding:7px 10px;text-align:left;font-family:var(--font);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--txt-muted);border-bottom:1px solid var(--border);width:60px;">Fase</th>
-        <th style="padding:7px 10px;text-align:left;font-family:var(--font);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--txt-muted);border-bottom:1px solid var(--border);">Template</th>
-        <th style="padding:7px 10px;text-align:center;font-family:var(--font);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--txt-dim);border-bottom:1px solid var(--border);width:90px;">Pré-Obra</th>
+        <th style="padding:7px 10px;text-align:left;font-family:var(--font);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--txt-muted);border-bottom:1px solid var(--border);width:44px;">Fase</th>
+        <th style="padding:7px 10px;text-align:left;font-family:var(--font);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--txt-muted);border-bottom:1px solid var(--border);width:210px;">Pré-Obra</th>
+        <th style="padding:7px 10px;text-align:left;font-family:var(--font);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--txt-muted);border-bottom:1px solid var(--border);">Template de Obra</th>
         <th style="padding:7px 10px;text-align:center;font-family:var(--font);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--txt-muted);border-bottom:1px solid var(--border);width:32px;"></th>
       </tr>
     </thead>
@@ -216,39 +215,60 @@ function renderObraFases(){
   for (let i = 0; i < n; i++) {
     const cfg = ESTADO.cfg.obraFases[i];
     const tplSel = cfg.templateId || 'escritorio-padrao';
+    const poSel = cfg.preObra.templateId || 'pre-obra-padrao';
+    const poAtivo = cfg.preObra.ativo || false;
     const faseMod = typeof _tplFaseModificada === 'function' && _tplFaseModificada(i);
-    const statusDot = tplSel
-      ? `<span title="${faseMod ? 'Modificado manualmente' : 'Sincronizado'}" style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${faseMod ? '#E07000' : '#2A7A30'};flex-shrink:0;margin-right:6px;"></span>`
-      : '';
+
+    const statusDot = `<span title="${faseMod?'Modificado manualmente':'Sincronizado'}" style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${faseMod?'#E07000':'#2A7A30'};flex-shrink:0;"></span>`;
+
     const tplOpts = todos.map(t =>
-      `<option value="${t.id}" ${t.id === tplSel ? 'selected' : ''}>${t.label}</option>`
+      `<option value="${t.id}" ${t.id===tplSel?'selected':''}>${t.label}</option>`
     ).join('');
+
+    const poOpts = todosPreObra.map(t =>
+      `<option value="${t.id}" ${t.id===poSel?'selected':''}>${t.label}</option>`
+    ).join('');
+
     const ressincBtn = faseMod
       ? `<button onclick="_tplRessincronizar(${i})" title="Ressincronizar com o template" style="width:26px;height:26px;border:1px solid var(--orange,#C07820);background:var(--orange-light,rgba(192,120,32,.08));color:var(--orange,#C07820);border-radius:4px;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;">↺</button>`
       : `<div style="width:26px;"></div>`;
 
+    // Badges de resumo
+    const poTpl = todosPreObra.find(t=>t.id===poSel);
+    const poDiscs = poTpl ? poTpl.disciplinas.filter(d=>d.ativo!==false).length : 0;
+    const oBadge = `<span style="font-size:10px;background:rgba(26,82,148,.12);color:#1A5294;padding:1px 7px;border-radius:10px;font-family:var(--font);font-weight:700;">${tplSel==='escritorio-padrao'?'14 disc · 8 mód':tplSel}</span>`;
+    const poBadge = poAtivo ? `<span style="font-size:10px;background:rgba(42,122,48,.12);color:#2A7A30;padding:1px 7px;border-radius:10px;font-family:var(--font);font-weight:700;">${poDiscs} disc · ${cfg.preObra.du||5} DU</span>` : '';
+
     html += `<tr style="border-bottom:1px solid var(--border);">
-      <td style="padding:8px 10px;">
-        <span style="font-family:var(--font);font-size:11px;font-weight:700;color:var(--txt);">F${i+1}</span>
+      <td style="padding:8px 10px;vertical-align:top;">
+        <span style="font-family:var(--font);font-size:12px;font-weight:700;color:var(--txt);">F${i+1}</span>
       </td>
-      <td style="padding:6px 10px;">
-        <div style="display:flex;align-items:center;gap:6px;">
+      <td style="padding:6px 10px;border-right:1px solid var(--border);vertical-align:top;">
+        <div style="display:flex;align-items:center;gap:7px;">
+          <input type="checkbox" ${poAtivo?'checked':''} onchange="_preObraToggle(${i},this.checked)"
+            style="width:14px;height:14px;accent-color:var(--accent);cursor:pointer;flex-shrink:0;">
+          ${poAtivo
+            ? `<select class="p-input" style="flex:1;height:28px;padding:0 6px;font-size:11px;"
+                onchange="ESTADO.cfg.obraFases[${i}].preObra.templateId=this.value;onCfgChange();renderObraFases();gRender();">
+                ${poOpts}
+              </select>`
+            : `<span style="font-size:11px;color:var(--txt-dim);font-style:italic;">sem pré-obra</span>`
+          }
+        </div>
+        ${poAtivo ? `<div style="margin-top:5px;padding-left:21px;">${poBadge}</div>` : ''}
+      </td>
+      <td style="padding:6px 10px;vertical-align:top;">
+        <div style="display:flex;align-items:center;gap:7px;">
           ${statusDot}
-          <select class="p-input" style="flex:1;height:30px;padding:0 8px;" onchange="_tplVincularFase(${i},this.value,this)">
+          <select class="p-input" style="flex:1;height:28px;padding:0 6px;font-size:11px;"
+            onchange="_tplVincularFase(${i},this.value,this)">
             <option value="">— sem template —</option>
             ${tplOpts}
           </select>
         </div>
+        <div style="margin-top:5px;padding-left:15px;">${oBadge}</div>
       </td>
-      <td style="padding:6px 8px;text-align:center;">
-        <div style="display:flex;align-items:center;justify-content:center;gap:6px;">
-          <label style="display:flex;align-items:center;gap:4px;cursor:pointer;">
-            <input type="checkbox" ${cfg.preObra.ativo?'checked':''} onchange="_preObraToggle(${i},this.checked)" style="accent-color:var(--accent);width:13px;height:13px;cursor:pointer;">
-          </label>
-          ${cfg.preObra.ativo?`<button onclick="_preObraAbrirModal(${i})" title="Configurar template de pré-obra" style="height:24px;padding:0 8px;background:var(--bg-surface2);border:1px solid var(--border);border-radius:4px;font-size:9px;font-family:var(--font);font-weight:700;color:var(--txt-muted);cursor:pointer;letter-spacing:.04em;text-transform:uppercase;">cfg</button>`:''}
-        </div>
-      </td>
-      <td style="padding:6px 8px;text-align:center;">${ressincBtn}</td>
+      <td style="padding:6px 8px;text-align:center;vertical-align:top;padding-top:8px;">${ressincBtn}</td>
     </tr>`;
   }
 
