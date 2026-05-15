@@ -2084,7 +2084,7 @@ const PREOBRA_TEMPLATES_DEFAULT = [
   ]}
 ];
 function _preObraGetTodos(){var custom=_preObraCarregarCustom();return PREOBRA_TEMPLATES_DEFAULT.concat(custom);}
-function _preObraCarregarCustom(){try{var r=localStorage.getItem('aw_preobra_templates');return r?JSON.parse(r)[];}catch{return[];}}
+function _preObraCarregarCustom(){try{var r=localStorage.getItem('aw_preobra_templates');return r?JSON.parse(r):[];}catch{return[];}}
 function _preObraSalvarCustom(arr){try{localStorage.setItem('aw_preobra_templates',JSON.stringify(arr));}catch{}}
 function _preObraGetTemplate(templateId){var todos=_preObraGetTodos();var tpl=todos.find(function(t){return t.id===templateId;});if(!tpl)return null;return JSON.parse(JSON.stringify(tpl));}
 function _preObraMakeDiscs(templateId){var tpl=_preObraGetTemplate(templateId||'pre-obra-padrao');if(!tpl)return[];return tpl.disciplinas.filter(function(d){return d.ativo!==false;}).map(function(d){return{id:d.id,label:d.label,ativo:true,tasks:d.tasks.map(function(t){return{n:t.n,prep:false,prof:t.prof||2,m:{1:100}};})};};}
