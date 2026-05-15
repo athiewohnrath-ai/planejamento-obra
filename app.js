@@ -247,7 +247,7 @@ if(_poCfg&&_poCfg.ativo){
   const _pxI=gPx(_poIni),_pxW=Math.max((G.diff(_poIni,_poFim)+1)*gSt.dayW,2*gSt.dayW);
   const _poC=darkenHex(COR.OBRA_MOM,.72),_poBg=COR.OBRA_BG;
   const _tplPO=typeof _preObraGetTemplate==='function'?_preObraGetTemplate(_poCfg.templateId):null;
-  const _lbPO=_tplPO?'<span style="font-size:8px;padding:1px 5px;border-radius:8px;background:rgba(255,255,255,.18);color:#fff;flex-shrink:0;">'+_tplPO.label.replace(/^\S+\s/,'').substring(0,9)+'</span>':'';
+  const _lbPO=_tplPO?'<span style="font-size:8px;padding:1px 5px;border-radius:8px;background:rgba(255,255,255,.18);color:#fff;flex-shrink:0;">'+_tplPO.label.substring(0,10)+'</span>':'';
   r.push('<div style="height:'+(G.ROW_H+8)+'px;background:'+_poBg+';display:flex;align-items:center;padding:0 5px 0 8px;border-bottom:1px solid #EEE0C8;border-right:2px solid #C0C8D4;font-size:10px;font-weight:700;color:#6A3810;text-transform:uppercase;letter-spacing:.04em;gap:3px;"><span style="width:5px;height:5px;border-radius:1px;background:'+_poC+';flex-shrink:0;"></span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Pré-Obra'+(gSt.obraFases.length>1?' F'+(_poFaseIdx+1):'')+'</span>'+_lbPO+'</div>');
   i.push('<div style="height:'+(G.ROW_H+8)+'px;background:'+_poBg+';position:relative;border-bottom:1px solid #EEE0C8;overflow:hidden;">'+gGridLines(o,e,false)+'<div style="position:absolute;top:8px;left:'+_pxI+'px;height:'+G.ROW_H+'px;width:'+_pxW+'px;background:'+_poC+';border-radius:3px;display:flex;align-items:center;justify-content:center;overflow:hidden;"><span style="font-size:9px;font-weight:700;color:rgba(255,255,255,.9);padding:0 6px;">'+_poDu+' DU</span></div></div>');
   if(_tplPO){
