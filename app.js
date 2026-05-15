@@ -305,10 +305,9 @@ document.addEventListener("DOMContentLoaded",()=>{buildVizSidebar()}),document.a
   }
   spacer(2);
 })();
-gObraRow(t,o,e,r,i),t.expanded&&(t.disciplinas||[]).forEach((a,n)=>{a&&a.ativo&&gDiscRow(t,a,n,o,e,r,i)}),spacer(4)}}),spacer(),!s){if(ESTADO.cfg.preObra&&gSt.obraFases.length){const t=parseInt(ESTADO.cfg.preObraDias)||10;let a=new Date(gSt.obraFases[0].obra.start);for(;CALENDARIO.isNaoUtil(a);)a=G.addD(a,-1);let n=new Date(a),s=0;for(;s<t;)n=G.addD(n,-1),CALENDARIO.isNaoUtil(n)||s++;for(;CALENDARIO.isNaoUtil(n);)n=G.addD(n,1);const d=gPx(n),l=Math.max(G.diff(n,a)*gSt.dayW,2*gSt.dayW),c=darkenHex(COR.OBRA_MOM,.6),p="rgba(122,74,16,.06)";r.push(`<div style="height:${G.ROW_H}px;background:${p};display:flex;align-items:center;padding:0 5px 0 8px;border-bottom:1px solid rgba(122,74,16,.15);border-right:2px solid #C0C8D4;font-size:9px;font-weight:700;color:${c};text-transform:uppercase;letter-spacing:.06em;gap:3px;"><span style="width:5px;height:5px;border-radius:1px;background:${c};flex-shrink:0;opacity:.5;"></span><span>Pré Obra</span><span style="margin-left:auto;opacity:.6;">${t}DU</span></div>`),i.push(`<div style="height:${G.ROW_H}px;background:${p};position:relative;border-bottom:1px solid rgba(122,74,16,.15);overflow:hidden;">${gGridLines(o,e,!1)}<div style="position:absolute;left:${d}px;top:4px;height:${G.ROW_H-8}px;width:${Math.max(l,8)}px;background:repeating-linear-gradient(135deg,${c}44 0,${c}44 4px,transparent 4px,transparent 8px);border:1px solid ${c}66;border-radius:4px;"></div></div>`)}phaseHdr("Obra",darkenHex(COR.OBRA_MOM,.65));const t=gSt.obraFases.length>1;gSt.obraFases.forEach((a,n)=>{if(t){const t=gObraFaseLabel(a),n=darkenHex(COR.OBRA_MOM,.72),s=a.expanded?"▲":"▼";r.push(`<div style="height:20px;background:${n};display:flex;align-items:center;padding:0 6px 0 12px;font-size:9px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.06em;border-right:2px solid ${darkenHex(COR.OBRA_MOM,.6)};gap:4px;"><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${t}</span><span onclick="gEditFaseNome('obra',${a.id},'${(a.nome||"").replace(/'/g,"")}')" style="cursor:pointer;opacity:.7;font-size:10px;" title="Renomear">✎</span><button onclick="gToggleObraExpand(${a.id})" style="background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:3px;cursor:pointer;font-size:9px;padding:1px 5px;flex-shrink:0;">${s}</button></div>`),i.push(`<div style="height:20px;background:linear-gradient(90deg,${n}CC,${n}22);position:relative;">${gGridLines(o,e,!1)}</div>`)}// Pré-obra da fase (v5.03)
+gObraRow(t,o,e,r,i),t.expanded&&(t.disciplinas||[]).forEach((a,n)=>{a&&a.ativo&&gDiscRow(t,a,n,o,e,r,i)}),spacer(4)}}),spacer(),!s){if(ESTADO.cfg.preObra&&gSt.obraFases.length){const t=parseInt(ESTADO.cfg.preObraDias)||10;let a=new Date(gSt.obraFases[0].obra.start);for(;CALENDARIO.isNaoUtil(a);)a=G.addD(a,-1);let n=new Date(a),s=0;for(;s<t;)n=G.addD(n,-1),CALENDARIO.isNaoUtil(n)||s++;for(;CALENDARIO.isNaoUtil(n);)n=G.addD(n,1);const d=gPx(n),l=Math.max(G.diff(n,a)*gSt.dayW,2*gSt.dayW),c=darkenHex(COR.OBRA_MOM,.6),p="rgba(122,74,16,.06)";r.push(`<div style="height:${G.ROW_H}px;background:${p};display:flex;align-items:center;padding:0 5px 0 8px;border-bottom:1px solid rgba(122,74,16,.15);border-right:2px solid #C0C8D4;font-size:9px;font-weight:700;color:${c};text-transform:uppercase;letter-spacing:.06em;gap:3px;"><span style="width:5px;height:5px;border-radius:1px;background:${c};flex-shrink:0;opacity:.5;"></span><span>Pré Obra</span><span style="margin-left:auto;opacity:.6;">${t}DU</span></div>`),i.push(`<div style="height:${G.ROW_H}px;background:${p};position:relative;border-bottom:1px solid rgba(122,74,16,.15);overflow:hidden;">${gGridLines(o,e,!1)}<div style="position:absolute;left:${d}px;top:4px;height:${G.ROW_H-8}px;width:${Math.max(l,8)}px;background:repeating-linear-gradient(135deg,${c}44 0,${c}44 4px,transparent 4px,transparent 8px);border:1px solid ${c}66;border-radius:4px;"></div></div>`)}phaseHdr("Obra",darkenHex(COR.OBRA_MOM,.65));const t=gSt.obraFases.length>1;gSt.obraFases.forEach((a,n)=>{if(t){const t=gObraFaseLabel(a),n=darkenHex(COR.OBRA_MOM,.72),s=a.expanded?"▲":"▼";r.push(`<div style="height:20px;background:${n};display:flex;align-items:center;padding:0 6px 0 12px;font-size:9px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.06em;border-right:2px solid ${darkenHex(COR.OBRA_MOM,.6)};gap:4px;"><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${t}</span><span onclick="gEditFaseNome('obra',${a.id},'${(a.nome||"").replace(/'/g,"")}')" style="cursor:pointer;opacity:.7;font-size:10px;" title="Renomear">✎</span><button onclick="gToggleObraExpand(${a.id})" style="background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:3px;cursor:pointer;font-size:9px;padding:1px 5px;flex-shrink:0;">${s}</button></div>`),i.push(`<div style="height:20px;background:linear-gradient(90deg,${n}CC,${n}22);position:relative;">${gGridLines(o,e,!1)}</div>`)}// Pré-obra da fase (v5.03.06) — usa gBar para drag correto
 (function(obraFase, obraFaseIdx){
   var pc=ESTADO.cfg.obraFases&&ESTADO.cfg.obraFases[obraFaseIdx]&&ESTADO.cfg.obraFases[obraFaseIdx].preObra;
-  console.log('[PRE-OBRA v3] idx='+obraFaseIdx+' pc='+JSON.stringify(pc));
   if(!pc||!pc.ativo)return;
   var du=pc.du||5;
   var fim=G.addD(new Date(obraFase.obra.start),-1);
@@ -316,12 +315,12 @@ gObraRow(t,o,e,r,i),t.expanded&&(t.disciplinas||[]).forEach((a,n)=>{a&&a.ativo&&
   var ini=new Date(fim),cnt=1;
   while(cnt<du){ini=G.addD(ini,-1);if(!CALENDARIO.isNaoUtil(ini))cnt++;}
   while(CALENDARIO.isNaoUtil(ini))ini=G.addD(ini,1);
-  var xi=gPx(ini);
-  var xw=Math.max((G.diff(ini,fim)+1)*gSt.dayW,2*gSt.dayW);
   var cm=darkenHex(COR.OBRA_MOM,.72);
   var cb=COR.OBRA_BG;
   var tpl=typeof _preObraGetTemplate==='function'?_preObraGetTemplate(pc.templateId):null;
   var lbl=tpl?tpl.label.substring(0,12):'';
+  var payload=encodeURIComponent(JSON.stringify({type:'preObra',faseIdx:obraFaseIdx}));
+  // Sidebar: header
   r.push(
     '<div style="height:'+(G.ROW_H+8)+'px;background:'+cb+';display:flex;align-items:center;'+
     'padding:0 5px 0 8px;border-bottom:1px solid #EEE0C8;border-right:2px solid #C0C8D4;'+
@@ -332,15 +331,15 @@ gObraRow(t,o,e,r,i),t.expanded&&(t.disciplinas||[]).forEach((a,n)=>{a&&a.ativo&&
     '</span>'+(lbl?'<span style="font-size:8px;padding:1px 5px;border-radius:8px;background:rgba(255,255,255,.18);color:#fff;">'+lbl+'</span>':'')+
     '</div>'
   );
+  // Gantt: usar gBar para drag correto
+  var barHtml=gBar(gPx(ini),xw=Math.max((G.diff(ini,fim)+1)*gSt.dayW,2*gSt.dayW),G.ROW_H,cm,ini,fim,null,payload,true);
   i.push(
-    '<div style="height:'+(G.ROW_H+8)+'px;background:'+cb+';position:relative;border-bottom:1px solid #EEE0C8;overflow:hidden;">'+
-    gGridLines(o,e,false)+
-    '<div style="position:absolute;top:8px;left:'+xi+'px;height:'+G.ROW_H+'px;width:'+xw+'px;'+
-    'background:'+cm+';border-radius:3px;display:flex;align-items:center;justify-content:center;overflow:hidden;">'+
-    '<span style="font-size:9px;font-weight:700;color:rgba(255,255,255,.9);padding:0 6px;">'+du+' DU</span>'+
-    '</div></div>'
+    '<div style="height:'+(G.ROW_H+8)+'px;background:'+cb+';position:relative;border-bottom:1px solid #EEE0C8;overflow:visible;">'+
+    gGridLines(o,e,false)+barHtml+'</div>'
   );
+  // Disciplinas
   if(tpl){
+    var xi=gPx(ini),xw2=Math.max((G.diff(ini,fim)+1)*gSt.dayW,2*gSt.dayW);
     var ds=typeof _preObraMakeDiscs==='function'?_preObraMakeDiscs(pc.templateId):tpl.disciplinas.filter(function(d){return d.ativo!==false;});
     ds.forEach(function(pd,pi){
       var dc=typeof getDiscPal==='function'?getDiscPal(pi):cm;
@@ -356,7 +355,7 @@ gObraRow(t,o,e,r,i),t.expanded&&(t.disciplinas||[]).forEach((a,n)=>{a&&a.ativo&&
         '<div style="height:'+G.SUB_H+'px;background:#FEFCF5;position:relative;'+
         'border-bottom:1px solid rgba(122,74,16,.12);overflow:hidden;">'+
         gGridLines(o,e,false)+
-        '<div style="position:absolute;top:3px;left:'+xi+'px;height:'+(G.SUB_H-6)+'px;width:'+xw+'px;'+
+        '<div style="position:absolute;top:3px;left:'+xi+'px;height:'+(G.SUB_H-6)+'px;width:'+xw2+'px;'+
         'background:'+dc+';border-radius:2px;opacity:.85;"></div>'+
         '</div>'
       );
