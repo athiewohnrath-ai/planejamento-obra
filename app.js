@@ -142,6 +142,43 @@ function _tplRessincronizar(faseIdx) {
   renderObraFases();
 }
 
+
+function _preObraToggle(faseIdx, ativo) {
+  if (!ESTADO.cfg.obraFases[faseIdx]) return;
+  if (!ESTADO.cfg.obraFases[faseIdx].preObra)
+    ESTADO.cfg.obraFases[faseIdx].preObra = {ativo:false,templateId:'pre-obra-padrao',du:5};
+  ESTADO.cfg.obraFases[faseIdx].preObra.ativo = ativo;
+  onCfgChange();
+  renderObraFases();
+  gRender();
+}
+
+function _preObraAbrirModal(faseIdx) {
+  // Placeholder para v5.01b — modal de template
+  const cfg = ESTADO.cfg.obraFases[faseIdx];
+  const todos = _preObraGetTodos();
+  const opts = todos.map(t => `<option value="${t.id}" ${t.id===(cfg.preObra.templateId||'pre-obra-padrao')?'selected':''}>${t.label}</option>`).join('');
+  const d = document.createElement('div');
+  d.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9800;display:flex;align-items:center;justify-content:center;';
+  d.innerHTML = `<div style="background:var(--bg-panel);border-radius:10px;width:380px;overflow:hidden;box-shadow:0 16px 48px rgba(0,0,0,.4);">
+    <div style="background:#1A2535;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;">
+      <span style="font-family:var(--font);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.6);">Pré-Obra · Fase ${faseIdx+1}</span>
+      <button onclick="this.closest('[style*=fixed]').remove()" style="width:26px;height:26px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:5px;cursor:pointer;font-size:13px;color:rgba(255,255,255,.5);">✕</button>
+    </div>
+    <div style="padding:16px;">
+      <label class="p-label">Template de Pré-Obra</label>
+      <select class="p-input" style="width:100%;margin-bottom:12px;" onchange="ESTADO.cfg.obraFases[${faseIdx}].preObra.templateId=this.value;onCfgChange();gRender();">${opts}</select>
+      <label class="p-label" style="margin-bottom:4px;">Duração padrão (dias úteis)</label>
+      <input class="p-input" type="number" min="1" max="30" value="${cfg.preObra.du||5}" style="width:80px;" onchange="ESTADO.cfg.obraFases[${faseIdx}].preObra.du=parseInt(this.value)||5;onCfgChange();gRender();">
+      <div style="font-size:10px;color:var(--txt-dim);margin-top:6px;">A duração pode ser ajustada arrastando a barra no cronograma.</div>
+    </div>
+    <div style="padding:10px 16px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;">
+      <button onclick="this.closest('[style*=fixed]').remove()" style="height:30px;padding:0 16px;background:var(--accent);border:none;border-radius:6px;font-family:var(--font);font-size:10px;font-weight:700;color:#0D1117;cursor:pointer;letter-spacing:.05em;text-transform:uppercase;">Fechar</button>
+    </div>
+  </div>`;
+  document.body.appendChild(d);
+}
+
 function renderObraFases(){
   const cont = document.getElementById('obra-fases-cfg') || document.getElementById('obra-fases-container');
   if (!cont) return;
@@ -170,6 +207,7 @@ function renderObraFases(){
       <tr style="background:var(--bg-surface2);">
         <th style="padding:7px 10px;text-align:left;font-family:var(--font);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--txt-muted);border-bottom:1px solid var(--border);width:60px;">Fase</th>
         <th style="padding:7px 10px;text-align:left;font-family:var(--font);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--txt-muted);border-bottom:1px solid var(--border);">Template</th>
+        <th style="padding:7px 10px;text-align:center;font-family:var(--font);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--txt-dim);border-bottom:1px solid var(--border);width:90px;">Pré-Obra</th>
         <th style="padding:7px 10px;text-align:center;font-family:var(--font);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--txt-muted);border-bottom:1px solid var(--border);width:32px;"></th>
       </tr>
     </thead>
@@ -200,6 +238,14 @@ function renderObraFases(){
             <option value="">— sem template —</option>
             ${tplOpts}
           </select>
+        </div>
+      </td>
+      <td style="padding:6px 8px;text-align:center;">
+        <div style="display:flex;align-items:center;justify-content:center;gap:6px;">
+          <label style="display:flex;align-items:center;gap:4px;cursor:pointer;">
+            <input type="checkbox" ${cfg.preObra.ativo?'checked':''} onchange="_preObraToggle(${i},this.checked)" style="accent-color:var(--accent);width:13px;height:13px;cursor:pointer;">
+          </label>
+          ${cfg.preObra.ativo?`<button onclick="_preObraAbrirModal(${i})" title="Configurar template de pré-obra" style="height:24px;padding:0 8px;background:var(--bg-surface2);border:1px solid var(--border);border-radius:4px;font-size:9px;font-family:var(--font);font-weight:700;color:var(--txt-muted);cursor:pointer;letter-spacing:.04em;text-transform:uppercase;">cfg</button>`:''}
         </div>
       </td>
       <td style="padding:6px 8px;text-align:center;">${ressincBtn}</td>
