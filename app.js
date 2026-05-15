@@ -2220,7 +2220,7 @@ function _pfResumo(){
   <style>
     *{box-sizing:border-box;margin:0;padding:0;}
     body{font-family:'Barlow',sans-serif;color:#1A2535;background:#fff;font-size:10px;line-height:1.4;}
-    @page{size:A4 portrait;margin:14mm 16mm 14mm 16mm;}
+    @page{size:A4;margin:14mm 16mm 14mm 16mm;}
     @media print{
       .no-print{display:none!important;}
       body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
