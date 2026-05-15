@@ -2053,21 +2053,27 @@ function getDiasAprovacao(subId){var fase=gSt.projFases[0];if(!fase)return[];var
 function onAprovaChange(faseIdx,subId){var chk=document.getElementById('proj-f'+faseIdx+'-aprova-'+subId);var inp=document.getElementById('proj-f'+faseIdx+'-aprova-dias-'+subId);if(!chk||!inp)return;inp.disabled=!chk.checked;setAprovaConfig(subId,chk.checked,Math.max(1,parseInt(inp.value)||1));onCfgChange();gRender();}
 function gPopAprovaChange(subId){var chk=document.getElementById('pop-aprova-chk');var inp=document.getElementById('pop-aprova-dias');if(!chk||!inp)return;inp.disabled=!chk.checked;setAprovaConfig(subId,chk.checked,Math.max(1,parseInt(inp.value)||1));gRender();}
 function gBuildAprovaHtml(t){
-  if(!t||!t.subId||t.rowId!=='arq')return '';
+  if(!t||!t.subId||t.rowId!=="arq")return "";
   var ac=getAprovaConfig(t.subId);
   var sid=t.subId;
-  var chkd=ac.ativo?'checked':'';
-  var dis=ac.ativo?'':'disabled';
-  var html='<div data-aprova-sid="'+sid+'" style="margin-top:12px;border-top:1px solid #EEF0F4;padding-top:12px;">';
-  html+='<div style="font-size:9px;font-weight:700;text-transform:uppercase;color:#D4A017;margin-bottom:6px;">★ Aprovação do Cliente</div>';
-  html+='<label style="display:flex;align-items:center;gap:7px;margin-bottom:7px;">';
-  html+='<input type="checkbox" id="pop-aprova-chk" '+chkd+' onchange="gPopAprovaChange(this.closest('[data-aprova-sid]').dataset.aprovaSid)" style="accent-color:#D4A017;width:13px;height:13px;cursor:pointer;">';
-  html+='<span style="font-size:12px;color:#3A4A5A;">Requer aprovação do cliente</span></label>';
-  html+='<label style="display:flex;align-items:center;gap:7px;">';
-  html+='<span style="font-size:11px;font-weight:700;color:#8A95A8;width:36px;">Dias</span>';
-  html+='<input type="number" id="pop-aprova-dias" value="'+ac.dias+'" min="1" max="10" onchange="gPopAprovaChange(this.closest('[data-aprova-sid]').dataset.aprovaSid)" style="width:50px;padding:4px 6px;border:1px solid #C8CDD8;border-radius:4px;font-size:13px;text-align:center;" '+dis+'>';
-  html+='</label></div>';
-  return html;
+  var chkd=ac.ativo?" checked":"";
+  var dis=ac.ativo?"":"disabled";
+  var el=document.createElement("div");
+  el.setAttribute("data-aprova-sid",sid);
+  el.style.cssText="margin-top:12px;border-top:1px solid #EEF0F4;padding-top:12px;";
+  el.innerHTML=[
+    "<div style=\"font-size:9px;font-weight:700;text-transform:uppercase;color:#D4A017;margin-bottom:6px;\">★ Aprovação do Cliente</div>",
+    "<label style=\"display:flex;align-items:center;gap:7px;margin-bottom:7px;\">",
+    "<input type=\"checkbox\" id=\"pop-aprova-chk\""+chkd+" onchange=\"gPopAprovaChange(this.parentElement.parentElement.dataset.aprovaSid)\" style=\"accent-color:#D4A017;width:13px;height:13px;cursor:pointer;\">",
+    "<span style=\"font-size:12px;color:#3A4A5A;\">Requer aprovação do cliente</span></label>",
+    "<label style=\"display:flex;align-items:center;gap:7px;\">",
+    "<span style=\"font-size:11px;font-weight:700;color:#8A95A8;width:36px;\">Dias</span>",
+    "<input type=\"number\" id=\"pop-aprova-dias\" value=\""+ac.dias+"\" min=\"1\" max=\"10\" onchange=\"gPopAprovaChange(this.parentElement.parentElement.dataset.aprovaSid)\" style=\"width:50px;padding:4px 6px;border:1px solid #C8CDD8;border-radius:4px;font-size:13px;text-align:center;\" "+dis+">",
+    "</label>"
+  ].join("");
+  var tmp=document.createElement("div");
+  tmp.appendChild(el);
+  return tmp.innerHTML;
 }
 const PREOBRA_TEMPLATES_DEFAULT = [
   {id:'pre-obra-padrao',label:'🏗 Pré-Obra Padrão',desc:'Template padrão A|W',disciplinas:[
