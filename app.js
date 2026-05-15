@@ -252,21 +252,25 @@ document.addEventListener("DOMContentLoaded",()=>{buildVizSidebar()}),document.a
   var ini=new Date(fim),cnt=1;
   while(cnt<du){ini=G.addD(ini,-1);if(!CALENDARIO.isNaoUtil(ini))cnt++;}
   while(CALENDARIO.isNaoUtil(ini))ini=G.addD(ini,1);
-  var xi=gPx(ini),xw=Math.max((G.diff(ini,fim)+1)*gSt.dayW,2*gSt.dayW);
-  var cm=darkenHex(COR.OBRA_MOM,.72),cb=COR.OBRA_BG;
+  var xi=gPx(ini);
+  var xw=Math.max((G.diff(ini,fim)+1)*gSt.dayW,2*gSt.dayW);
+  var cm=darkenHex(COR.OBRA_MOM,.72);
+  var cb=COR.OBRA_BG;
   var tpl=typeof _preObraGetTemplate==='function'?_preObraGetTemplate(pc.templateId):null;
   var lbl=tpl?tpl.label.substring(0,12):'';
-  var sid=r,gid=i;
-  sid.push(
+  // Sidebar: header da pré-obra
+  r.push(
     '<div style="height:'+(G.ROW_H+8)+'px;background:'+cb+';display:flex;align-items:center;'+
     'padding:0 5px 0 8px;border-bottom:1px solid #EEE0C8;border-right:2px solid #C0C8D4;'+
     'font-size:10px;font-weight:700;color:#6A3810;text-transform:uppercase;letter-spacing:.04em;gap:3px;">'+
     '<span style="width:5px;height:5px;border-radius:1px;background:'+cm+';flex-shrink:0;"></span>'+
-    '<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+
-    'Pré-Obra'+(gSt.obraFases.length>1?' F'+(_poFaseIdx+1):'')+
-    (lbl?'</span><span style="font-size:8px;padding:1px 5px;border-radius:8px;background:rgba(255,255,255,.18);color:#fff;flex-shrink:0;">'+lbl:'')+'</span></div>'
+    '<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Pré-Obra'+
+    (gSt.obraFases.length>1?' F'+(_poFaseIdx+1):'')+
+    '</span>'+(lbl?'<span style="font-size:8px;padding:1px 5px;border-radius:8px;background:rgba(255,255,255,.18);color:#fff;">'+lbl+'</span>':'')+
+    '</div>'
   );
-  gid.push(
+  // Gantt: barra da pré-obra
+  i.push(
     '<div style="height:'+(G.ROW_H+8)+'px;background:'+cb+';position:relative;border-bottom:1px solid #EEE0C8;overflow:hidden;">'+
     gGridLines(o,e,false)+
     '<div style="position:absolute;top:8px;left:'+xi+'px;height:'+G.ROW_H+'px;width:'+xw+'px;'+
@@ -274,23 +278,26 @@ document.addEventListener("DOMContentLoaded",()=>{buildVizSidebar()}),document.a
     '<span style="font-size:9px;font-weight:700;color:rgba(255,255,255,.9);padding:0 6px;">'+du+' DU</span>'+
     '</div></div>'
   );
+  // Disciplinas
   if(tpl){
     var ds=typeof _preObraMakeDiscs==='function'?_preObraMakeDiscs(pc.templateId):tpl.disciplinas.filter(function(d){return d.ativo!==false;});
     ds.forEach(function(pd,pi){
       var dc=typeof getDiscPal==='function'?getDiscPal(pi):cm;
-      sid.push(
+      r.push(
         '<div style="height:'+G.SUB_H+'px;background:#FEFCF5;display:flex;align-items:center;'+
         'padding:0 8px;border-bottom:1px solid rgba(122,74,16,.12);border-right:2px solid #C0C8D4;'+
         'font-size:9px;color:#6A3810;gap:4px;overflow:hidden;">'+
         '<span style="width:4px;height:4px;border-radius:1px;background:'+dc+';flex-shrink:0;"></span>'+
-        '<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+(pd.label||pd.id)+'</span></div>'
+        '<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+(pd.label||pd.id)+'</span>'+
+        '</div>'
       );
-      gid.push(
+      i.push(
         '<div style="height:'+G.SUB_H+'px;background:#FEFCF5;position:relative;'+
         'border-bottom:1px solid rgba(122,74,16,.12);overflow:hidden;">'+
         gGridLines(o,e,false)+
         '<div style="position:absolute;top:3px;left:'+xi+'px;height:'+(G.SUB_H-6)+'px;width:'+xw+'px;'+
-        'background:'+dc+';border-radius:2px;opacity:.85;"></div></div>'
+        'background:'+dc+';border-radius:2px;opacity:.85;"></div>'+
+        '</div>'
       );
     });
   }
