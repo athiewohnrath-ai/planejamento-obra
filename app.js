@@ -246,7 +246,8 @@ document.addEventListener("DOMContentLoaded",()=>{buildVizSidebar()}),document.a
 (function(obraFase, obraFaseIdx){
   var pc=ESTADO.cfg.obraFases&&ESTADO.cfg.obraFases[obraFaseIdx]&&ESTADO.cfg.obraFases[obraFaseIdx].preObra;
   if(!pc||!pc.ativo)return;
-  var du=pc.du||5;
+  var _custom=ESTADO.preObraCustom&&ESTADO.preObraCustom[obraFaseIdx];
+  var du=(_custom?_custom.du:pc.du)||5;
   var fim=G.addD(new Date(obraFase.obra.start),-1);
   while(CALENDARIO.isNaoUtil(fim))fim=G.addD(fim,-1);
   var ini=new Date(fim),cnt=1;
@@ -256,12 +257,13 @@ document.addEventListener("DOMContentLoaded",()=>{buildVizSidebar()}),document.a
   var xw=Math.max((G.diff(ini,fim)+1)*gSt.dayW,2*gSt.dayW);
   var cm=darkenHex(COR.OBRA_MOM,.72);
   var cb=COR.OBRA_BG;
-  var tpl=typeof _preObraGetTemplate==='function'?_preObraGetTemplate(pc.templateId):null;
+  var tpl=_custom?{label:'Custom',disciplinas:_custom.disciplinas}:(typeof _preObraGetTemplate==='function'?_preObraGetTemplate(pc.templateId):null);
   var lbl=tpl?tpl.label.substring(0,12):'';
   var payload=encodeURIComponent(JSON.stringify({type:'preObra',faseIdx:obraFaseIdx}));
   console.log('[PO3] xi='+xi+' xw='+xw+' ini='+G.fmtISO(ini)+' tpl='+!!tpl+' ds='+(tpl?tpl.disciplinas.length:0));
   // Sidebar header
-  r.push('<div style="height:'+(G.ROW_H+8)+'px;background:'+cb+';display:flex;align-items:center;padding:0 5px 0 8px;border-bottom:1px solid #EEE0C8;border-right:2px solid #C0C8D4;font-size:10px;font-weight:700;color:#6A3810;text-transform:uppercase;letter-spacing:.04em;gap:3px;"><span style="width:5px;height:5px;border-radius:1px;background:'+cm+';flex-shrink:0;"></span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Pré-Obra'+(gSt.obraFases.length>1?' F'+(obraFaseIdx+1):'')+' '+du+' DU</span></div>');
+  var _poClickPayload=encodeURIComponent(JSON.stringify({type:'preObra',faseIdx:obraFaseIdx}));
+  r.push('<div onclick="abrirModalPreObra('+obraFaseIdx+')" style="height:'+(G.ROW_H+8)+'px;background:'+cb+';display:flex;align-items:center;padding:0 5px 0 8px;border-bottom:1px solid #EEE0C8;border-right:2px solid #C0C8D4;font-size:10px;font-weight:700;color:#6A3810;text-transform:uppercase;letter-spacing:.04em;gap:3px;cursor:pointer;" title="Editar pré-obra"><span style="width:5px;height:5px;border-radius:1px;background:'+cm+';flex-shrink:0;"></span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Pré-Obra'+(gSt.obraFases.length>1?' F'+(obraFaseIdx+1):'')+' · '+du+' DU</span><span style="font-size:9px;opacity:.5;">✏</span></div>');
   // Gantt: barra principal
   i.push('<div style="height:'+(G.ROW_H+8)+'px;background:'+cb+';position:relative;border-bottom:1px solid #EEE0C8;overflow:visible;">'+gGridLines(o,e,false)+gBar(xi,xw,G.ROW_H,cm,ini,fim,null,payload,true)+'</div>');
   // Disciplinas
@@ -282,7 +284,8 @@ gObraRow(t,o,e,r,i),t.expanded&&(t.disciplinas||[]).forEach((a,n)=>{a&&a.ativo&&
 (function(obraFase, obraFaseIdx){
   var pc=ESTADO.cfg.obraFases&&ESTADO.cfg.obraFases[obraFaseIdx]&&ESTADO.cfg.obraFases[obraFaseIdx].preObra;
   if(!pc||!pc.ativo)return;
-  var du=pc.du||5;
+  var _custom=ESTADO.preObraCustom&&ESTADO.preObraCustom[obraFaseIdx];
+  var du=(_custom?_custom.du:pc.du)||5;
   var fim=G.addD(new Date(obraFase.obra.start),-1);
   while(CALENDARIO.isNaoUtil(fim))fim=G.addD(fim,-1);
   var ini=new Date(fim),cnt=1;
@@ -292,12 +295,13 @@ gObraRow(t,o,e,r,i),t.expanded&&(t.disciplinas||[]).forEach((a,n)=>{a&&a.ativo&&
   var xw=Math.max((G.diff(ini,fim)+1)*gSt.dayW,2*gSt.dayW);
   var cm=darkenHex(COR.OBRA_MOM,.72);
   var cb=COR.OBRA_BG;
-  var tpl=typeof _preObraGetTemplate==='function'?_preObraGetTemplate(pc.templateId):null;
+  var tpl=_custom?{label:'Custom',disciplinas:_custom.disciplinas}:(typeof _preObraGetTemplate==='function'?_preObraGetTemplate(pc.templateId):null);
   var lbl=tpl?tpl.label.substring(0,12):'';
   var payload=encodeURIComponent(JSON.stringify({type:'preObra',faseIdx:obraFaseIdx}));
   console.log('[PO3] xi='+xi+' xw='+xw+' ini='+G.fmtISO(ini)+' tpl='+!!tpl+' ds='+(tpl?tpl.disciplinas.length:0));
   // Sidebar header
-  r.push('<div style="height:'+(G.ROW_H+8)+'px;background:'+cb+';display:flex;align-items:center;padding:0 5px 0 8px;border-bottom:1px solid #EEE0C8;border-right:2px solid #C0C8D4;font-size:10px;font-weight:700;color:#6A3810;text-transform:uppercase;letter-spacing:.04em;gap:3px;"><span style="width:5px;height:5px;border-radius:1px;background:'+cm+';flex-shrink:0;"></span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Pré-Obra'+(gSt.obraFases.length>1?' F'+(obraFaseIdx+1):'')+' '+du+' DU</span></div>');
+  var _poClickPayload=encodeURIComponent(JSON.stringify({type:'preObra',faseIdx:obraFaseIdx}));
+  r.push('<div onclick="abrirModalPreObra('+obraFaseIdx+')" style="height:'+(G.ROW_H+8)+'px;background:'+cb+';display:flex;align-items:center;padding:0 5px 0 8px;border-bottom:1px solid #EEE0C8;border-right:2px solid #C0C8D4;font-size:10px;font-weight:700;color:#6A3810;text-transform:uppercase;letter-spacing:.04em;gap:3px;cursor:pointer;" title="Editar pré-obra"><span style="width:5px;height:5px;border-radius:1px;background:'+cm+';flex-shrink:0;"></span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Pré-Obra'+(gSt.obraFases.length>1?' F'+(obraFaseIdx+1):'')+' · '+du+' DU</span><span style="font-size:9px;opacity:.5;">✏</span></div>');
   // Gantt: barra principal
   i.push('<div style="height:'+(G.ROW_H+8)+'px;background:'+cb+';position:relative;border-bottom:1px solid #EEE0C8;overflow:visible;">'+gGridLines(o,e,false)+gBar(xi,xw,G.ROW_H,cm,ini,fim,null,payload,true)+'</div>');
   // Disciplinas
@@ -1073,6 +1077,166 @@ let _tplEditorId = null;
 let _tplEditorData = null; // { disciplinas: [...] } — espelha estrutura de fase.disciplinas
 
 // ── Abrir gerenciador (lista) ─────────────────────────────
+// ── Modal de edição da Pré-Obra por cronograma ────────────
+
+function abrirModalPreObra(faseIdx) {
+  document.getElementById('modal-po-overlay')?.remove();
+
+  // Garantir estrutura de customização por cronograma
+  if (!ESTADO.preObraCustom) ESTADO.preObraCustom = {};
+  if (!ESTADO.preObraCustom[faseIdx]) {
+    // Inicializar com cópia do template
+    var poCfg = ESTADO.cfg.obraFases[faseIdx]?.preObra || {templateId:'pre-obra-padrao',du:5};
+    var tpl = typeof _preObraGetTemplate==='function' ? _preObraGetTemplate(poCfg.templateId) : null;
+    ESTADO.preObraCustom[faseIdx] = {
+      du: poCfg.du || 5,
+      disciplinas: tpl ? JSON.parse(JSON.stringify(tpl.disciplinas)) : []
+    };
+  }
+
+  var custom = ESTADO.preObraCustom[faseIdx];
+  var ov = document.createElement('div');
+  ov.id = 'modal-po-overlay';
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9500;display:flex;align-items:center;justify-content:center;padding:16px;';
+  ov.addEventListener('click', function(e){ if(e.target===ov) fecharModalPreObra(); });
+  document.body.appendChild(ov);
+  _poRender(faseIdx);
+}
+
+function fecharModalPreObra() {
+  document.getElementById('modal-po-overlay')?.remove();
+}
+
+function _poRender(faseIdx) {
+  var ov = document.getElementById('modal-po-overlay');
+  if (!ov) return;
+  var custom = ESTADO.preObraCustom[faseIdx];
+  var discs = custom.disciplinas || [];
+
+  var discsHtml = discs.map(function(disc, di) {
+    var tasksHtml = (disc.tasks || []).map(function(task, ti) {
+      return '<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;padding:5px 8px;background:var(--bg-surface);border-radius:4px;border:0.5px solid var(--border);">'
+        + '<span data-po-drag="task" data-fi="'+faseIdx+'" data-di="'+di+'" data-ti="'+ti+'" style="cursor:grab;opacity:.35;font-size:11px;flex-shrink:0;">⠿</span>'
+        + '<input type="text" value="'+task.n.replace(/"/g,'&quot;')+'" onchange="ESTADO.preObraCustom['+faseIdx+'].disciplinas['+di+'].tasks['+ti+'].n=this.value;onCfgChange();" style="flex:1;height:26px;padding:0 6px;border:0.5px solid var(--border);border-radius:4px;background:var(--bg-surface2);color:var(--txt);font-size:11px;">'
+        + '<label style="font-size:10px;color:var(--txt-muted);white-space:nowrap;flex-shrink:0;">Efetivo</label>'
+        + '<input type="number" min="1" max="50" value="'+(task.prof||2)+'" onchange="ESTADO.preObraCustom['+faseIdx+'].disciplinas['+di+'].tasks['+ti+'].prof=parseInt(this.value)||1;onCfgChange();gRender();" style="width:44px;height:26px;padding:0 4px;border:0.5px solid var(--border);border-radius:4px;background:var(--bg-surface2);color:var(--txt);font-size:11px;text-align:center;">'
+        + '<button onclick="_poRemoverTarefa('+faseIdx+','+di+','+ti+')" style="width:22px;height:22px;background:none;border:none;cursor:pointer;font-size:12px;color:var(--txt-dim);" title="Remover">✕</button>'
+        + '</div>';
+    }).join('');
+
+    return '<div data-po-disc="'+di+'" style="border:1px solid var(--border);border-radius:8px;margin-bottom:10px;overflow:hidden;">'
+      + '<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--bg-surface2);border-bottom:1px solid var(--border);">'
+      + '<span data-po-drag="disc" data-fi="'+faseIdx+'" data-di="'+di+'" style="cursor:grab;opacity:.35;font-size:13px;flex-shrink:0;">⠿</span>'
+      + '<input type="text" value="'+disc.label.replace(/"/g,'&quot;')+'" onchange="ESTADO.preObraCustom['+faseIdx+'].disciplinas['+di+'].label=this.value;onCfgChange();" style="flex:1;height:28px;padding:0 8px;border:0.5px solid var(--border);border-radius:4px;background:var(--bg-surface);color:var(--txt);font-size:12px;font-weight:700;">'
+      + '<label style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--txt-muted);cursor:pointer;flex-shrink:0;"><input type="checkbox" '+(disc.ativo!==false?'checked':'')+' onchange="ESTADO.preObraCustom['+faseIdx+'].disciplinas['+di+'].ativo=this.checked;onCfgChange();gRender();" style="accent-color:var(--accent);"> Ativa</label>'
+      + '<button onclick="_poRemoverDisc('+faseIdx+','+di+')" style="height:26px;padding:0 8px;background:rgba(180,20,20,.08);border:1px solid rgba(180,20,20,.2);border-radius:4px;font-size:10px;color:#B41414;cursor:pointer;flex-shrink:0;">✕ Disc.</button>'
+      + '</div>'
+      + '<div style="padding:8px 10px;">'
+      + tasksHtml
+      + '<button onclick="_poAdicionarTarefa('+faseIdx+','+di+')" style="font-size:10px;color:var(--accent);background:none;border:none;cursor:pointer;font-family:var(--font);font-weight:700;">+ Tarefa</button>'
+      + '</div>'
+      + '</div>';
+  }).join('');
+
+  ov.innerHTML = '<div style="background:var(--bg-panel);border-radius:12px;box-shadow:0 24px 64px rgba(0,0,0,.45);width:100%;max-width:660px;max-height:88vh;display:flex;flex-direction:column;overflow:hidden;">'
+    + '<div style="display:flex;align-items:center;gap:10px;padding:14px 20px;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--bg-surface2);">'
+    + '<div style="width:6px;height:6px;border-radius:2px;background:#C07820;flex-shrink:0;"></div>'
+    + '<div style="flex:1;">'
+    + '<div style="font-family:var(--font);font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--txt);">Pré-Obra · Fase '+(faseIdx+1)+'</div>'
+    + '<div style="font-size:10px;color:var(--txt-muted);margin-top:1px;">Edição específica deste cronograma — não altera o template</div>'
+    + '</div>'
+    + '<div style="display:flex;align-items:center;gap:6px;">'
+    + '<label style="font-size:10px;color:var(--txt-muted);white-space:nowrap;">Duração (DU)</label>'
+    + '<input type="number" min="1" max="30" value="'+custom.du+'" onchange="ESTADO.preObraCustom['+faseIdx+'].du=parseInt(this.value)||5;ESTADO.cfg.obraFases['+faseIdx+'].preObra.du=parseInt(this.value)||5;onCfgChange();gRender();" style="width:52px;height:28px;padding:0 6px;border:1px solid var(--border);border-radius:5px;background:var(--bg-surface);color:var(--txt);font-family:var(--font);font-size:12px;font-weight:700;text-align:center;">'
+    + '</div>'
+    + '<button onclick="fecharModalPreObra()" style="width:30px;height:30px;background:var(--bg-surface);border:1px solid var(--border);border-radius:5px;cursor:pointer;font-size:14px;color:var(--txt-muted);">✕</button>'
+    + '</div>'
+    + '<div style="flex:1;overflow-y:auto;padding:16px 20px;">'
+    + discsHtml
+    + '<button onclick="_poAdicionarDisc('+faseIdx+')" style="width:100%;height:32px;background:var(--bg-surface2);border:1px dashed var(--border);border-radius:6px;font-family:var(--font);font-size:10px;font-weight:700;color:var(--txt-muted);cursor:pointer;">+ Adicionar Disciplina</button>'
+    + '</div>'
+    + '<div style="padding:12px 20px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">'
+    + '<button onclick="_poResetarCustom('+faseIdx+')" style="font-size:10px;color:var(--txt-dim);background:none;border:none;cursor:pointer;font-family:var(--font);">↺ Restaurar template</button>'
+    + '<div style="display:flex;gap:8px;">'
+    + '<button onclick="fecharModalPreObra()" style="height:32px;padding:0 16px;background:var(--bg-surface2);border:1px solid var(--border);border-radius:6px;font-family:var(--font);font-size:10px;font-weight:700;color:var(--txt-muted);cursor:pointer;">Cancelar</button>'
+    + '<button onclick="_poSalvar('+faseIdx+')" style="height:32px;padding:0 20px;background:var(--accent);border:none;border-radius:6px;font-family:var(--font);font-size:10px;font-weight:700;color:#0D1117;cursor:pointer;">✓ Salvar</button>'
+    + '</div>'
+    + '</div>'
+    + '</div>';
+
+  // Drag & drop das disciplinas
+  _poInitDragDisc(faseIdx);
+}
+
+function _poAdicionarDisc(faseIdx) {
+  ESTADO.preObraCustom[faseIdx].disciplinas.push({
+    id:'disc-'+Date.now(), label:'Nova Disciplina', ativo:true,
+    tasks:[{n:'Nova tarefa', prof:2}]
+  });
+  onCfgChange(); _poRender(faseIdx);
+}
+
+function _poRemoverDisc(faseIdx, di) {
+  ESTADO.preObraCustom[faseIdx].disciplinas.splice(di, 1);
+  onCfgChange(); gRender(); _poRender(faseIdx);
+}
+
+function _poAdicionarTarefa(faseIdx, di) {
+  ESTADO.preObraCustom[faseIdx].disciplinas[di].tasks.push({n:'Nova tarefa', prof:2});
+  onCfgChange(); _poRender(faseIdx);
+}
+
+function _poRemoverTarefa(faseIdx, di, ti) {
+  ESTADO.preObraCustom[faseIdx].disciplinas[di].tasks.splice(ti, 1);
+  onCfgChange(); gRender(); _poRender(faseIdx);
+}
+
+function _poResetarCustom(faseIdx) {
+  if (!confirm('Restaurar o template original? As edições desta fase serão perdidas.')) return;
+  delete ESTADO.preObraCustom[faseIdx];
+  onCfgChange(); gRender(); abrirModalPreObra(faseIdx);
+}
+
+function _poSalvar(faseIdx) {
+  onCfgChange();
+  salvarDados();
+  gRender();
+  fecharModalPreObra();
+}
+
+function _poInitDragDisc(faseIdx) {
+  var ov = document.getElementById('modal-po-overlay');
+  if (!ov) return;
+  var discsEls = ov.querySelectorAll('[data-po-disc]');
+  var dragSrc = null;
+
+  discsEls.forEach(function(el) {
+    el.setAttribute('draggable', 'true');
+    el.addEventListener('dragstart', function(e) {
+      dragSrc = el;
+      e.dataTransfer.effectAllowed = 'move';
+      el.style.opacity = '0.4';
+    });
+    el.addEventListener('dragend', function() {
+      el.style.opacity = '1';
+    });
+    el.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+    });
+    el.addEventListener('drop', function(e) {
+      e.stopPropagation();
+      if (dragSrc === el) return;
+      var fromIdx = parseInt(dragSrc.dataset.poDisc);
+      var toIdx = parseInt(el.dataset.poDisc);
+      var discs = ESTADO.preObraCustom[faseIdx].disciplinas;
+      var moved = discs.splice(fromIdx, 1)[0];
+      discs.splice(toIdx, 0, moved);
+      onCfgChange(); gRender(); _poRender(faseIdx);
+    });
+  });
+}
+
 function abrirGerenciarTPO() {
   document.getElementById('modal-tpo-overlay')?.remove();
   const ov = document.createElement('div');
