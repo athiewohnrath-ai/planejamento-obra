@@ -1111,8 +1111,8 @@ function _poRenderModal(faseIdx) {
 
   var discsHtml = discs.map(function(disc, di) {
     var tasksHtml = (disc.tasks||[]).map(function(task, ti) {
-      return '<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;padding:5px 8px;background:var(--bg-surface);border-radius:4px;border:0.5px solid var(--border);">'
-        + '<span style="cursor:grab;opacity:.35;font-size:11px;flex-shrink:0;">⠿</span>'
+      return '<div data-po-task="'+ti+'" style="display:flex;align-items:center;gap:6px;margin-bottom:5px;padding:5px 8px;background:var(--bg-surface);border-radius:4px;border:0.5px solid var(--border);">'
+        + '<span data-task-handle="1" style="cursor:grab;opacity:.35;font-size:11px;flex-shrink:0;padding:4px;margin:-4px;">⠿</span>'
         + '<input type="text" value="'+task.n.replace(/"/g,'&quot;')+'" '
         + 'onchange="ESTADO.preObraCustom['+faseIdx+'].disciplinas['+di+'].tasks['+ti+'].n=this.value;onCfgChange();" '
         + 'style="flex:1;height:26px;padding:0 6px;border:0.5px solid var(--border);border-radius:4px;background:var(--bg-surface2);color:var(--txt);font-size:11px;">'
@@ -1169,11 +1169,15 @@ function _poRenderModal(faseIdx) {
     + '</div></div></div>';
 
   _poInitDragDisc(faseIdx);
+  _poInitDragTask(faseIdx);
 }
 
 function _poAdicionarDisc(faseIdx) {
   ESTADO.preObraCustom[faseIdx].disciplinas.push({id:'disc-'+Date.now(),label:'Nova Disciplina',ativo:true,tasks:[{n:'Nova tarefa',prof:2}]});
   onCfgChange(); _poRenderModal(faseIdx);
+  // Scroll para o fim
+  var ov=document.getElementById('modal-po-overlay');
+  if(ov){var body=ov.querySelector('div[style*="overflow-y:auto"]');if(body)body.scrollTop=body.scrollHeight;}
 }
 window._poAdicionarDisc = _poAdicionarDisc;
 
@@ -1240,6 +1244,42 @@ function _poInitDragDisc(faseIdx) {
     });
   });
 }
+function _poInitDragTask(faseIdx) {
+  var ov = document.getElementById('modal-po-overlay');
+  if (!ov) return;
+  // Para cada disciplina, inicializar drag nas tarefas
+  ov.querySelectorAll('[data-po-disc]').forEach(function(discEl) {
+    var di = parseInt(discEl.dataset.poDisc);
+    var taskEls = discEl.querySelectorAll('[data-po-task]');
+    var dragSrcTask = null;
+    taskEls.forEach(function(el) {
+      var handle = el.querySelector('[data-task-handle]');
+      if (handle) {
+        handle.addEventListener('mousedown', function() { el.setAttribute('draggable','true'); });
+        handle.addEventListener('mouseup', function() { el.removeAttribute('draggable'); });
+      }
+      el.addEventListener('dragstart', function(e) {
+        if (!el.getAttribute('draggable')) { e.preventDefault(); return; }
+        dragSrcTask=el; e.dataTransfer.effectAllowed='move'; el.style.opacity='.4';
+      });
+      el.addEventListener('dragend', function() {
+        el.style.opacity='1'; el.removeAttribute('draggable');
+      });
+      el.addEventListener('dragover', function(e) { e.preventDefault(); });
+      el.addEventListener('drop', function(e) {
+        e.stopPropagation();
+        if (dragSrcTask===el) return;
+        var from=parseInt(dragSrcTask.dataset.poTask);
+        var to=parseInt(el.dataset.poTask);
+        var tasks=ESTADO.preObraCustom[faseIdx].disciplinas[di].tasks;
+        var moved=tasks.splice(from,1)[0];
+        tasks.splice(to,0,moved);
+        onCfgChange(); _poRenderModal(faseIdx);
+      });
+    });
+  });
+}
+
 
 function abrirGerenciarTPO() {
   document.getElementById('modal-tpo-overlay')?.remove();
