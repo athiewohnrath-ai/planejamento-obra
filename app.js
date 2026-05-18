@@ -350,12 +350,13 @@ gObraRow(t,o,e,r,i),t.expanded&&(t.disciplinas||[]).forEach((a,n)=>{a&&a.ativo&&
         '<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+(pd.label||pd.id)+'</span>'+
         '</div>'
       );
+      var _xiC=Math.max(0,xi),_xwC=xw2-(Math.max(0,-xi));
       i.push(
         '<div style="height:'+G.SUB_H+'px;background:#FEFCF5;position:relative;'+
         'border-bottom:1px solid rgba(122,74,16,.12);overflow:hidden;">'+
         gGridLines(o,e,false)+
-        '<div style="position:absolute;top:3px;left:'+xi+'px;height:'+(G.SUB_H-6)+'px;width:'+xw2+'px;'+
-        'background:'+dc+';border-radius:2px;opacity:.85;"></div>'+
+        (_xwC>0?'<div style="position:absolute;top:3px;left:'+_xiC+'px;height:'+(G.SUB_H-6)+'px;width:'+_xwC+'px;'+
+        'background:'+dc+';border-radius:2px;opacity:.85;"></div>':'')+
         '</div>'
       );
     });
