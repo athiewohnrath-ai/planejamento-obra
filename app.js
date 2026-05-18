@@ -246,8 +246,7 @@ document.addEventListener("DOMContentLoaded",()=>{buildVizSidebar()}),document.a
 (function(obraFase, obraFaseIdx){
   var pc=ESTADO.cfg.obraFases&&ESTADO.cfg.obraFases[obraFaseIdx]&&ESTADO.cfg.obraFases[obraFaseIdx].preObra;
   if(!pc||!pc.ativo)return;
-  var _custom=ESTADO.preObraCustom&&ESTADO.preObraCustom[obraFaseIdx];
-  var du=(_custom?_custom.du:pc.du)||5;
+  var du=pc.du||5;
   var fim=G.addD(new Date(obraFase.obra.start),-1);
   while(CALENDARIO.isNaoUtil(fim))fim=G.addD(fim,-1);
   var ini=new Date(fim),cnt=1;
@@ -257,17 +256,17 @@ document.addEventListener("DOMContentLoaded",()=>{buildVizSidebar()}),document.a
   var xw=Math.max((G.diff(ini,fim)+1)*gSt.dayW,2*gSt.dayW);
   var cm=darkenHex(COR.OBRA_MOM,.72);
   var cb=COR.OBRA_BG;
-  var tpl=_custom?{label:'Custom',disciplinas:_custom.disciplinas}:(typeof _preObraGetTemplate==='function'?_preObraGetTemplate(pc.templateId):null);
+  var tpl=typeof _preObraGetTemplate==='function'?_preObraGetTemplate(pc.templateId):null;
   var lbl=tpl?tpl.label.substring(0,12):'';
   var payload=encodeURIComponent(JSON.stringify({type:'preObra',faseIdx:obraFaseIdx}));
   console.log('[PO3] xi='+xi+' xw='+xw+' ini='+G.fmtISO(ini)+' tpl='+!!tpl+' ds='+(tpl?tpl.disciplinas.length:0));
   // Sidebar header
-    r.push('<div data-po-open="'+obraFaseIdx+'" style="height:'+(G.ROW_H+8)+'px;background:'+cb+';display:flex;align-items:center;padding:0 5px 0 8px;border-bottom:1px solid #EEE0C8;border-right:2px solid #C0C8D4;font-size:10px;font-weight:700;color:#6A3810;text-transform:uppercase;letter-spacing:.04em;gap:3px;cursor:pointer;" title="Clique para editar"><span style="width:5px;height:5px;border-radius:1px;background:'+cm+';flex-shrink:0;"></span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Pré-Obra'+(gSt.obraFases.length>1?' F'+(obraFaseIdx+1):'')+' · '+du+' DU</span><span style="font-size:9px;opacity:.5;">✏</span></div>');
+  r.push('<div onclick="abrirModalPreObra('+obraFaseIdx+')" style="height:'+(G.ROW_H+8)+'px;background:'+cb+';display:flex;align-items:center;padding:0 5px 0 8px;border-bottom:1px solid #EEE0C8;border-right:2px solid #C0C8D4;font-size:10px;font-weight:700;color:#6A3810;text-transform:uppercase;letter-spacing:.04em;gap:3px;cursor:pointer;"><span style="width:5px;height:5px;border-radius:1px;background:'+cm+';flex-shrink:0;"></span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Pré-Obra'+(gSt.obraFases.length>1?' F'+(obraFaseIdx+1):'')+' · '+du+' DU</span><span style="font-size:9px;opacity:.5;"> ✏</span></div>');
   // Gantt: barra principal
   i.push('<div style="height:'+(G.ROW_H+8)+'px;background:'+cb+';position:relative;border-bottom:1px solid #EEE0C8;overflow:visible;">'+gGridLines(o,e,false)+gBar(xi,xw,G.ROW_H,cm,ini,fim,null,payload,true)+'</div>');
   // Disciplinas
   if(tpl){
-    var ds=typeof _preObraMakeDiscs==='function'?_preObraMakeDiscs(pc.templateId):(tpl&&tpl.disciplinas?tpl.disciplinas.filter(function(d){return d.ativo!==false;}):[]);
+    var ds=typeof _preObraMakeDiscs==='function'?_preObraMakeDiscs(pc.templateId):tpl.disciplinas.filter(function(d){return d.ativo!==false;});
     console.log('[PO4] ds.length='+ds.length+' xi='+xi+' xw='+xw);
     ds.forEach(function(pd,pi){
       var _dcArr=typeof getDiscPal==='function'?getDiscPal(pi):[cm];var dc=Array.isArray(_dcArr)?_dcArr[0]:_dcArr;
@@ -283,8 +282,7 @@ gObraRow(t,o,e,r,i),t.expanded&&(t.disciplinas||[]).forEach((a,n)=>{a&&a.ativo&&
 (function(obraFase, obraFaseIdx){
   var pc=ESTADO.cfg.obraFases&&ESTADO.cfg.obraFases[obraFaseIdx]&&ESTADO.cfg.obraFases[obraFaseIdx].preObra;
   if(!pc||!pc.ativo)return;
-  var _custom=ESTADO.preObraCustom&&ESTADO.preObraCustom[obraFaseIdx];
-  var du=(_custom?_custom.du:pc.du)||5;
+  var du=pc.du||5;
   var fim=G.addD(new Date(obraFase.obra.start),-1);
   while(CALENDARIO.isNaoUtil(fim))fim=G.addD(fim,-1);
   var ini=new Date(fim),cnt=1;
@@ -294,17 +292,17 @@ gObraRow(t,o,e,r,i),t.expanded&&(t.disciplinas||[]).forEach((a,n)=>{a&&a.ativo&&
   var xw=Math.max((G.diff(ini,fim)+1)*gSt.dayW,2*gSt.dayW);
   var cm=darkenHex(COR.OBRA_MOM,.72);
   var cb=COR.OBRA_BG;
-  var tpl=_custom?{label:'Custom',disciplinas:_custom.disciplinas}:(typeof _preObraGetTemplate==='function'?_preObraGetTemplate(pc.templateId):null);
+  var tpl=typeof _preObraGetTemplate==='function'?_preObraGetTemplate(pc.templateId):null;
   var lbl=tpl?tpl.label.substring(0,12):'';
   var payload=encodeURIComponent(JSON.stringify({type:'preObra',faseIdx:obraFaseIdx}));
   console.log('[PO3] xi='+xi+' xw='+xw+' ini='+G.fmtISO(ini)+' tpl='+!!tpl+' ds='+(tpl?tpl.disciplinas.length:0));
   // Sidebar header
-    r.push('<div data-po-open="'+obraFaseIdx+'" style="height:'+(G.ROW_H+8)+'px;background:'+cb+';display:flex;align-items:center;padding:0 5px 0 8px;border-bottom:1px solid #EEE0C8;border-right:2px solid #C0C8D4;font-size:10px;font-weight:700;color:#6A3810;text-transform:uppercase;letter-spacing:.04em;gap:3px;cursor:pointer;" title="Clique para editar"><span style="width:5px;height:5px;border-radius:1px;background:'+cm+';flex-shrink:0;"></span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Pré-Obra'+(gSt.obraFases.length>1?' F'+(obraFaseIdx+1):'')+' · '+du+' DU</span><span style="font-size:9px;opacity:.5;">✏</span></div>');
+  r.push('<div style="height:'+(G.ROW_H+8)+'px;background:'+cb+';display:flex;align-items:center;padding:0 5px 0 8px;border-bottom:1px solid #EEE0C8;border-right:2px solid #C0C8D4;font-size:10px;font-weight:700;color:#6A3810;text-transform:uppercase;letter-spacing:.04em;gap:3px;"><span style="width:5px;height:5px;border-radius:1px;background:'+cm+';flex-shrink:0;"></span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Pré-Obra'+(gSt.obraFases.length>1?' F'+(obraFaseIdx+1):'')+' '+du+' DU</span></div>');
   // Gantt: barra principal
   i.push('<div style="height:'+(G.ROW_H+8)+'px;background:'+cb+';position:relative;border-bottom:1px solid #EEE0C8;overflow:visible;">'+gGridLines(o,e,false)+gBar(xi,xw,G.ROW_H,cm,ini,fim,null,payload,true)+'</div>');
   // Disciplinas
   if(tpl){
-    var ds=typeof _preObraMakeDiscs==='function'?_preObraMakeDiscs(pc.templateId):(tpl&&tpl.disciplinas?tpl.disciplinas.filter(function(d){return d.ativo!==false;}):[]);
+    var ds=typeof _preObraMakeDiscs==='function'?_preObraMakeDiscs(pc.templateId):tpl.disciplinas.filter(function(d){return d.ativo!==false;});
     console.log('[PO4] ds.length='+ds.length+' xi='+xi+' xw='+xw);
     ds.forEach(function(pd,pi){
       var _dcArr=typeof getDiscPal==='function'?getDiscPal(pi):[cm];var dc=Array.isArray(_dcArr)?_dcArr[0]:_dcArr;
@@ -316,7 +314,7 @@ gObraRow(t,o,e,r,i),t.expanded&&(t.disciplinas||[]).forEach((a,n)=>{a&&a.ativo&&
   }
   spacer(2);
 })(a, _fi);
-gObraRow(a,o,e,r,i);if(!a.expanded)(a.disciplinas||[]).forEach((t,n)=>{t&&t.ativo&&gDiscRow(a,t,n,o,e,r,i)});spacer(2);})}spacer(4);const l=[];for(let t=new Date(gSt.axisStart);G.diff(gSt.axisStart,t)<gSt.totalDays;t=G.addD(t,1))l.push({date:new Date(t),dow:t.getDay(),isSat:6===t.getDay(),isSun:0===t.getDay(),buffer:!1});const c=`<div style="display:flex;flex-shrink:0;height:100%;width:${e}px;">${buildDayHeaderHTML(l,gSt.dayW)}</div>`,p=`<div style="position:absolute;right:6px;top:50%;transform:translateY(-50%);display:flex;align-items:center;gap:4px;z-index:20;background:#fff;border-radius:5px;padding:2px 4px;box-shadow:0 1px 4px rgba(0,0,0,.12);"><button onclick="gZoom(-1)" style="width:26px;height:22px;border:1px solid #C8CDD8;background:#F4F5F8;color:#3A4A5A;border-radius:4px;cursor:pointer;font-size:15px;line-height:1;">−</button><span style="font-size:9px;font-weight:700;color:#5A6A7A;min-width:32px;text-align:center;">${Math.round(100*gSt.zoom)}%</span><button onclick="gZoom(1)" style="width:26px;height:22px;border:1px solid #C8CDD8;background:#F4F5F8;color:#3A4A5A;border-radius:4px;cursor:pointer;font-size:15px;line-height:1;">+</button></div>`,f=document.getElementById("g-tl-col"),u=f?f.scrollTop:0,g=f?f.scrollLeft:0;t.innerHTML=` <div style="flex-shrink:0;display:flex;height:40px;border-bottom:2px solid #009EA8;background:#fff;position:relative;"><div style="width:${G.LBL_W}px;flex-shrink:0;border-right:2px solid #C0C8D4;background:#FAFBFC;"></div><div id="g-wk-hdr-wrap" style="flex:1;overflow:hidden;position:relative;">${c}${p}</div></div><div style="flex:1;display:flex;min-height:0;overflow:hidden;"><div id="g-lbl-col" style="width:${G.LBL_W}px;flex-shrink:0;overflow:hidden;position:relative;z-index:2;"></div><div id="g-tl-col" style="flex:1;overflow:auto;min-width:0;"><div id="g-tl-inner" style="min-width:${gSt.zoom>1?e+"px":"100%"};"></div></div></div>`;const m=document.getElementById("g-lbl-col"),b=document.getElementById("g-tl-col"),x=(()=>{const t=document.createElement("div");t.style.cssText="overflow:scroll;width:50px;height:50px;position:absolute;visibility:hidden;",document.body.appendChild(t);const e=t.offsetWidth-t.clientWidth;return document.body.removeChild(t),e||15})();m.innerHTML=r.join("")+`<div style="height:${x}px;background:#FAFBFC;border-right:2px solid #C0C8D4;flex-shrink:0;"></div>`;const h=document.getElementById("g-tl-inner");h?h.innerHTML=i.join(""):b.innerHTML=i.join("");const A=document.getElementById("g-wk-hdr-wrap");b.addEventListener("scroll",()=>{m.scrollTop=b.scrollTop,A&&(A.scrollLeft=b.scrollLeft)}),(u||g)&&(b.scrollTop=u,b.scrollLeft=g,m.scrollTop=u),b.querySelectorAll("[data-drag]").forEach(t=>t.addEventListener("mousedown",gDragStart,{passive:!1}));m.querySelectorAll("[data-po-open]").forEach(function(el){el.addEventListener("click",function(){abrirModalPreObra(parseInt(el.dataset.poOpen));});});,b.querySelectorAll("[data-click]").forEach(t=>t.addEventListener("click",gBarClickHandler))}function gZoomIn(){window.gZoom(1)}function gZoomOut(){window.gZoom(-1)}function gZoomReset(){gSt.zoom=1,gRender()}function gSnapForDrag(t){if("proj"===t.type){const e=gSt.projFases.find(e=>e.id==t.phId);if(!e)return{};const o={};return["arq","tec"].forEach(t=>{const a=e.rows[t],n="tec"===t?G.TEC_IDS:G.SUB_IDS;o[t]={start:G.clone(a.start),end:G.clone(a.end),subs:n.reduce((t,e)=>({...t,[e]:{start:G.clone(a.subs[e]?.start||a.start),end:G.clone(a.subs[e]?.end||a.end)}}),{})}}),{ph:e,snap:o}}if("obra"===t.type||"obraSub"===t.type){const e=gSt.obraFases.find(e=>e.id==t.phId);return e?{of:e,obraSnap:{start:G.clone(e.obra.start),end:G.clone(e.obra.end)}}:{}}if("preObra"===t.type){console.log("[SNAP preObra] t="+JSON.stringify(t));const fi=t.faseIdx||0;const of=gSt.obraFases[fi];return of?{poFase:of,poFaseIdx:fi,poDu:(ESTADO.cfg.obraFases[fi]&&ESTADO.cfg.obraFases[fi].preObra&&ESTADO.cfg.obraFases[fi].preObra.du)||5}:{};}return{}}function gApplyDrag(t,e,o,a){if("proj"===t.type){const{ph:n,snap:r}=a;if(!n)return;if("tec"===t.rowId&&t.subId){const a=r.tec.subs[t.subId];let i=G.addD(a.start,o),s=G.addD(a.end,o);for(;CALENDARIO.isNaoUtil(i);)i=G.addD(i,1);for(;CALENDARIO.isNaoUtil(s);)s=G.addD(s,1);n.rows.tec.subs[t.subId]="move"===e?{start:i,end:s}:"right"===e?{start:a.start,end:s}:{start:i,end:a.end};const d=gCascadeTec(n.rows.tec.subs,n.rows.arq.subs,gSt._visitaDate,n.tecChains,n.tecChainTypes);return n.rows.tec.subs=d,n.rows.tec.start=new Date(Math.min(...G.TEC_IDS.map(t=>G.ms(d[t].start)))),void(n.rows.tec.end=new Date(Math.max(...G.TEC_IDS.map(t=>G.ms(d[t].end)))))}if("tec"===t.rowId&&!t.subId)return;const i="arq"===t.rowId?"tec":"arq";if(t.subId){const a=G.SUB_IDS.indexOf(t.subId);let s=G.SUB_IDS.reduce((e,o)=>({...e,[o]:{...r[t.rowId].subs[o]}}),{});if("move"===e)s[t.subId]={start:G.addD(r[t.rowId].subs[t.subId].start,o),end:G.addD(r[t.rowId].subs[t.subId].end,o)},s=G.cascade(s,n.chains[t.rowId],a,n.chainTypes?.[t.rowId],n.chainSrc?.[t.rowId]);else if("left"===e){const e=G.addD(r[t.rowId].subs[t.subId].start,o);s[t.subId]={start:G.diff(e,r[t.rowId].subs[t.subId].end)<1?G.addD(r[t.rowId].subs[t.subId].end,-1):e,end:r[t.rowId].subs[t.subId].end}}else s[t.subId]={start:r[t.rowId].subs[t.subId].start,end:G.addD(r[t.rowId].subs[t.subId].end,o)},s=G.cascade(s,n.chains[t.rowId],a,n.chainTypes?.[t.rowId],n.chainSrc?.[t.rowId]);if(n.rows[t.rowId]={...n.rows[t.rowId],subs:s,...G.parentSpan(s)},n.locked&&"tec"!==i){let s=G.SUB_IDS.reduce((t,e)=>({...t,[e]:{...r[i].subs[e]}}),{});const d=r[i].subs[t.subId];if("move"===e)s[t.subId]={start:G.addD(d.start,o),end:G.addD(d.end,o)},s=G.cascade(s,n.chains[i],a,n.chainTypes?.[i],n.chainSrc?.[i]);else if("left"===e){const e=G.addD(d.start,o);s[t.subId]={start:G.diff(e,d.end)<1?G.addD(d.end,-1):e,end:d.end}}else s[t.subId]={start:d.start,end:G.addD(d.end,o)},s=G.cascade(s,n.chains[i],a,n.chainTypes?.[i],n.chainSrc?.[i]);n.rows[i]={...n.rows[i],subs:s,...G.parentSpan(s)}}}else if("move"===e){const e=G.SUB_IDS.reduce((e,a)=>({...e,[a]:{start:G.addD(r[t.rowId].subs[a].start,o),end:G.addD(r[t.rowId].subs[a].end,o)}}),{});if(n.rows[t.rowId]={...n.rows[t.rowId],start:G.addD(r[t.rowId].start,o),end:G.addD(r[t.rowId].end,o),subs:e},n.locked&&"tec"!==i){const t=G.SUB_IDS.reduce((t,e)=>({...t,[e]:{start:G.addD(r[i].subs[e].start,o),end:G.addD(r[i].subs[e].end,o)}}),{});n.rows[i]={...n.rows[i],start:G.addD(r[i].start,o),end:G.addD(r[i].end,o),subs:t}}}}if("preObra"===t.type){const{poFase,poFaseIdx,poDu}=a;console.log("[DRAG preObra] delta="+o+" poDu="+poDu+" poFase="+!!poFase);if(!poFase)return;const delta=Math.round(o);const newDu=Math.max(1,poDu-delta);if(ESTADO.cfg.obraFases[poFaseIdx]&&ESTADO.cfg.obraFases[poFaseIdx].preObra){ESTADO.cfg.obraFases[poFaseIdx].preObra.du=newDu;}}if("obra"===t.type){const{of:t,obraSnap:n}=a;if(!t)return;if("move"===e)t.obra.start=G.addD(n.start,o),t.obra.end=G.addD(n.end,o);else if("left"===e){const e=G.addD(n.start,o);t.obra.start=G.diff(e,n.end)<7?G.addD(n.end,-7):e}else{const e=G.addD(n.end,o);t.obra.end=G.diff(n.start,e)<7?G.addD(n.start,7):e}}}function gDragStart(t){const e=t.currentTarget,o=e.dataset.mode||"move",a=JSON.parse(decodeURIComponent(e.dataset.drag));t.preventDefault(),t.stopPropagation();const n=t.clientX,r=gSnapForDrag(a);let i=!1;const onMove=t=>{const e=Math.round((t.clientX-n)/gSt.dayW);0!==e&&(i=!0),gApplyDrag(a,o,e,r),gRender()},onUp=()=>{if(document.removeEventListener("mousemove",onMove),document.removeEventListener("mouseup",onUp),i&&"move"===o&&"proj"===a.type&&a.subId){const t=gSt.projFases.find(t=>t.id==a.phId);if(t)if("tec"===a.rowId)t.tecChains||(t.tecChains={}),t.tecChains[a.subId]||(t.tecChains[a.subId]={st:!0,en:!0}),t.tecChains[a.subId].st=!1,gRender();else{const e=G.SUB_IDS.indexOf(a.subId);if(e>0){if(t.chains[a.rowId][e-1]=!1,t.locked){const o="arq"===a.rowId?"tec":"arq";t.chains[o]&&(t.chains[o][e-1]=!1)}gRender()}}}i&&"obra"===a.type&&(gSt._obraVinculadaCond=!1);if(i&&"preObra"===a.type)salvarDados();gSt.obraFases.forEach((t,e)=>{const o=ESTADO.cfg.obraFases[e];o&&(o.inicio=G.fmtISO(t.obra.start),o.prazo=G.diff(t.obra.start,t.obra.end));const a=document.getElementById(`obra-f${e}-inicio`),n=document.getElementById(`obra-f${e}-prazo`);a&&(a.value=G.fmtISO(t.obra.start)),n&&(n.value=G.diff(t.obra.start,t.obra.end))}),atualizarResumoDatas()};document.addEventListener("mousemove",onMove),document.addEventListener("mouseup",onUp)}function gBarClickHandler(t){t._wasDrag||gShowPop(JSON.parse(decodeURIComponent(t.currentTarget.dataset.click)),t.currentTarget.getBoundingClientRect())}let _alocPendingChanges=false;
+gObraRow(a,o,e,r,i),t&&!a.expanded||(a.disciplinas||[]).forEach((t,n)=>{t&&t.ativo&&gDiscRow(a,t,n,o,e,r,i)})})}spacer(4);const l=[];for(let t=new Date(gSt.axisStart);G.diff(gSt.axisStart,t)<gSt.totalDays;t=G.addD(t,1))l.push({date:new Date(t),dow:t.getDay(),isSat:6===t.getDay(),isSun:0===t.getDay(),buffer:!1});const c=`<div style="display:flex;flex-shrink:0;height:100%;width:${e}px;">${buildDayHeaderHTML(l,gSt.dayW)}</div>`,p=`<div style="position:absolute;right:6px;top:50%;transform:translateY(-50%);display:flex;align-items:center;gap:4px;z-index:20;background:#fff;border-radius:5px;padding:2px 4px;box-shadow:0 1px 4px rgba(0,0,0,.12);"><button onclick="gZoom(-1)" style="width:26px;height:22px;border:1px solid #C8CDD8;background:#F4F5F8;color:#3A4A5A;border-radius:4px;cursor:pointer;font-size:15px;line-height:1;">−</button><span style="font-size:9px;font-weight:700;color:#5A6A7A;min-width:32px;text-align:center;">${Math.round(100*gSt.zoom)}%</span><button onclick="gZoom(1)" style="width:26px;height:22px;border:1px solid #C8CDD8;background:#F4F5F8;color:#3A4A5A;border-radius:4px;cursor:pointer;font-size:15px;line-height:1;">+</button></div>`,f=document.getElementById("g-tl-col"),u=f?f.scrollTop:0,g=f?f.scrollLeft:0;t.innerHTML=` <div style="flex-shrink:0;display:flex;height:40px;border-bottom:2px solid #009EA8;background:#fff;position:relative;"><div style="width:${G.LBL_W}px;flex-shrink:0;border-right:2px solid #C0C8D4;background:#FAFBFC;"></div><div id="g-wk-hdr-wrap" style="flex:1;overflow:hidden;position:relative;">${c}${p}</div></div><div style="flex:1;display:flex;min-height:0;overflow:hidden;"><div id="g-lbl-col" style="width:${G.LBL_W}px;flex-shrink:0;overflow:hidden;position:relative;z-index:2;"></div><div id="g-tl-col" style="flex:1;overflow:auto;min-width:0;"><div id="g-tl-inner" style="min-width:${gSt.zoom>1?e+"px":"100%"};"></div></div></div>`;const m=document.getElementById("g-lbl-col"),b=document.getElementById("g-tl-col"),x=(()=>{const t=document.createElement("div");t.style.cssText="overflow:scroll;width:50px;height:50px;position:absolute;visibility:hidden;",document.body.appendChild(t);const e=t.offsetWidth-t.clientWidth;return document.body.removeChild(t),e||15})();m.innerHTML=r.join("")+`<div style="height:${x}px;background:#FAFBFC;border-right:2px solid #C0C8D4;flex-shrink:0;"></div>`;const h=document.getElementById("g-tl-inner");h?h.innerHTML=i.join(""):b.innerHTML=i.join("");const A=document.getElementById("g-wk-hdr-wrap");b.addEventListener("scroll",()=>{m.scrollTop=b.scrollTop,A&&(A.scrollLeft=b.scrollLeft)}),(u||g)&&(b.scrollTop=u,b.scrollLeft=g,m.scrollTop=u),b.querySelectorAll("[data-drag]").forEach(t=>t.addEventListener("mousedown",gDragStart,{passive:!1})),b.querySelectorAll("[data-click]").forEach(t=>t.addEventListener("click",gBarClickHandler))}function gZoomIn(){window.gZoom(1)}function gZoomOut(){window.gZoom(-1)}function gZoomReset(){gSt.zoom=1,gRender()}function gSnapForDrag(t){if("proj"===t.type){const e=gSt.projFases.find(e=>e.id==t.phId);if(!e)return{};const o={};return["arq","tec"].forEach(t=>{const a=e.rows[t],n="tec"===t?G.TEC_IDS:G.SUB_IDS;o[t]={start:G.clone(a.start),end:G.clone(a.end),subs:n.reduce((t,e)=>({...t,[e]:{start:G.clone(a.subs[e]?.start||a.start),end:G.clone(a.subs[e]?.end||a.end)}}),{})}}),{ph:e,snap:o}}if("obra"===t.type||"obraSub"===t.type){const e=gSt.obraFases.find(e=>e.id==t.phId);return e?{of:e,obraSnap:{start:G.clone(e.obra.start),end:G.clone(e.obra.end)}}:{}}if("preObra"===t.type){console.log("[SNAP preObra] t="+JSON.stringify(t));const fi=t.faseIdx||0;const of=gSt.obraFases[fi];return of?{poFase:of,poFaseIdx:fi,poDu:(ESTADO.cfg.obraFases[fi]&&ESTADO.cfg.obraFases[fi].preObra&&ESTADO.cfg.obraFases[fi].preObra.du)||5}:{};}return{}}function gApplyDrag(t,e,o,a){if("proj"===t.type){const{ph:n,snap:r}=a;if(!n)return;if("tec"===t.rowId&&t.subId){const a=r.tec.subs[t.subId];let i=G.addD(a.start,o),s=G.addD(a.end,o);for(;CALENDARIO.isNaoUtil(i);)i=G.addD(i,1);for(;CALENDARIO.isNaoUtil(s);)s=G.addD(s,1);n.rows.tec.subs[t.subId]="move"===e?{start:i,end:s}:"right"===e?{start:a.start,end:s}:{start:i,end:a.end};const d=gCascadeTec(n.rows.tec.subs,n.rows.arq.subs,gSt._visitaDate,n.tecChains,n.tecChainTypes);return n.rows.tec.subs=d,n.rows.tec.start=new Date(Math.min(...G.TEC_IDS.map(t=>G.ms(d[t].start)))),void(n.rows.tec.end=new Date(Math.max(...G.TEC_IDS.map(t=>G.ms(d[t].end)))))}if("tec"===t.rowId&&!t.subId)return;const i="arq"===t.rowId?"tec":"arq";if(t.subId){const a=G.SUB_IDS.indexOf(t.subId);let s=G.SUB_IDS.reduce((e,o)=>({...e,[o]:{...r[t.rowId].subs[o]}}),{});if("move"===e)s[t.subId]={start:G.addD(r[t.rowId].subs[t.subId].start,o),end:G.addD(r[t.rowId].subs[t.subId].end,o)},s=G.cascade(s,n.chains[t.rowId],a,n.chainTypes?.[t.rowId],n.chainSrc?.[t.rowId]);else if("left"===e){const e=G.addD(r[t.rowId].subs[t.subId].start,o);s[t.subId]={start:G.diff(e,r[t.rowId].subs[t.subId].end)<1?G.addD(r[t.rowId].subs[t.subId].end,-1):e,end:r[t.rowId].subs[t.subId].end}}else s[t.subId]={start:r[t.rowId].subs[t.subId].start,end:G.addD(r[t.rowId].subs[t.subId].end,o)},s=G.cascade(s,n.chains[t.rowId],a,n.chainTypes?.[t.rowId],n.chainSrc?.[t.rowId]);if(n.rows[t.rowId]={...n.rows[t.rowId],subs:s,...G.parentSpan(s)},n.locked&&"tec"!==i){let s=G.SUB_IDS.reduce((t,e)=>({...t,[e]:{...r[i].subs[e]}}),{});const d=r[i].subs[t.subId];if("move"===e)s[t.subId]={start:G.addD(d.start,o),end:G.addD(d.end,o)},s=G.cascade(s,n.chains[i],a,n.chainTypes?.[i],n.chainSrc?.[i]);else if("left"===e){const e=G.addD(d.start,o);s[t.subId]={start:G.diff(e,d.end)<1?G.addD(d.end,-1):e,end:d.end}}else s[t.subId]={start:d.start,end:G.addD(d.end,o)},s=G.cascade(s,n.chains[i],a,n.chainTypes?.[i],n.chainSrc?.[i]);n.rows[i]={...n.rows[i],subs:s,...G.parentSpan(s)}}}else if("move"===e){const e=G.SUB_IDS.reduce((e,a)=>({...e,[a]:{start:G.addD(r[t.rowId].subs[a].start,o),end:G.addD(r[t.rowId].subs[a].end,o)}}),{});if(n.rows[t.rowId]={...n.rows[t.rowId],start:G.addD(r[t.rowId].start,o),end:G.addD(r[t.rowId].end,o),subs:e},n.locked&&"tec"!==i){const t=G.SUB_IDS.reduce((t,e)=>({...t,[e]:{start:G.addD(r[i].subs[e].start,o),end:G.addD(r[i].subs[e].end,o)}}),{});n.rows[i]={...n.rows[i],start:G.addD(r[i].start,o),end:G.addD(r[i].end,o),subs:t}}}}if("preObra"===t.type){const{poFase,poFaseIdx,poDu}=a;console.log("[DRAG preObra] delta="+o+" poDu="+poDu+" poFase="+!!poFase);if(!poFase)return;const delta=Math.round(o);const newDu=Math.max(1,poDu-delta);if(ESTADO.cfg.obraFases[poFaseIdx]&&ESTADO.cfg.obraFases[poFaseIdx].preObra){ESTADO.cfg.obraFases[poFaseIdx].preObra.du=newDu;}}if("obra"===t.type){const{of:t,obraSnap:n}=a;if(!t)return;if("move"===e)t.obra.start=G.addD(n.start,o),t.obra.end=G.addD(n.end,o);else if("left"===e){const e=G.addD(n.start,o);t.obra.start=G.diff(e,n.end)<7?G.addD(n.end,-7):e}else{const e=G.addD(n.end,o);t.obra.end=G.diff(n.start,e)<7?G.addD(n.start,7):e}}}function gDragStart(t){const e=t.currentTarget,o=e.dataset.mode||"move",a=JSON.parse(decodeURIComponent(e.dataset.drag));t.preventDefault(),t.stopPropagation();const n=t.clientX,r=gSnapForDrag(a);let i=!1;const onMove=t=>{const e=Math.round((t.clientX-n)/gSt.dayW);0!==e&&(i=!0),gApplyDrag(a,o,e,r),gRender()},onUp=()=>{if(document.removeEventListener("mousemove",onMove),document.removeEventListener("mouseup",onUp),i&&"move"===o&&"proj"===a.type&&a.subId){const t=gSt.projFases.find(t=>t.id==a.phId);if(t)if("tec"===a.rowId)t.tecChains||(t.tecChains={}),t.tecChains[a.subId]||(t.tecChains[a.subId]={st:!0,en:!0}),t.tecChains[a.subId].st=!1,gRender();else{const e=G.SUB_IDS.indexOf(a.subId);if(e>0){if(t.chains[a.rowId][e-1]=!1,t.locked){const o="arq"===a.rowId?"tec":"arq";t.chains[o]&&(t.chains[o][e-1]=!1)}gRender()}}}i&&"obra"===a.type&&(gSt._obraVinculadaCond=!1);if(i&&"preObra"===a.type)salvarDados();gSt.obraFases.forEach((t,e)=>{const o=ESTADO.cfg.obraFases[e];o&&(o.inicio=G.fmtISO(t.obra.start),o.prazo=G.diff(t.obra.start,t.obra.end));const a=document.getElementById(`obra-f${e}-inicio`),n=document.getElementById(`obra-f${e}-prazo`);a&&(a.value=G.fmtISO(t.obra.start)),n&&(n.value=G.diff(t.obra.start,t.obra.end))}),atualizarResumoDatas()};document.addEventListener("mousemove",onMove),document.addEventListener("mouseup",onUp)}function gBarClickHandler(t){t._wasDrag||gShowPop(JSON.parse(decodeURIComponent(t.currentTarget.dataset.click)),t.currentTarget.getBoundingClientRect())}let _alocPendingChanges=false;
 function gClosePopForce(){document.getElementById("g-pop-el")?.remove(),document.getElementById("g-pop-mod-panel")?.remove(),document.removeEventListener("mousedown",gPopOutside),_alocDs=null,_alocPendingChanges=false}
 function gClosePop(){
   if(_alocDs&&_alocPendingChanges){
@@ -1075,76 +1073,72 @@ let _tplEditorId = null;
 let _tplEditorData = null; // { disciplinas: [...] } — espelha estrutura de fase.disciplinas
 
 // ── Abrir gerenciador (lista) ─────────────────────────────
-// ── Modal de edição da Pré-Obra por cronograma ────────────
+// ── v5.07: Modal de edição da Pré-Obra por cronograma ─────
 
 function abrirModalPreObra(faseIdx) {
   document.getElementById('modal-po-overlay')?.remove();
-
-  // Garantir estrutura de customização por cronograma
   if (!ESTADO.preObraCustom) ESTADO.preObraCustom = {};
   if (!ESTADO.preObraCustom[faseIdx]) {
-    // Inicializar com cópia do template
-    var poCfg = ESTADO.cfg.obraFases[faseIdx]?.preObra || {templateId:'pre-obra-padrao',du:5};
-    var tpl = typeof _preObraGetTemplate==='function' ? _preObraGetTemplate(poCfg.templateId) : null;
+    var poCfg = (ESTADO.cfg.obraFases[faseIdx]||{}).preObra || {templateId:'pre-obra-padrao',du:5};
+    var tplBase = typeof _preObraGetTemplate==='function' ? _preObraGetTemplate(poCfg.templateId) : null;
     ESTADO.preObraCustom[faseIdx] = {
-      du: poCfg.du || 5,
-      disciplinas: tpl ? JSON.parse(JSON.stringify(tpl.disciplinas)) : []
+      du: poCfg.du||5,
+      disciplinas: tplBase ? JSON.parse(JSON.stringify(tplBase.disciplinas)) : []
     };
   }
-
-  var custom = ESTADO.preObraCustom[faseIdx];
   var ov = document.createElement('div');
   ov.id = 'modal-po-overlay';
   ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9500;display:flex;align-items:center;justify-content:center;padding:16px;';
   ov.addEventListener('click', function(e){ if(e.target===ov) fecharModalPreObra(); });
   document.body.appendChild(ov);
-  _poRender(faseIdx);
+  _poRenderModal(faseIdx);
 }
-
-window.abrirModalPreObra=abrirModalPreObra;
-window.fecharModalPreObra=fecharModalPreObra;
-window._poAdicionarDisc=_poAdicionarDisc;
-window._poRemoverDisc=_poRemoverDisc;
-window._poAdicionarTarefa=_poAdicionarTarefa;
-window._poRemoverTarefa=_poRemoverTarefa;
-window._poResetarCustom=_poResetarCustom;
-window._poSalvar=_poSalvar;
-
 window.abrirModalPreObra = abrirModalPreObra;
-window.fecharModalPreObra = fecharModalPreObra;
+
 function fecharModalPreObra() {
   document.getElementById('modal-po-overlay')?.remove();
 }
+window.fecharModalPreObra = fecharModalPreObra;
 
-function _poRender(faseIdx) {
+function _poRenderModal(faseIdx) {
   var ov = document.getElementById('modal-po-overlay');
   if (!ov) return;
   var custom = ESTADO.preObraCustom[faseIdx];
   var discs = custom.disciplinas || [];
 
   var discsHtml = discs.map(function(disc, di) {
-    var tasksHtml = (disc.tasks || []).map(function(task, ti) {
+    var tasksHtml = (disc.tasks||[]).map(function(task, ti) {
       return '<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;padding:5px 8px;background:var(--bg-surface);border-radius:4px;border:0.5px solid var(--border);">'
-        + '<span data-po-drag="task" data-fi="'+faseIdx+'" data-di="'+di+'" data-ti="'+ti+'" style="cursor:grab;opacity:.35;font-size:11px;flex-shrink:0;">⠿</span>'
-        + '<input type="text" value="'+task.n.replace(/"/g,'&quot;')+'" onchange="ESTADO.preObraCustom['+faseIdx+'].disciplinas['+di+'].tasks['+ti+'].n=this.value;onCfgChange();" style="flex:1;height:26px;padding:0 6px;border:0.5px solid var(--border);border-radius:4px;background:var(--bg-surface2);color:var(--txt);font-size:11px;">'
+        + '<span style="cursor:grab;opacity:.35;font-size:11px;flex-shrink:0;">⠿</span>'
+        + '<input type="text" value="'+task.n.replace(/"/g,'&quot;')+'" '
+        + 'onchange="ESTADO.preObraCustom['+faseIdx+'].disciplinas['+di+'].tasks['+ti+'].n=this.value;onCfgChange();" '
+        + 'style="flex:1;height:26px;padding:0 6px;border:0.5px solid var(--border);border-radius:4px;background:var(--bg-surface2);color:var(--txt);font-size:11px;">'
         + '<label style="font-size:10px;color:var(--txt-muted);white-space:nowrap;flex-shrink:0;">Efetivo</label>'
-        + '<input type="number" min="1" max="50" value="'+(task.prof||2)+'" onchange="ESTADO.preObraCustom['+faseIdx+'].disciplinas['+di+'].tasks['+ti+'].prof=parseInt(this.value)||1;onCfgChange();gRender();" style="width:44px;height:26px;padding:0 4px;border:0.5px solid var(--border);border-radius:4px;background:var(--bg-surface2);color:var(--txt);font-size:11px;text-align:center;">'
-        + '<button onclick="_poRemoverTarefa('+faseIdx+','+di+','+ti+')" style="width:22px;height:22px;background:none;border:none;cursor:pointer;font-size:12px;color:var(--txt-dim);" title="Remover">✕</button>'
+        + '<input type="number" min="1" max="50" value="'+(task.prof||2)+'" '
+        + 'onchange="ESTADO.preObraCustom['+faseIdx+'].disciplinas['+di+'].tasks['+ti+'].prof=parseInt(this.value)||1;onCfgChange();gRender();" '
+        + 'style="width:44px;height:26px;padding:0 4px;border:0.5px solid var(--border);border-radius:4px;background:var(--bg-surface2);color:var(--txt);font-size:11px;text-align:center;">'
+        + '<button onclick="_poRemoverTarefa('+faseIdx+','+di+','+ti+')" '
+        + 'style="width:22px;height:22px;background:none;border:none;cursor:pointer;font-size:12px;color:var(--txt-dim);">✕</button>'
         + '</div>';
     }).join('');
 
-    return '<div data-po-disc="'+di+'" style="border:1px solid var(--border);border-radius:8px;margin-bottom:10px;overflow:hidden;">'
+    return '<div data-po-disc="'+di+'" draggable="true" style="border:1px solid var(--border);border-radius:8px;margin-bottom:10px;overflow:hidden;">'
       + '<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--bg-surface2);border-bottom:1px solid var(--border);">'
-      + '<span data-po-drag="disc" data-fi="'+faseIdx+'" data-di="'+di+'" style="cursor:grab;opacity:.35;font-size:13px;flex-shrink:0;">⠿</span>'
-      + '<input type="text" value="'+disc.label.replace(/"/g,'&quot;')+'" onchange="ESTADO.preObraCustom['+faseIdx+'].disciplinas['+di+'].label=this.value;onCfgChange();" style="flex:1;height:28px;padding:0 8px;border:0.5px solid var(--border);border-radius:4px;background:var(--bg-surface);color:var(--txt);font-size:12px;font-weight:700;">'
-      + '<label style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--txt-muted);cursor:pointer;flex-shrink:0;"><input type="checkbox" '+(disc.ativo!==false?'checked':'')+' onchange="ESTADO.preObraCustom['+faseIdx+'].disciplinas['+di+'].ativo=this.checked;onCfgChange();gRender();" style="accent-color:var(--accent);"> Ativa</label>'
-      + '<button onclick="_poRemoverDisc('+faseIdx+','+di+')" style="height:26px;padding:0 8px;background:rgba(180,20,20,.08);border:1px solid rgba(180,20,20,.2);border-radius:4px;font-size:10px;color:#B41414;cursor:pointer;flex-shrink:0;">✕ Disc.</button>'
+      + '<span style="cursor:grab;opacity:.35;font-size:13px;flex-shrink:0;">⠿</span>'
+      + '<input type="text" value="'+disc.label.replace(/"/g,'&quot;')+'" '
+      + 'onchange="ESTADO.preObraCustom['+faseIdx+'].disciplinas['+di+'].label=this.value;onCfgChange();" '
+      + 'style="flex:1;height:28px;padding:0 8px;border:0.5px solid var(--border);border-radius:4px;background:var(--bg-surface);color:var(--txt);font-size:12px;font-weight:700;">'
+      + '<label style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--txt-muted);cursor:pointer;flex-shrink:0;">'
+      + '<input type="checkbox" '+(disc.ativo!==false?'checked':'')+' '
+      + 'onchange="ESTADO.preObraCustom['+faseIdx+'].disciplinas['+di+'].ativo=this.checked;onCfgChange();gRender();" '
+      + 'style="accent-color:var(--accent);"> Ativa</label>'
+      + '<button onclick="_poRemoverDisc('+faseIdx+','+di+')" '
+      + 'style="height:26px;padding:0 8px;background:rgba(180,20,20,.08);border:1px solid rgba(180,20,20,.2);border-radius:4px;font-size:10px;color:#B41414;cursor:pointer;flex-shrink:0;">✕ Disc.</button>'
       + '</div>'
-      + '<div style="padding:8px 10px;">'
-      + tasksHtml
-      + '<button onclick="_poAdicionarTarefa('+faseIdx+','+di+')" style="font-size:10px;color:var(--accent);background:none;border:none;cursor:pointer;font-family:var(--font);font-weight:700;">+ Tarefa</button>'
-      + '</div>'
-      + '</div>';
+      + '<div style="padding:8px 10px;">' + tasksHtml
+      + '<button onclick="_poAdicionarTarefa('+faseIdx+','+di+')" '
+      + 'style="font-size:10px;color:var(--accent);background:none;border:none;cursor:pointer;font-family:var(--font);font-weight:700;">+ Tarefa</button>'
+      + '</div></div>';
   }).join('');
 
   ov.innerHTML = '<div style="background:var(--bg-panel);border-radius:12px;box-shadow:0 24px 64px rgba(0,0,0,.45);width:100%;max-width:660px;max-height:88vh;display:flex;flex-direction:column;overflow:hidden;">'
@@ -1154,94 +1148,80 @@ function _poRender(faseIdx) {
     + '<div style="font-family:var(--font);font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--txt);">Pré-Obra · Fase '+(faseIdx+1)+'</div>'
     + '<div style="font-size:10px;color:var(--txt-muted);margin-top:1px;">Edição específica deste cronograma — não altera o template</div>'
     + '</div>'
-    + '<div style="display:flex;align-items:center;gap:6px;">'
-    + '<label style="font-size:10px;color:var(--txt-muted);white-space:nowrap;">Duração (DU)</label>'
-    + '<input type="number" min="1" max="30" value="'+custom.du+'" onchange="ESTADO.preObraCustom['+faseIdx+'].du=parseInt(this.value)||5;ESTADO.cfg.obraFases['+faseIdx+'].preObra.du=parseInt(this.value)||5;onCfgChange();gRender();" style="width:52px;height:28px;padding:0 6px;border:1px solid var(--border);border-radius:5px;background:var(--bg-surface);color:var(--txt);font-family:var(--font);font-size:12px;font-weight:700;text-align:center;">'
-    + '</div>'
+    + '<label style="display:flex;align-items:center;gap:6px;font-size:10px;color:var(--txt-muted);flex-shrink:0;">Duração (DU)'
+    + '<input type="number" min="1" max="30" value="'+custom.du+'" '
+    + 'onchange="ESTADO.preObraCustom['+faseIdx+'].du=parseInt(this.value)||5;ESTADO.cfg.obraFases['+faseIdx+'].preObra.du=parseInt(this.value)||5;onCfgChange();gRender();" '
+    + 'style="width:52px;height:28px;padding:0 6px;border:1px solid var(--border);border-radius:5px;background:var(--bg-surface);color:var(--txt);font-family:var(--font);font-size:12px;font-weight:700;text-align:center;"></label>'
     + '<button onclick="fecharModalPreObra()" style="width:30px;height:30px;background:var(--bg-surface);border:1px solid var(--border);border-radius:5px;cursor:pointer;font-size:14px;color:var(--txt-muted);">✕</button>'
     + '</div>'
-    + '<div style="flex:1;overflow-y:auto;padding:16px 20px;">'
-    + discsHtml
-    + '<button onclick="_poAdicionarDisc('+faseIdx+')" style="width:100%;height:32px;background:var(--bg-surface2);border:1px dashed var(--border);border-radius:6px;font-family:var(--font);font-size:10px;font-weight:700;color:var(--txt-muted);cursor:pointer;">+ Adicionar Disciplina</button>'
+    + '<div style="flex:1;overflow-y:auto;padding:16px 20px;">' + discsHtml
+    + '<button onclick="_poAdicionarDisc('+faseIdx+')" '
+    + 'style="width:100%;height:32px;background:var(--bg-surface2);border:1px dashed var(--border);border-radius:6px;font-family:var(--font);font-size:10px;font-weight:700;color:var(--txt-muted);cursor:pointer;">+ Adicionar Disciplina</button>'
     + '</div>'
     + '<div style="padding:12px 20px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">'
     + '<button onclick="_poResetarCustom('+faseIdx+')" style="font-size:10px;color:var(--txt-dim);background:none;border:none;cursor:pointer;font-family:var(--font);">↺ Restaurar template</button>'
     + '<div style="display:flex;gap:8px;">'
     + '<button onclick="fecharModalPreObra()" style="height:32px;padding:0 16px;background:var(--bg-surface2);border:1px solid var(--border);border-radius:6px;font-family:var(--font);font-size:10px;font-weight:700;color:var(--txt-muted);cursor:pointer;">Cancelar</button>'
     + '<button onclick="_poSalvar('+faseIdx+')" style="height:32px;padding:0 20px;background:var(--accent);border:none;border-radius:6px;font-family:var(--font);font-size:10px;font-weight:700;color:#0D1117;cursor:pointer;">✓ Salvar</button>'
-    + '</div>'
-    + '</div>'
-    + '</div>';
+    + '</div></div></div>';
 
-  // Drag & drop das disciplinas
   _poInitDragDisc(faseIdx);
 }
 
 function _poAdicionarDisc(faseIdx) {
-  ESTADO.preObraCustom[faseIdx].disciplinas.push({
-    id:'disc-'+Date.now(), label:'Nova Disciplina', ativo:true,
-    tasks:[{n:'Nova tarefa', prof:2}]
-  });
-  onCfgChange(); _poRender(faseIdx);
+  ESTADO.preObraCustom[faseIdx].disciplinas.push({id:'disc-'+Date.now(),label:'Nova Disciplina',ativo:true,tasks:[{n:'Nova tarefa',prof:2}]});
+  onCfgChange(); _poRenderModal(faseIdx);
 }
+window._poAdicionarDisc = _poAdicionarDisc;
 
 function _poRemoverDisc(faseIdx, di) {
-  ESTADO.preObraCustom[faseIdx].disciplinas.splice(di, 1);
-  onCfgChange(); gRender(); _poRender(faseIdx);
+  ESTADO.preObraCustom[faseIdx].disciplinas.splice(di,1);
+  onCfgChange(); gRender(); _poRenderModal(faseIdx);
 }
+window._poRemoverDisc = _poRemoverDisc;
 
 function _poAdicionarTarefa(faseIdx, di) {
-  ESTADO.preObraCustom[faseIdx].disciplinas[di].tasks.push({n:'Nova tarefa', prof:2});
-  onCfgChange(); _poRender(faseIdx);
+  ESTADO.preObraCustom[faseIdx].disciplinas[di].tasks.push({n:'Nova tarefa',prof:2});
+  onCfgChange(); _poRenderModal(faseIdx);
 }
+window._poAdicionarTarefa = _poAdicionarTarefa;
 
 function _poRemoverTarefa(faseIdx, di, ti) {
-  ESTADO.preObraCustom[faseIdx].disciplinas[di].tasks.splice(ti, 1);
-  onCfgChange(); gRender(); _poRender(faseIdx);
+  ESTADO.preObraCustom[faseIdx].disciplinas[di].tasks.splice(ti,1);
+  onCfgChange(); gRender(); _poRenderModal(faseIdx);
 }
+window._poRemoverTarefa = _poRemoverTarefa;
 
 function _poResetarCustom(faseIdx) {
   if (!confirm('Restaurar o template original? As edições desta fase serão perdidas.')) return;
   delete ESTADO.preObraCustom[faseIdx];
   onCfgChange(); gRender(); abrirModalPreObra(faseIdx);
 }
+window._poResetarCustom = _poResetarCustom;
 
 function _poSalvar(faseIdx) {
-  onCfgChange();
-  salvarDados();
-  gRender();
-  fecharModalPreObra();
+  onCfgChange(); salvarDados(); gRender(); fecharModalPreObra();
 }
+window._poSalvar = _poSalvar;
 
 function _poInitDragDisc(faseIdx) {
   var ov = document.getElementById('modal-po-overlay');
   if (!ov) return;
-  var discsEls = ov.querySelectorAll('[data-po-disc]');
+  var els = ov.querySelectorAll('[data-po-disc]');
   var dragSrc = null;
-
-  discsEls.forEach(function(el) {
-    el.setAttribute('draggable', 'true');
-    el.addEventListener('dragstart', function(e) {
-      dragSrc = el;
-      e.dataTransfer.effectAllowed = 'move';
-      el.style.opacity = '0.4';
-    });
-    el.addEventListener('dragend', function() {
-      el.style.opacity = '1';
-    });
-    el.addEventListener('dragover', function(e) {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = 'move';
-    });
+  els.forEach(function(el) {
+    el.addEventListener('dragstart', function(e) { dragSrc=el; e.dataTransfer.effectAllowed='move'; el.style.opacity='.4'; });
+    el.addEventListener('dragend', function() { el.style.opacity='1'; });
+    el.addEventListener('dragover', function(e) { e.preventDefault(); });
     el.addEventListener('drop', function(e) {
       e.stopPropagation();
-      if (dragSrc === el) return;
-      var fromIdx = parseInt(dragSrc.dataset.poDisc);
-      var toIdx = parseInt(el.dataset.poDisc);
-      var discs = ESTADO.preObraCustom[faseIdx].disciplinas;
-      var moved = discs.splice(fromIdx, 1)[0];
-      discs.splice(toIdx, 0, moved);
-      onCfgChange(); gRender(); _poRender(faseIdx);
+      if (dragSrc===el) return;
+      var from=parseInt(dragSrc.dataset.poDisc);
+      var to=parseInt(el.dataset.poDisc);
+      var discs=ESTADO.preObraCustom[faseIdx].disciplinas;
+      var moved=discs.splice(from,1)[0];
+      discs.splice(to,0,moved);
+      onCfgChange(); gRender(); _poRenderModal(faseIdx);
     });
   });
 }
