@@ -282,6 +282,7 @@ document.addEventListener("DOMContentLoaded",()=>{buildVizSidebar()}),document.a
   // Disciplinas
   if(tpl){
     var ds=typeof _preObraMakeDiscs==='function'?_preObraMakeDiscs(pc.templateId):tpl.disciplinas.filter(function(d){return d.ativo!==false;});
+    console.log('[DISC] xi='+xi+' xw2='+xw2+' ds='+ds.length+' ini='+G.fmtISO(ini)+' fim='+G.fmtISO(fim)+' axisStart='+G.fmtISO(gSt.axisStart));
     ds.forEach(function(pd,pi){
       var dc=typeof getDiscPal==='function'?getDiscPal(pi):cm;
       r.push(
