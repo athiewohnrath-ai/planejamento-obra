@@ -997,6 +997,124 @@ let _tplEditorId = null;
 let _tplEditorData = null; // { disciplinas: [...] } — espelha estrutura de fase.disciplinas
 
 // ── Abrir gerenciador (lista) ─────────────────────────────
+function abrirGerenciarTPO() {
+  document.getElementById('modal-tpo-overlay')?.remove();
+  const ov = document.createElement('div');
+  ov.id = 'modal-tpo-overlay';
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9200;display:flex;align-items:center;justify-content:center;padding:16px;';
+  ov.addEventListener('click', e => { if (e.target === ov) ov.remove(); });
+  document.body.appendChild(ov);
+  _tpoRenderModal(ov);
+}
+
+function _tpoRenderModal(ov) {
+  const todos = _preObraGetTodos();
+  const custom = _preObraCarregarCustom();
+
+  let listHtml = todos.map((tpl, idx) => {
+    const isDefault = PREOBRA_TEMPLATES_DEFAULT.some(d => d.id === tpl.id);
+    const nDiscs = tpl.disciplinas.filter(d => d.ativo !== false).length;
+    return '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);">'
+      + '<div style="flex:1;min-width:0;">'
+      + '<div style="font-family:var(--font);font-size:12px;font-weight:700;color:var(--txt);">' + tpl.label + '</div>'
+      + '<div style="font-size:10px;color:var(--txt-muted);">' + nDiscs + ' disciplinas' + (isDefault ? ' · padrão' : '') + '</div>'
+      + '</div>'
+      + '<button onclick="_tpoEditarTemplate(\'' + tpl.id + '\')" style="height:28px;padding:0 10px;background:var(--bg-surface2);border:1px solid var(--border);border-radius:5px;font-size:10px;font-family:var(--font);font-weight:700;color:var(--txt);cursor:pointer;">Editar</button>'
+      + (!isDefault ? '<button onclick="_tpoExcluirTemplate(\'' + tpl.id + '\')" style="height:28px;padding:0 10px;background:rgba(180,20,20,.08);border:1px solid rgba(180,20,20,.2);border-radius:5px;font-size:10px;font-family:var(--font);font-weight:700;color:#B41414;cursor:pointer;">Excluir</button>' : '')
+      + '</div>';
+  }).join('');
+
+  ov.innerHTML = '<div style="background:var(--bg-panel);border-radius:12px;box-shadow:0 24px 64px rgba(0,0,0,.45);width:100%;max-width:640px;max-height:88vh;display:flex;flex-direction:column;overflow:hidden;">'
+    + '<div style="display:flex;align-items:center;gap:10px;padding:16px 20px;border-bottom:1px solid var(--border);flex-shrink:0;">'
+    + '<span style="font-family:var(--font);font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--txt);flex:1;">Templates de Pré-Obra</span>'
+    + '<button onclick="_tpoNovoTemplate()" style="height:30px;padding:0 14px;background:var(--accent);color:#0D1117;border:none;border-radius:5px;font-family:var(--font);font-size:10px;font-weight:700;cursor:pointer;">+ Novo</button>'
+    + '<button onclick="document.getElementById(\'modal-tpo-overlay\').remove()" style="width:30px;height:30px;background:var(--bg-surface2);border:1px solid var(--border);border-radius:5px;cursor:pointer;font-size:14px;color:var(--txt-muted);">✕</button>'
+    + '</div>'
+    + '<div style="flex:1;overflow-y:auto;padding:0 20px;">' + listHtml + '</div>'
+    + '</div>';
+}
+
+function _tpoNovoTemplate() {
+  const id = 'tpo-custom-' + Date.now();
+  const novoTpl = {id: id, label: 'Novo Template', desc: '', disciplinas: [
+    {id: 'disc-1', label: 'Nova Disciplina', ativo: true, tasks: [{n: 'Tarefa 1', prof: 2}]}
+  ]};
+  const custom = _preObraCarregarCustom();
+  custom.push(novoTpl);
+  _preObraSalvarCustom(custom);
+  _tpoEditarTemplate(id);
+}
+
+function _tpoExcluirTemplate(tplId) {
+  if (!confirm('Excluir este template de pré-obra?')) return;
+  const custom = _preObraCarregarCustom().filter(t => t.id !== tplId);
+  _preObraSalvarCustom(custom);
+  const ov = document.getElementById('modal-tpo-overlay');
+  if (ov) _tpoRenderModal(ov);
+}
+
+function _tpoEditarTemplate(tplId) {
+  const todos = _preObraGetTodos();
+  const tpl = JSON.parse(JSON.stringify(todos.find(t => t.id === tplId)));
+  if (!tpl) return;
+  const isDefault = PREOBRA_TEMPLATES_DEFAULT.some(d => d.id === tplId);
+
+  const ov = document.getElementById('modal-tpo-overlay');
+  if (!ov) return;
+
+  function render() {
+    let discsHtml = (tpl.disciplinas || []).map((disc, di) => {
+      let tasksHtml = (disc.tasks || []).map((task, ti) =>
+        '<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;padding:4px 6px;background:var(--bg-surface);border-radius:4px;border:0.5px solid var(--border);">'
+        + '<svg width="10" height="14" viewBox="0 0 8 12" style="opacity:.3;flex-shrink:0;cursor:grab;"><circle cx="2" cy="2" r="1.2" fill="currentColor"/><circle cx="6" cy="2" r="1.2" fill="currentColor"/><circle cx="2" cy="6" r="1.2" fill="currentColor"/><circle cx="6" cy="6" r="1.2" fill="currentColor"/><circle cx="2" cy="10" r="1.2" fill="currentColor"/><circle cx="6" cy="10" r="1.2" fill="currentColor"/></svg>'
+        + '<input type="text" value="' + task.n.replace(/"/g,'&quot;') + '" onchange="tpl.disciplinas[' + di + '].tasks[' + ti + '].n=this.value" style="flex:1;height:26px;padding:0 6px;border:0.5px solid var(--border);border-radius:4px;background:var(--bg-surface2);color:var(--txt);font-size:11px;">'
+        + '<label style="font-size:10px;color:var(--txt-muted);white-space:nowrap;">Efetivo</label>'
+        + '<input type="number" min="1" max="50" value="' + (task.prof||2) + '" onchange="tpl.disciplinas[' + di + '].tasks[' + ti + '].prof=parseInt(this.value)||1" style="width:44px;height:26px;padding:0 4px;border:0.5px solid var(--border);border-radius:4px;background:var(--bg-surface2);color:var(--txt);font-size:11px;text-align:center;">'
+        + (!isDefault ? '<button onclick="tpl.disciplinas[' + di + '].tasks.splice(' + ti + ',1);render()" style="width:22px;height:22px;background:none;border:none;cursor:pointer;font-size:12px;color:var(--txt-dim);" title="Remover tarefa">✕</button>' : '')
+        + '</div>'
+      ).join('');
+
+      return '<div style="border:1px solid var(--border);border-radius:8px;margin-bottom:10px;overflow:hidden;">'
+        + '<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg-surface2);border-bottom:1px solid var(--border);">'
+        + '<input type="text" value="' + disc.label.replace(/"/g,'&quot;') + '" onchange="tpl.disciplinas[' + di + '].label=this.value" style="flex:1;height:28px;padding:0 8px;border:0.5px solid var(--border);border-radius:4px;background:var(--bg-surface);color:var(--txt);font-size:12px;font-weight:700;">'
+        + '<label style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--txt-muted);cursor:pointer;"><input type="checkbox" ' + (disc.ativo!==false?'checked':'') + ' onchange="tpl.disciplinas[' + di + '].ativo=this.checked" style="accent-color:var(--accent);"> Ativa</label>'
+        + (!isDefault ? '<button onclick="tpl.disciplinas.splice(' + di + ',1);render()" style="height:26px;padding:0 8px;background:rgba(180,20,20,.08);border:1px solid rgba(180,20,20,.2);border-radius:4px;font-size:10px;color:#B41414;cursor:pointer;">✕ Disc.</button>' : '')
+        + '</div>'
+        + '<div style="padding:8px 10px;">' + tasksHtml
+        + (!isDefault ? '<button onclick="tpl.disciplinas[' + di + '].tasks.push({n:\'Nova tarefa\',prof:2});render()" style="margin-top:4px;font-size:10px;color:var(--accent);background:none;border:none;cursor:pointer;font-family:var(--font);font-weight:700;">+ Tarefa</button>' : '')
+        + '</div>'
+        + '</div>';
+    }).join('');
+
+    ov.innerHTML = '<div style="background:var(--bg-panel);border-radius:12px;box-shadow:0 24px 64px rgba(0,0,0,.45);width:100%;max-width:660px;max-height:88vh;display:flex;flex-direction:column;overflow:hidden;">'
+      + '<div style="display:flex;align-items:center;gap:10px;padding:14px 20px;border-bottom:1px solid var(--border);flex-shrink:0;">'
+      + '<button onclick="_tpoRenderModal(document.getElementById(\'modal-tpo-overlay\'))" style="height:28px;padding:0 10px;background:var(--bg-surface2);border:1px solid var(--border);border-radius:5px;font-size:11px;color:var(--txt-muted);cursor:pointer;">← Voltar</button>'
+      + '<input type="text" id="tpo-edit-label" value="' + tpl.label.replace(/"/g,'&quot;') + '" onchange="tpl.label=this.value" style="flex:1;height:32px;padding:0 10px;border:1px solid var(--border);border-radius:6px;background:var(--bg-surface2);color:var(--txt);font-size:14px;font-weight:700;">'
+      + '<button onclick="document.getElementById(\'modal-tpo-overlay\').remove()" style="width:30px;height:30px;background:var(--bg-surface2);border:1px solid var(--border);border-radius:5px;cursor:pointer;font-size:14px;color:var(--txt-muted);">✕</button>'
+      + '</div>'
+      + '<div style="flex:1;overflow-y:auto;padding:16px 20px;">' + discsHtml
+      + (!isDefault ? '<button onclick="tpl.disciplinas.push({id:\'disc-\'+Date.now(),label:\'Nova Disciplina\',ativo:true,tasks:[{n:\'Tarefa\',prof:2}]});render()" style="width:100%;height:32px;background:var(--bg-surface2);border:1px dashed var(--border);border-radius:6px;font-family:var(--font);font-size:10px;font-weight:700;color:var(--txt-muted);cursor:pointer;">+ Adicionar Disciplina</button>' : '')
+      + '</div>'
+      + (!isDefault ? '<div style="padding:12px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;">'
+      + '<button onclick="_tpoRenderModal(document.getElementById(\'modal-tpo-overlay\'))" style="height:32px;padding:0 16px;background:var(--bg-surface2);border:1px solid var(--border);border-radius:6px;font-family:var(--font);font-size:10px;font-weight:700;color:var(--txt-muted);cursor:pointer;">Cancelar</button>'
+      + '<button onclick="_tpoSalvarEdicao(tpl)" style="height:32px;padding:0 20px;background:var(--accent);border:none;border-radius:6px;font-family:var(--font);font-size:10px;font-weight:700;color:#0D1117;cursor:pointer;">✓ Salvar Template</button>'
+      + '</div>' : '')
+      + '</div>';
+  }
+  render();
+}
+
+function _tpoSalvarEdicao(tpl) {
+  const custom = _preObraCarregarCustom();
+  const idx = custom.findIndex(t => t.id === tpl.id);
+  if (idx >= 0) custom[idx] = tpl;
+  else custom.push(tpl);
+  _preObraSalvarCustom(custom);
+  const ov = document.getElementById('modal-tpo-overlay');
+  if (ov) _tpoRenderModal(ov);
+  renderObraFases();
+}
+
 function abrirGerenciarTemplates() {
   document.getElementById('modal-tpl-overlay')?.remove();
   const ov = document.createElement('div');
