@@ -1111,7 +1111,7 @@ function _poRenderModal(faseIdx) {
 
   var discsHtml = discs.map(function(disc, di) {
     var tasksHtml = (disc.tasks||[]).map(function(task, ti) {
-      return '<div data-po-task="'+ti+'" data-po-disc-ref="'+di+'" style="display:flex;align-items:center;gap:6px;margin-bottom:5px;padding:5px 8px;background:var(--bg-surface);border-radius:4px;border:0.5px solid var(--border);">'
+      return '<div data-po-task="'+ti+'" data-po-disc-ref="'+di+'" draggable="true" style="display:flex;align-items:center;gap:6px;margin-bottom:5px;padding:5px 8px;background:var(--bg-surface);border-radius:4px;border:0.5px solid var(--border);">'
         + '<span data-task-handle="1" style="cursor:grab;opacity:.35;font-size:11px;flex-shrink:0;padding:4px;margin:-4px;">⠿</span>'
         + '<input type="text" value="'+task.n.replace(/"/g,'&quot;')+'" '
         + 'onchange="ESTADO.preObraCustom['+faseIdx+'].disciplinas['+di+'].tasks['+ti+'].n=this.value;onCfgChange();" '
