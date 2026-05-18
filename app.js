@@ -626,6 +626,120 @@ function ouGetFase() {
   return gSt.obraFases.find(f => f.id == _ouPhId);
 }
 
+function ouImprimir() {
+  const fase = ouGetFase();
+  if (!fase) return;
+  const discs = (fase.disciplinas || []).filter(d => d.ativo !== false);
+  const cod = ESTADO.meta?.codigo || '';
+  const nomeProj = ESTADO.meta?.nome || 'Planejamento de Obra';
+  const nomeFase = fase.nome || 'Obra';
+  const gi = ESTADO.meta?.gi || '';
+  const gp = ESTADO.meta?.gp || '';
+  const hoje = new Date().toLocaleDateString('pt-BR', {day:'2-digit', month:'long', year:'numeric'});
+
+  // Totais de efetivo por módulo
+  const totEft = Array(9).fill(0);
+  discs.forEach(disc => {
+    (disc.tasks || []).forEach(t => {
+      for (let m = 1; m <= 8; m++) totEft[m] += (t.prof || 0) * ((t.m[m] || 0) / 100);
+    });
+  });
+
+  // Linhas da tabela
+  let rows = '';
+  discs.forEach((disc, di) => {
+    const discColor = ['#8B4513','#A0522D','#6B3410','#C07820','#8B6914','#5A3A00','#7A4010','#4A2800'][di % 8];
+    rows += '<tr style="background:#F4F6F8;">'
+      + '<td colspan="11" style="padding:5px 8px;font-family:Oswald,sans-serif;font-size:11px;font-weight:700;color:'+discColor+';border:0.5px solid #D8DCE4;border-left:3px solid '+discColor+';">'+disc.label+'</td>'
+      + '</tr>';
+    (disc.tasks || []).forEach(task => {
+      const totalTask = Array.from({length:8},(_,i)=>i+1).reduce((s,m)=>s+(task.prof||0)*((task.m[m]||0)/100),0);
+      const modCells = Array.from({length:8},(_,i)=>i+1).map(m => {
+        const pct = task.m[m] || 0;
+        const ef = pct > 0 ? Math.round((task.prof||0) * pct / 100 * 10)/10 : '';
+        const bg = pct > 0 ? 'background:rgba('+( discColor === '#C07820' ? '192,120,32' : '139,69,19')+','+(pct/100*0.15+0.05)+');' : '';
+        return '<td style="padding:4px 3px;text-align:center;font-size:9px;border:0.5px solid #D8DCE4;'+bg+'">'+(ef||'')+'</td>';
+      }).join('');
+      rows += '<tr>'
+        + '<td style="padding:4px 8px 4px 16px;font-size:10px;border:0.5px solid #D8DCE4;color:#3A4A5A;">'+task.n+'</td>'
+        + '<td style="padding:4px 3px;text-align:center;font-size:9px;border:0.5px solid #D8DCE4;color:#6A7585;">'+(task.prep?'Prep.':'Exec.')+'</td>'
+        + '<td style="padding:4px 3px;text-align:center;font-size:10px;font-weight:700;border:0.5px solid #D8DCE4;">'+(task.prof||'')+'</td>'
+        + modCells
+        + '<td style="padding:4px 3px;text-align:center;font-size:10px;font-weight:700;border:0.5px solid #D8DCE4;color:#1A5294;">'+(totalTask>0?Math.round(totalTask*10)/10:'')+'</td>'
+        + '</tr>';
+    });
+  });
+
+  // Linha de totais
+  const modTotCells = Array.from({length:8},(_,i)=>i+1).map(m =>
+    '<td style="padding:5px 3px;text-align:center;font-size:10px;font-weight:700;border:0.5px solid #D8DCE4;background:#1A2535;color:#00DEDB;">'+(totEft[m]>0?Math.round(totEft[m]*10)/10:'')+'</td>'
+  ).join('');
+  rows += '<tr style="background:#1A2535;">'
+    + '<td colspan="2" style="padding:5px 8px;font-family:Oswald,sans-serif;font-size:10px;font-weight:700;color:#9AA0AF;border:0.5px solid #2A3545;">TOTAL EFETIVO / MÓDULO</td>'
+    + '<td style="padding:5px 3px;border:0.5px solid #2A3545;"></td>'
+    + modTotCells
+    + '<td style="padding:5px 3px;border:0.5px solid #2A3545;"></td>'
+    + '</tr>';
+
+  const html = `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">
+<title>Visão Unificada — ${nomeProj}</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Barlow',sans-serif;color:#1A2535;background:#fff;font-size:10px;}
+  @page{size:A4 portrait;margin:10mm 12mm;}
+  @media print{.no-print{display:none!important;}body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}
+  table{border-collapse:collapse;width:100%;}
+</style>
+</head><body>
+
+<!-- CABEÇALHO -->
+<div style="display:flex;align-items:flex-end;justify-content:space-between;padding-bottom:8px;border-bottom:2.5px solid #00DEDB;margin-bottom:12px;">
+  <div>
+    <div style="font-family:Oswald,sans-serif;font-size:8px;font-weight:400;letter-spacing:.2em;text-transform:uppercase;color:#9AA0AF;margin-bottom:3px;">Athié Wohnrath · Planejamento de Obra</div>
+    <div style="font-family:Oswald,sans-serif;font-size:22px;font-weight:700;text-transform:uppercase;color:#1A2535;line-height:1;">Visão Unificada <span style="color:#00DEDB;">${nomeFase}</span></div>
+    <div style="font-size:10px;color:#5A6275;margin-top:3px;">${cod?cod+' · ':''}${nomeProj}</div>
+  </div>
+  <div style="text-align:right;font-size:9px;color:#9AA0AF;line-height:2;">
+    ${gi?`<div><strong style="color:#1A2535;">GI:</strong> ${gi}</div>`:''}
+    ${gp?`<div><strong style="color:#1A2535;">GP:</strong> ${gp}</div>`:''}
+    <div><strong style="color:#1A2535;">Emitido em:</strong> ${hoje}</div>
+  </div>
+</div>
+
+<!-- TABELA -->
+<table>
+  <thead>
+    <tr style="background:#1A2535;">
+      <th style="padding:6px 8px;text-align:left;font-family:Oswald,sans-serif;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#9AA0AF;border:0.5px solid #2A3545;min-width:130px;">Disciplina / Tarefa</th>
+      <th style="padding:6px 4px;text-align:center;font-family:Oswald,sans-serif;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#9AA0AF;border:0.5px solid #2A3545;width:44px;">Tipo</th>
+      <th style="padding:6px 4px;text-align:center;font-family:Oswald,sans-serif;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#9AA0AF;border:0.5px solid #2A3545;width:38px;">Efet.</th>
+      ${Array.from({length:8},(_,i)=>'<th style="padding:6px 4px;text-align:center;font-family:Oswald,sans-serif;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#9AA0AF;border:0.5px solid #2A3545;width:34px;">M'+(i+1)+'</th>').join('')}
+      <th style="padding:6px 4px;text-align:center;font-family:Oswald,sans-serif;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#9AA0AF;border:0.5px solid #2A3545;width:38px;">Total</th>
+    </tr>
+  </thead>
+  <tbody>${rows}</tbody>
+</table>
+
+<!-- RODAPÉ -->
+<div style="margin-top:10px;padding-top:8px;border-top:0.5px solid #E8ECF0;display:flex;justify-content:space-between;font-size:8px;color:#9AA0AF;">
+  <div>Athié Wohnrath · Visão Unificada · ${hoje}</div>
+  <div>${cod||nomeProj} · Documento gerado automaticamente</div>
+</div>
+
+<!-- BOTÕES -->
+<div class="no-print" style="position:fixed;bottom:20px;right:20px;display:flex;gap:10px;">
+  <button onclick="window.close()" style="height:36px;padding:0 16px;background:#F4F6F8;border:1px solid #D8DCE4;border-radius:6px;font-family:Oswald,sans-serif;font-size:10px;font-weight:700;color:#5A6275;cursor:pointer;letter-spacing:.06em;text-transform:uppercase;">Fechar</button>
+  <button onclick="window.print()" style="height:36px;padding:0 20px;background:#00DEDB;border:none;border-radius:6px;font-family:Oswald,sans-serif;font-size:10px;font-weight:700;color:#0D1117;cursor:pointer;letter-spacing:.06em;text-transform:uppercase;">🖨 Imprimir / PDF</button>
+</div>
+
+</body></html>`;
+
+  const win = window.open('', '_blank');
+  win.document.write(html);
+  win.document.close();
+}
+
 function ouRender() {
   const fase = ouGetFase();
   if (!fase) return;
