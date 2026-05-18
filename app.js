@@ -247,7 +247,6 @@ document.addEventListener("DOMContentLoaded",()=>{buildVizSidebar()}),document.a
   var pc=ESTADO.cfg.obraFases&&ESTADO.cfg.obraFases[obraFaseIdx]&&ESTADO.cfg.obraFases[obraFaseIdx].preObra;
   if(!pc||!pc.ativo)return;
   var _custom=ESTADO.preObraCustom&&ESTADO.preObraCustom[obraFaseIdx];
-  console.log('[CUSTOM] faseIdx='+obraFaseIdx+' custom='+!!_custom+' discs='+(_custom&&_custom.disciplinas?_custom.disciplinas.length:'n/a'));
   var du=(_custom?_custom.du:pc.du)||5;
   var fim=G.addD(new Date(obraFase.obra.start),-1);
   while(CALENDARIO.isNaoUtil(fim))fim=G.addD(fim,-1);
@@ -268,7 +267,7 @@ document.addEventListener("DOMContentLoaded",()=>{buildVizSidebar()}),document.a
   i.push('<div style="height:'+(G.ROW_H+8)+'px;background:'+cb+';position:relative;border-bottom:1px solid #EEE0C8;overflow:visible;">'+gGridLines(o,e,false)+gBar(xi,xw,G.ROW_H,cm,ini,fim,null,payload,true)+'</div>');
   // Disciplinas
   if(tpl){
-    var ds=(_custom&&_custom.disciplinas)?_custom.disciplinas.filter(function(d){return d.ativo!==false;}):(typeof _preObraMakeDiscs==='function'?_preObraMakeDiscs(pc.templateId):tpl.disciplinas.filter(function(d){return d.ativo!==false;}));
+    var ds=(_custom&&_custom.disciplinas)?_custom.disciplinas.filter(function(d){return d.ativo!==false;}):(typeof _preObraMakeDiscs==='function'?_preObraMakeDiscs(pc.templateId):(tpl&&tpl.disciplinas?tpl.disciplinas.filter(function(d){return d.ativo!==false;}):[])); 
     console.log('[PO4] ds.length='+ds.length+' xi='+xi+' xw='+xw);
     ds.forEach(function(pd,pi){
       var _dcArr=typeof getDiscPal==='function'?getDiscPal(pi):[cm];var dc=Array.isArray(_dcArr)?_dcArr[0]:_dcArr;
@@ -285,7 +284,6 @@ gObraRow(t,o,e,r,i),t.expanded&&(t.disciplinas||[]).forEach((a,n)=>{a&&a.ativo&&
   var pc=ESTADO.cfg.obraFases&&ESTADO.cfg.obraFases[obraFaseIdx]&&ESTADO.cfg.obraFases[obraFaseIdx].preObra;
   if(!pc||!pc.ativo)return;
   var _custom=ESTADO.preObraCustom&&ESTADO.preObraCustom[obraFaseIdx];
-  console.log('[CUSTOM] faseIdx='+obraFaseIdx+' custom='+!!_custom+' discs='+(_custom&&_custom.disciplinas?_custom.disciplinas.length:'n/a'));
   var du=(_custom?_custom.du:pc.du)||5;
   var fim=G.addD(new Date(obraFase.obra.start),-1);
   while(CALENDARIO.isNaoUtil(fim))fim=G.addD(fim,-1);
@@ -306,7 +304,7 @@ gObraRow(t,o,e,r,i),t.expanded&&(t.disciplinas||[]).forEach((a,n)=>{a&&a.ativo&&
   i.push('<div style="height:'+(G.ROW_H+8)+'px;background:'+cb+';position:relative;border-bottom:1px solid #EEE0C8;overflow:visible;">'+gGridLines(o,e,false)+gBar(xi,xw,G.ROW_H,cm,ini,fim,null,payload,true)+'</div>');
   // Disciplinas
   if(tpl){
-    var ds=(_custom&&_custom.disciplinas)?_custom.disciplinas.filter(function(d){return d.ativo!==false;}):(typeof _preObraMakeDiscs==='function'?_preObraMakeDiscs(pc.templateId):tpl.disciplinas.filter(function(d){return d.ativo!==false;}));
+    var ds=(_custom&&_custom.disciplinas)?_custom.disciplinas.filter(function(d){return d.ativo!==false;}):(typeof _preObraMakeDiscs==='function'?_preObraMakeDiscs(pc.templateId):(tpl&&tpl.disciplinas?tpl.disciplinas.filter(function(d){return d.ativo!==false;}):[])); 
     console.log('[PO4] ds.length='+ds.length+' xi='+xi+' xw='+xw);
     ds.forEach(function(pd,pi){
       var _dcArr=typeof getDiscPal==='function'?getDiscPal(pi):[cm];var dc=Array.isArray(_dcArr)?_dcArr[0]:_dcArr;
