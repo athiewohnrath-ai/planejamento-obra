@@ -1247,35 +1247,44 @@ function _poInitDragDisc(faseIdx) {
 function _poInitDragTask(faseIdx) {
   var ov = document.getElementById('modal-po-overlay');
   if (!ov) return;
-  // Para cada disciplina, inicializar drag nas tarefas
-  ov.querySelectorAll('[data-po-disc]').forEach(function(discEl) {
-    var di = parseInt(discEl.dataset.poDisc);
-    var taskEls = discEl.querySelectorAll('[data-po-task]');
-    var dragSrcTask = null;
-    taskEls.forEach(function(el) {
-      var handle = el.querySelector('[data-task-handle]');
-      if (handle) {
-        handle.addEventListener('mousedown', function() { el.setAttribute('draggable','true'); });
-        handle.addEventListener('mouseup', function() { el.removeAttribute('draggable'); });
-      }
-      el.addEventListener('dragstart', function(e) {
-        if (!el.getAttribute('draggable')) { e.preventDefault(); return; }
-        dragSrcTask=el; e.dataTransfer.effectAllowed='move'; el.style.opacity='.4';
+  var dragSrcTask = null;
+  var dragSrcDi = -1;
+  var taskAllowed = false;
+
+  ov.querySelectorAll('[data-po-task]').forEach(function(el) {
+    var discEl = el.closest('[data-po-disc]');
+    var di = discEl ? parseInt(discEl.dataset.poDisc) : -1;
+
+    // Handle: só o ícone inicia o drag
+    var handle = el.querySelector('[data-task-handle]');
+    if (handle) {
+      handle.addEventListener('mousedown', function(e) {
+        taskAllowed = true;
+        el.setAttribute('draggable','true');
       });
-      el.addEventListener('dragend', function() {
-        el.style.opacity='1'; el.removeAttribute('draggable');
-      });
-      el.addEventListener('dragover', function(e) { e.preventDefault(); });
-      el.addEventListener('drop', function(e) {
-        e.stopPropagation();
-        if (dragSrcTask===el) return;
-        var from=parseInt(dragSrcTask.dataset.poTask);
-        var to=parseInt(el.dataset.poTask);
-        var tasks=ESTADO.preObraCustom[faseIdx].disciplinas[di].tasks;
-        var moved=tasks.splice(from,1)[0];
-        tasks.splice(to,0,moved);
-        onCfgChange(); _poRenderModal(faseIdx);
-      });
+    }
+    el.addEventListener('dragstart', function(e) {
+      if (!taskAllowed) { e.preventDefault(); return; }
+      dragSrcTask = el;
+      dragSrcDi = di;
+      e.dataTransfer.effectAllowed = 'move';
+      setTimeout(function(){ el.style.opacity='.4'; }, 0);
+    });
+    el.addEventListener('dragend', function() {
+      el.style.opacity = '1';
+      el.removeAttribute('draggable');
+      taskAllowed = false;
+    });
+    el.addEventListener('dragover', function(e) { e.preventDefault(); });
+    el.addEventListener('drop', function(e) {
+      e.stopPropagation();
+      if (!dragSrcTask || dragSrcTask === el || dragSrcDi !== di) return;
+      var from = parseInt(dragSrcTask.dataset.poTask);
+      var to = parseInt(el.dataset.poTask);
+      var tasks = ESTADO.preObraCustom[faseIdx].disciplinas[di].tasks;
+      var moved = tasks.splice(from, 1)[0];
+      tasks.splice(to, 0, moved);
+      onCfgChange(); _poRenderModal(faseIdx);
     });
   });
 }
