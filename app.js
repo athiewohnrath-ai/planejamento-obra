@@ -269,7 +269,7 @@ document.addEventListener("DOMContentLoaded",()=>{buildVizSidebar()}),document.a
     var ds=typeof _preObraMakeDiscs==='function'?_preObraMakeDiscs(pc.templateId):tpl.disciplinas.filter(function(d){return d.ativo!==false;});
     console.log('[PO4] ds.length='+ds.length+' xi='+xi+' xw='+xw);
     ds.forEach(function(pd,pi){
-      var dc=typeof getDiscPal==='function'?getDiscPal(pi):cm;
+      var _dcArr=typeof getDiscPal==='function'?getDiscPal(pi):[cm];var dc=Array.isArray(_dcArr)?_dcArr[0]:_dcArr;
       var xiC=Math.max(0,xi);
       var xwC=xw+Math.min(0,xi);
       r.push('<div style="height:'+G.SUB_H+'px;background:#FEFCF5;display:flex;align-items:center;padding:0 8px;border-bottom:1px solid rgba(122,74,16,.12);border-right:2px solid #C0C8D4;font-size:9px;color:#6A3810;gap:4px;overflow:hidden;"><span style="width:4px;height:4px;border-radius:1px;background:'+dc+';flex-shrink:0;"></span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+(pd.label||pd.id)+'</span></div>');
@@ -305,7 +305,7 @@ gObraRow(t,o,e,r,i),t.expanded&&(t.disciplinas||[]).forEach((a,n)=>{a&&a.ativo&&
     var ds=typeof _preObraMakeDiscs==='function'?_preObraMakeDiscs(pc.templateId):tpl.disciplinas.filter(function(d){return d.ativo!==false;});
     console.log('[PO4] ds.length='+ds.length+' xi='+xi+' xw='+xw);
     ds.forEach(function(pd,pi){
-      var dc=typeof getDiscPal==='function'?getDiscPal(pi):cm;
+      var _dcArr=typeof getDiscPal==='function'?getDiscPal(pi):[cm];var dc=Array.isArray(_dcArr)?_dcArr[0]:_dcArr;
       var xiC=Math.max(0,xi);
       var xwC=xw+Math.min(0,xi);
       r.push('<div style="height:'+G.SUB_H+'px;background:#FEFCF5;display:flex;align-items:center;padding:0 8px;border-bottom:1px solid rgba(122,74,16,.12);border-right:2px solid #C0C8D4;font-size:9px;color:#6A3810;gap:4px;overflow:hidden;"><span style="width:4px;height:4px;border-radius:1px;background:'+dc+';flex-shrink:0;"></span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+(pd.label||pd.id)+'</span></div>');
