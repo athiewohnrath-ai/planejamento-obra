@@ -656,9 +656,17 @@ function ouImprimir() {
       const totalTask = Array.from({length:8},(_,i)=>i+1).reduce((s,m)=>s+(task.prof||0)*((task.m[m]||0)/100),0);
       const modCells = Array.from({length:8},(_,i)=>i+1).map(m => {
         const pct = task.m[m] || 0;
-        const bg = pct > 0 ? 'background:rgba(139,69,19,'+(pct/100*0.15+0.05)+');font-weight:700;color:#6B3000;' : 'color:#CCC;';
-        const txt = pct > 0 ? pct+'%' : '—';
-        return '<td style="padding:4px 3px;text-align:center;font-size:9px;border:0.5px solid #D8DCE4;'+bg+'">' + txt + '</td>';
+        const prof = task.prof || 0;
+        if (pct === 0) {
+          return '<td style="padding:3px;text-align:center;font-size:9px;border:0.5px solid #D8DCE4;color:#DDD;">—</td>';
+        }
+        const bg = 'background:rgba(139,69,19,'+(pct/100*0.12+0.04)+');';
+        const content = prof > 0
+          ? '<span style="font-size:9px;font-weight:700;color:#3A2000;">'+prof+'</span>'
+            + '<span style="display:inline-block;width:1.5px;height:12px;background:#8B5010;margin:0 3px;vertical-align:middle;"></span>'
+            + '<span style="font-size:8px;color:#6B3000;">'+pct+'%</span>'
+          : '<span style="font-size:8px;color:#6B3000;">'+pct+'%</span>';
+        return '<td style="padding:3px 4px;text-align:center;font-size:9px;border:0.5px solid #D8DCE4;'+bg+'white-space:nowrap;">'+content+'</td>';
       }).join('');
       rows += '<tr>'
         + '<td style="padding:4px 8px 4px 16px;font-size:10px;border:0.5px solid #D8DCE4;color:#3A4A5A;">'+task.n+'</td>'
