@@ -739,6 +739,8 @@ function ouImprimir() {
   win.document.write(html);
   win.document.close();
 }
+window.ouImprimir = ouImprimir;
+
 
 function ouRender() {
   const fase = ouGetFase();
