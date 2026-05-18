@@ -297,7 +297,8 @@ gObraRow(t,o,e,r,i),t.expanded&&(t.disciplinas||[]).forEach((a,n)=>{a&&a.ativo&&
   var payload=encodeURIComponent(JSON.stringify({type:'preObra',faseIdx:obraFaseIdx}));
   console.log('[PO3] xi='+xi+' xw='+xw+' ini='+G.fmtISO(ini)+' tpl='+!!tpl+' ds='+(tpl?tpl.disciplinas.length:0));
   // Sidebar header
-  r.push('<div style="height:'+(G.ROW_H+8)+'px;background:'+cb+';display:flex;align-items:center;padding:0 5px 0 8px;border-bottom:1px solid #EEE0C8;border-right:2px solid #C0C8D4;font-size:10px;font-weight:700;color:#6A3810;text-transform:uppercase;letter-spacing:.04em;gap:3px;"><span style="width:5px;height:5px;border-radius:1px;background:'+cm+';flex-shrink:0;"></span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Pré-Obra'+(gSt.obraFases.length>1?' F'+(obraFaseIdx+1):'')+' '+du+' DU</span></div>');
+  r.push('<div data-po-open="'+obraFaseIdx+'" style="height:'+(G.ROW_H+8)+'px;background:'+cb+';display:flex;align-items:center;padding:0 5px 0 8px;border-bottom:1px solid #EEE0C8;border-right:2px solid #C0C8D4;font-size:10px;font-weight:700;color:#6A3810;text-transform:uppercase;letter-spacing:.04em;gap:3px;cursor:pointer;"><span style="width:5px;height:5px;border-radius:1px;background:'+cm+';flex-shrink:0;"></span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Pré-Obra'+(gSt.obraFases.length>1?' F'+(obraFaseIdx+1):'')+' · '+du+' DU</span><span style="font-size:9px;opacity:.5;"> ✏</span></div>');
+
   // Gantt: barra principal
   i.push('<div style="height:'+(G.ROW_H+8)+'px;background:'+cb+';position:relative;border-bottom:1px solid #EEE0C8;overflow:visible;">'+gGridLines(o,e,false)+gBar(xi,xw,G.ROW_H,cm,ini,fim,null,payload,true)+'</div>');
   // Disciplinas
