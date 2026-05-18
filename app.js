@@ -267,7 +267,7 @@ document.addEventListener("DOMContentLoaded",()=>{buildVizSidebar()}),document.a
   i.push('<div style="height:'+(G.ROW_H+8)+'px;background:'+cb+';position:relative;border-bottom:1px solid #EEE0C8;overflow:visible;">'+gGridLines(o,e,false)+gBar(xi,xw,G.ROW_H,cm,ini,fim,null,payload,true)+'</div>');
   // Disciplinas
   if(tpl){
-    var ds=(_custom&&_custom.disciplinas)?_custom.disciplinas.filter(function(d){return d.ativo!==false;}):(typeof _preObraMakeDiscs==='function'?_preObraMakeDiscs(pc.templateId):(tpl&&tpl.disciplinas?tpl.disciplinas.filter(function(d){return d.ativo!==false;}):[])); 
+    var ds=typeof _preObraMakeDiscs==='function'?_preObraMakeDiscs(pc.templateId):(tpl&&tpl.disciplinas?tpl.disciplinas.filter(function(d){return d.ativo!==false;}):[]);
     console.log('[PO4] ds.length='+ds.length+' xi='+xi+' xw='+xw);
     ds.forEach(function(pd,pi){
       var _dcArr=typeof getDiscPal==='function'?getDiscPal(pi):[cm];var dc=Array.isArray(_dcArr)?_dcArr[0]:_dcArr;
@@ -304,7 +304,7 @@ gObraRow(t,o,e,r,i),t.expanded&&(t.disciplinas||[]).forEach((a,n)=>{a&&a.ativo&&
   i.push('<div style="height:'+(G.ROW_H+8)+'px;background:'+cb+';position:relative;border-bottom:1px solid #EEE0C8;overflow:visible;">'+gGridLines(o,e,false)+gBar(xi,xw,G.ROW_H,cm,ini,fim,null,payload,true)+'</div>');
   // Disciplinas
   if(tpl){
-    var ds=(_custom&&_custom.disciplinas)?_custom.disciplinas.filter(function(d){return d.ativo!==false;}):(typeof _preObraMakeDiscs==='function'?_preObraMakeDiscs(pc.templateId):(tpl&&tpl.disciplinas?tpl.disciplinas.filter(function(d){return d.ativo!==false;}):[])); 
+    var ds=typeof _preObraMakeDiscs==='function'?_preObraMakeDiscs(pc.templateId):(tpl&&tpl.disciplinas?tpl.disciplinas.filter(function(d){return d.ativo!==false;}):[]);
     console.log('[PO4] ds.length='+ds.length+' xi='+xi+' xw='+xw);
     ds.forEach(function(pd,pi){
       var _dcArr=typeof getDiscPal==='function'?getDiscPal(pi):[cm];var dc=Array.isArray(_dcArr)?_dcArr[0]:_dcArr;
