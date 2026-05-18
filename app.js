@@ -1247,43 +1247,40 @@ function _poInitDragDisc(faseIdx) {
 function _poInitDragTask(faseIdx) {
   var ov = document.getElementById('modal-po-overlay');
   if (!ov) return;
-  var dragSrcTask = null;
-  var dragSrcDi = -1;
-  var taskAllowed = false;
+  var dragSrc = null;
 
   ov.querySelectorAll('[data-po-task]').forEach(function(el) {
     var di = parseInt(el.dataset.poDiscRef);
+    el.setAttribute('draggable', 'true');
 
-    // Handle: só o ícone inicia o drag
-    var handle = el.querySelector('[data-task-handle]');
-    if (handle) {
-      handle.addEventListener('mousedown', function(e) {
-        taskAllowed = true;
-        el.setAttribute('draggable','true');
-      });
-    }
     el.addEventListener('dragstart', function(e) {
-      if (!taskAllowed) { e.preventDefault(); return; }
-      dragSrcTask = el;
-      dragSrcDi = di;
+      dragSrc = el;
       e.dataTransfer.effectAllowed = 'move';
-      setTimeout(function(){ el.style.opacity='.4'; }, 0);
+      el.style.opacity = '.5';
     });
     el.addEventListener('dragend', function() {
       el.style.opacity = '1';
-      el.removeAttribute('draggable');
-      taskAllowed = false;
     });
-    el.addEventListener('dragover', function(e) { e.preventDefault(); });
+    el.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      el.style.background = 'var(--bg-surface2)';
+    });
+    el.addEventListener('dragleave', function() {
+      el.style.background = 'var(--bg-surface)';
+    });
     el.addEventListener('drop', function(e) {
       e.stopPropagation();
-      if (!dragSrcTask || dragSrcTask === el || dragSrcDi !== di) return;
-      var from = parseInt(dragSrcTask.dataset.poTask);
+      el.style.background = 'var(--bg-surface)';
+      if (!dragSrc || dragSrc === el) return;
+      var fromDi = parseInt(dragSrc.dataset.poDiscRef);
+      if (fromDi !== di) return; // só dentro da mesma disciplina
+      var from = parseInt(dragSrc.dataset.poTask);
       var to = parseInt(el.dataset.poTask);
       var tasks = ESTADO.preObraCustom[faseIdx].disciplinas[di].tasks;
       var moved = tasks.splice(from, 1)[0];
       tasks.splice(to, 0, moved);
-      onCfgChange(); _poRenderModal(faseIdx);
+      onCfgChange();
+      _poRenderModal(faseIdx);
     });
   });
 }
