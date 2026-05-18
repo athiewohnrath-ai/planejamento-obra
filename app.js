@@ -247,6 +247,7 @@ document.addEventListener("DOMContentLoaded",()=>{buildVizSidebar()}),document.a
   var pc=ESTADO.cfg.obraFases&&ESTADO.cfg.obraFases[obraFaseIdx]&&ESTADO.cfg.obraFases[obraFaseIdx].preObra;
   if(!pc||!pc.ativo)return;
   var _custom=ESTADO.preObraCustom&&ESTADO.preObraCustom[obraFaseIdx];
+  console.log('[CUSTOM] faseIdx='+obraFaseIdx+' custom='+!!_custom+' discs='+(_custom&&_custom.disciplinas?_custom.disciplinas.length:'n/a'));
   var du=(_custom?_custom.du:pc.du)||5;
   var fim=G.addD(new Date(obraFase.obra.start),-1);
   while(CALENDARIO.isNaoUtil(fim))fim=G.addD(fim,-1);
@@ -284,6 +285,7 @@ gObraRow(t,o,e,r,i),t.expanded&&(t.disciplinas||[]).forEach((a,n)=>{a&&a.ativo&&
   var pc=ESTADO.cfg.obraFases&&ESTADO.cfg.obraFases[obraFaseIdx]&&ESTADO.cfg.obraFases[obraFaseIdx].preObra;
   if(!pc||!pc.ativo)return;
   var _custom=ESTADO.preObraCustom&&ESTADO.preObraCustom[obraFaseIdx];
+  console.log('[CUSTOM] faseIdx='+obraFaseIdx+' custom='+!!_custom+' discs='+(_custom&&_custom.disciplinas?_custom.disciplinas.length:'n/a'));
   var du=(_custom?_custom.du:pc.du)||5;
   var fim=G.addD(new Date(obraFase.obra.start),-1);
   while(CALENDARIO.isNaoUtil(fim))fim=G.addD(fim,-1);
