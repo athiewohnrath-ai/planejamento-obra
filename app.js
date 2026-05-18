@@ -250,6 +250,18 @@ document.addEventListener("DOMContentLoaded",()=>{buildVizSidebar()}),document.a
   // log após ativo check
   var _tplCheck=typeof _preObraGetTemplate==='function'?_preObraGetTemplate(pc.templateId):null;
   console.log("[PO2] tpl="+(_tplCheck?_tplCheck.label:'NULL')+" discs="+(_tplCheck?_tplCheck.disciplinas.length:0)+" obraFase="+JSON.stringify({start:obraFase&&obraFase.obra&&obraFase.obra.start}));
+  // Calcular datas e posições para debug
+  (function(){
+    var du2=pc.du||5;
+    var fim2=G.addD(new Date(obraFase.obra.start),-1);
+    while(CALENDARIO.isNaoUtil(fim2))fim2=G.addD(fim2,-1);
+    var ini2=new Date(fim2),cnt2=1;
+    while(cnt2<du2){ini2=G.addD(ini2,-1);if(!CALENDARIO.isNaoUtil(ini2))cnt2++;}
+    while(CALENDARIO.isNaoUtil(ini2))ini2=G.addD(ini2,1);
+    var xi2=gPx(ini2);
+    var xw2=Math.max((G.diff(ini2,fim2)+1)*gSt.dayW,2*gSt.dayW);
+    console.log("[PO3] ini="+G.fmtISO(ini2)+" fim="+G.fmtISO(fim2)+" xi="+xi2+" xw="+xw2+" dayW="+gSt.dayW+" axisStart="+G.fmtISO(gSt.axisStart));
+  })();
   var du=pc.du||5;
   var fim=G.addD(new Date(obraFase.obra.start),-1);
   while(CALENDARIO.isNaoUtil(fim))fim=G.addD(fim,-1);
@@ -314,6 +326,18 @@ gObraRow(t,o,e,r,i),t.expanded&&(t.disciplinas||[]).forEach((a,n)=>{a&&a.ativo&&
   // log após ativo check
   var _tplCheck=typeof _preObraGetTemplate==='function'?_preObraGetTemplate(pc.templateId):null;
   console.log("[PO2] tpl="+(_tplCheck?_tplCheck.label:'NULL')+" discs="+(_tplCheck?_tplCheck.disciplinas.length:0)+" obraFase="+JSON.stringify({start:obraFase&&obraFase.obra&&obraFase.obra.start}));
+  // Calcular datas e posições para debug
+  (function(){
+    var du2=pc.du||5;
+    var fim2=G.addD(new Date(obraFase.obra.start),-1);
+    while(CALENDARIO.isNaoUtil(fim2))fim2=G.addD(fim2,-1);
+    var ini2=new Date(fim2),cnt2=1;
+    while(cnt2<du2){ini2=G.addD(ini2,-1);if(!CALENDARIO.isNaoUtil(ini2))cnt2++;}
+    while(CALENDARIO.isNaoUtil(ini2))ini2=G.addD(ini2,1);
+    var xi2=gPx(ini2);
+    var xw2=Math.max((G.diff(ini2,fim2)+1)*gSt.dayW,2*gSt.dayW);
+    console.log("[PO3] ini="+G.fmtISO(ini2)+" fim="+G.fmtISO(fim2)+" xi="+xi2+" xw="+xw2+" dayW="+gSt.dayW+" axisStart="+G.fmtISO(gSt.axisStart));
+  })();
   var du=pc.du||5;
   var fim=G.addD(new Date(obraFase.obra.start),-1);
   while(CALENDARIO.isNaoUtil(fim))fim=G.addD(fim,-1);
