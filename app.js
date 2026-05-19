@@ -275,7 +275,7 @@ document.addEventListener("DOMContentLoaded",()=>{buildVizSidebar()}),document.a
       var xiC=Math.max(0,xi);
       var xwC=xw+Math.min(0,xi);
       var _poDiscIdx = _custom ? ESTADO.preObraCustom[obraFaseIdx].disciplinas.findIndex(function(d){return d===pd;}) : pi;
-      r.push('<div data-po-disc-open="1" data-po-fi="'+obraFaseIdx+'" data-po-di="'+_poDiscIdx+'" style="height:'+G.SUB_H+'px;background:#FEFCF5;display:flex;align-items:center;padding:0 5px 0 18px;border-bottom:1px solid #EEE4CC;border-right:2px solid #C0C8D4;font-size:12px;color:#3A4A5A;gap:5px;overflow:hidden;cursor:pointer;"><span style="width:5px;height:5px;border-radius:1px;background:'+dc+';flex-shrink:0;"></span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+(pd.label||pd.id)+'</span></div>');
+      r.push(`<div style="height:${G.SUB_H}px;background:#FEFCF5;display:flex;align-items:center;padding:0 5px 0 18px;border-bottom:1px solid #EEE4CC;border-right:2px solid #C0C8D4;font-size:12px;color:#3A4A5A;gap:5px;overflow:hidden;cursor:pointer;" onclick="_poOpenDiscModal(${obraFaseIdx},${_poDiscIdx})"><span style="width:5px;height:5px;border-radius:1px;background:${dc};flex-shrink:0;"></span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${pd.label||pd.id}</span></div>`);
       i.push('<div style="height:'+G.SUB_H+'px;background:#FEFCF5;position:relative;border-bottom:1px solid rgba(122,74,16,.12);overflow:hidden;">'+gGridLines(o,e,false)+(xwC>0?'<div style="position:absolute;top:5px;left:'+xiC+'px;height:'+(G.SUB_H-10)+'px;width:'+xwC+'px;background:'+dc+';border-radius:2px;opacity:.85;"></div>':''  )+'</div>');
     });
   }
@@ -315,7 +315,7 @@ gObraRow(t,o,e,r,i),t.expanded&&(t.disciplinas||[]).forEach((a,n)=>{a&&a.ativo&&
       var xiC=Math.max(0,xi);
       var xwC=xw+Math.min(0,xi);
       var _poDiscIdx = _custom ? ESTADO.preObraCustom[obraFaseIdx].disciplinas.findIndex(function(d){return d===pd;}) : pi;
-      r.push('<div data-po-disc-open="1" data-po-fi="'+obraFaseIdx+'" data-po-di="'+_poDiscIdx+'" style="height:'+G.SUB_H+'px;background:#FEFCF5;display:flex;align-items:center;padding:0 5px 0 18px;border-bottom:1px solid #EEE4CC;border-right:2px solid #C0C8D4;font-size:12px;color:#3A4A5A;gap:5px;overflow:hidden;cursor:pointer;"><span style="width:5px;height:5px;border-radius:1px;background:'+dc+';flex-shrink:0;"></span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+(pd.label||pd.id)+'</span></div>');
+      r.push(`<div style="height:${G.SUB_H}px;background:#FEFCF5;display:flex;align-items:center;padding:0 5px 0 18px;border-bottom:1px solid #EEE4CC;border-right:2px solid #C0C8D4;font-size:12px;color:#3A4A5A;gap:5px;overflow:hidden;cursor:pointer;" onclick="_poOpenDiscModal(${obraFaseIdx},${_poDiscIdx})"><span style="width:5px;height:5px;border-radius:1px;background:${dc};flex-shrink:0;"></span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${pd.label||pd.id}</span></div>`);
       i.push('<div style="height:'+G.SUB_H+'px;background:#FEFCF5;position:relative;border-bottom:1px solid rgba(122,74,16,.12);overflow:hidden;">'+gGridLines(o,e,false)+(xwC>0?'<div style="position:absolute;top:5px;left:'+xiC+'px;height:'+(G.SUB_H-10)+'px;width:'+xwC+'px;background:'+dc+';border-radius:2px;opacity:.85;"></div>':''  )+'</div>');
     });
   }
