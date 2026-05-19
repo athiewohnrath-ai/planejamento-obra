@@ -1110,42 +1110,43 @@ function _poRenderModal(faseIdx) {
   var discs = custom.disciplinas || [];
 
   var discsHtml = discs.map(function(disc, di) {
-        var nTasks = (disc.tasks||[]).length;
-    var tasksHtml = '<button onclick="_poAbrirTarefas('+faseIdx+','+di+')" style="height:26px;padding:0 12px;background:var(--bg-surface);border:1px solid var(--border);border-radius:5px;font-family:var(--font);font-size:10px;font-weight:700;color:var(--txt-muted);cursor:pointer;white-space:nowrap;">📋 Tarefas ('+nTasks+')</button>';
-
-    return '<div data-po-disc="'+di+'" style="border:1px solid var(--border);border-radius:8px;margin-bottom:10px;overflow:hidden;">'
-      + '<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--bg-surface2);border-bottom:1px solid var(--border);">'
-      + '<span data-drag-handle="1" style="cursor:grab;opacity:.35;font-size:13px;flex-shrink:0;padding:4px;margin:-4px;">⠿</span>'
+    return '<div style="display:flex;align-items:center;gap:8px;padding:10px 12px;border:1px solid var(--border);border-radius:8px;margin-bottom:8px;background:var(--bg-surface);">'
+      + '<div style="flex:1;min-width:0;">'
       + '<input type="text" value="'+disc.label.replace(/"/g,'&quot;')+'" '
       + 'onchange="ESTADO.preObraCustom['+faseIdx+'].disciplinas['+di+'].label=this.value;onCfgChange();" '
-      + 'style="flex:1;height:28px;padding:0 8px;border:0.5px solid var(--border);border-radius:4px;background:var(--bg-surface);color:var(--txt);font-size:12px;font-weight:700;">'
+      + 'style="width:100%;height:28px;padding:0 8px;border:0.5px solid var(--border);border-radius:4px;background:var(--bg-surface2);color:var(--txt);font-size:12px;font-weight:700;">'
+      + '<div style="font-size:10px;color:var(--txt-muted);margin-top:3px;">'+(disc.tasks||[]).length+' tarefas</div>'
+      + '</div>'
       + '<label style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--txt-muted);cursor:pointer;flex-shrink:0;">'
       + '<input type="checkbox" '+(disc.ativo!==false?'checked':'')+' '
       + 'onchange="ESTADO.preObraCustom['+faseIdx+'].disciplinas['+di+'].ativo=this.checked;onCfgChange();gRender();" '
-      + 'style="accent-color:var(--accent);"> Ativa</label>'
+      + 'style="accent-color:var(--accent);">Ativa</label>'
+      + '<button onclick="_poMoverDisc('+faseIdx+','+di+',-1)" title="Mover para cima" '
+      + 'style="width:28px;height:28px;background:var(--bg-surface2);border:1px solid var(--border);border-radius:4px;cursor:pointer;font-size:13px;">↑</button>'
+      + '<button onclick="_poMoverDisc('+faseIdx+','+di+',1)" title="Mover para baixo" '
+      + 'style="width:28px;height:28px;background:var(--bg-surface2);border:1px solid var(--border);border-radius:4px;cursor:pointer;font-size:13px;">↓</button>'
+      + '<button onclick="_poAbrirTarefas('+faseIdx+','+di+')" '
+      + 'style="height:28px;padding:0 10px;background:var(--bg-surface2);border:1px solid var(--border);border-radius:4px;font-family:var(--font);font-size:10px;font-weight:700;color:var(--txt-muted);cursor:pointer;white-space:nowrap;">📋 Tarefas</button>'
       + '<button onclick="_poRemoverDisc('+faseIdx+','+di+')" '
-      + 'style="height:26px;padding:0 8px;background:rgba(180,20,20,.08);border:1px solid rgba(180,20,20,.2);border-radius:4px;font-size:10px;color:#B41414;cursor:pointer;flex-shrink:0;">✕ Disc.</button>'
-      + '</div>'
-      + '<div style="padding:8px 10px;">' + tasksHtml
-      + '<button onclick="_poAdicionarTarefa('+faseIdx+','+di+')" '
-      + 'style="font-size:10px;color:var(--accent);background:none;border:none;cursor:pointer;font-family:var(--font);font-weight:700;">+ Tarefa</button>'
-      + '</div></div>';
+      + 'style="width:28px;height:28px;background:rgba(180,20,20,.08);border:1px solid rgba(180,20,20,.2);border-radius:4px;font-size:11px;color:#B41414;cursor:pointer;">✕</button>'
+      + '</div>';
   }).join('');
 
-  ov.innerHTML = '<div style="background:var(--bg-panel);border-radius:12px;box-shadow:0 24px 64px rgba(0,0,0,.45);width:100%;max-width:660px;max-height:88vh;display:flex;flex-direction:column;overflow:hidden;">'
+  ov.innerHTML = '<div style="background:var(--bg-panel);border-radius:12px;box-shadow:0 24px 64px rgba(0,0,0,.45);width:100%;max-width:600px;max-height:88vh;display:flex;flex-direction:column;overflow:hidden;">'
     + '<div style="display:flex;align-items:center;gap:10px;padding:14px 20px;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--bg-surface2);">'
     + '<div style="width:6px;height:6px;border-radius:2px;background:#C07820;flex-shrink:0;"></div>'
     + '<div style="flex:1;">'
     + '<div style="font-family:var(--font);font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--txt);">Pré-Obra · Fase '+(faseIdx+1)+'</div>'
     + '<div style="font-size:10px;color:var(--txt-muted);margin-top:1px;">Edição específica deste cronograma — não altera o template</div>'
     + '</div>'
-    + '<label style="display:flex;align-items:center;gap:6px;font-size:10px;color:var(--txt-muted);flex-shrink:0;">Duração (DU)'
+    + '<label style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--txt-muted);flex-shrink:0;white-space:nowrap;">Duração (DU)'
     + '<input type="number" min="1" max="30" value="'+custom.du+'" '
     + 'onchange="ESTADO.preObraCustom['+faseIdx+'].du=parseInt(this.value)||5;ESTADO.cfg.obraFases['+faseIdx+'].preObra.du=parseInt(this.value)||5;onCfgChange();gRender();" '
     + 'style="width:52px;height:28px;padding:0 6px;border:1px solid var(--border);border-radius:5px;background:var(--bg-surface);color:var(--txt);font-family:var(--font);font-size:12px;font-weight:700;text-align:center;"></label>'
     + '<button onclick="fecharModalPreObra()" style="width:30px;height:30px;background:var(--bg-surface);border:1px solid var(--border);border-radius:5px;cursor:pointer;font-size:14px;color:var(--txt-muted);">✕</button>'
     + '</div>'
-    + '<div style="flex:1;overflow-y:auto;padding:16px 20px;">' + discsHtml
+    + '<div style="flex:1;overflow-y:auto;padding:16px 20px;">'
+    + discsHtml
     + '<button onclick="_poAdicionarDisc('+faseIdx+')" '
     + 'style="width:100%;height:32px;background:var(--bg-surface2);border:1px dashed var(--border);border-radius:6px;font-family:var(--font);font-size:10px;font-weight:700;color:var(--txt-muted);cursor:pointer;">+ Adicionar Disciplina</button>'
     + '</div>'
@@ -1167,6 +1168,16 @@ function _poAdicionarDisc(faseIdx) {
   if(ov){var body=ov.querySelector('div[style*="overflow-y:auto"]');if(body)body.scrollTop=body.scrollHeight;}
 }
 window._poAdicionarDisc = _poAdicionarDisc;
+
+function _poMoverDisc(faseIdx, di, dir) {
+  var discs = ESTADO.preObraCustom[faseIdx].disciplinas;
+  var newIdx = di + dir;
+  if (newIdx < 0 || newIdx >= discs.length) return;
+  var moved = discs.splice(di, 1)[0];
+  discs.splice(newIdx, 0, moved);
+  onCfgChange(); gRender(); _poRenderModal(faseIdx);
+}
+window._poMoverDisc = _poMoverDisc;
 
 function _poRemoverDisc(faseIdx, di) {
   ESTADO.preObraCustom[faseIdx].disciplinas.splice(di,1);
