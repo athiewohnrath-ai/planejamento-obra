@@ -1142,8 +1142,8 @@ function _poRenderModal(faseIdx) {
       + '</div>'
       + tasksHtml
       + '<div style="padding:6px 10px;">'
-      + '<button onclick="_poAdicionarTarefa('+faseIdx+','+di+')" '
-      + 'style="font-size:10px;color:var(--accent);background:none;border:none;cursor:pointer;font-family:var(--font);font-weight:700;">+ Tarefa</button>'
+      + '<button onclick="_poOpenDiscModal('+faseIdx+','+di+')" '
+      + 'style="font-size:10px;color:var(--accent);background:none;border:none;cursor:pointer;font-family:var(--font);font-weight:700;">✏ Editar tarefas</button>'
       + '</div>'
       + '</div>';
   }).join('');
@@ -1352,6 +1352,117 @@ function _poRemoverTarefaModal(faseIdx, di, ti) {
   if (window._poRenderTasks) window._poRenderTasks();
 }
 window._poRemoverTarefaModal = _poRemoverTarefaModal;
+
+// ── Modal de disciplina da Pré-Obra (padrão da obra) ──────
+
+function _poOpenDiscModal(faseIdx, di) {
+  var custom = ESTADO.preObraCustom && ESTADO.preObraCustom[faseIdx];
+  if (!custom) return;
+  var disc = custom.disciplinas[di];
+  if (!disc) return;
+
+  var existing = document.getElementById('modal-po-disc');
+  if (existing) existing.remove();
+
+  var _discCors = (function(){
+    var arr = typeof getDiscPal==='function' ? getDiscPal(di) : ['#C07820','#8B4513'];
+    return Array.isArray(arr) ? arr : [arr, arr];
+  })();
+
+  var ov = document.createElement('div');
+  ov.id = 'modal-po-disc';
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9700;display:flex;align-items:center;justify-content:center;padding:16px;';
+  document.body.appendChild(ov);
+
+  function render() {
+    var tasks = disc.tasks || [];
+    var rows = tasks.map(function(task, ti) {
+      return '<tr style="border-bottom:1px solid #E8E0D0;">'
+        + '<td style="width:28px;padding:4px;text-align:center;border-right:1px solid #E8E0D0;cursor:grab;color:#BBA070;">⠿</td>'
+        + '<td style="padding:4px 8px;border-right:1px solid #E8E0D0;">'
+        + '<input type="text" value="'+task.n.replace(/"/g,'&quot;')+'" '
+        + 'onchange="ESTADO.preObraCustom['+faseIdx+'].disciplinas['+di+'].tasks['+ti+'].n=this.value;onCfgChange();" '
+        + 'style="width:100%;height:28px;padding:0 6px;border:1px solid #E0D8C8;border-radius:4px;font-size:12px;background:#FFFDF8;color:#3A2800;">'
+        + '</td>'
+        + '<td style="width:70px;padding:4px;text-align:center;border-right:1px solid #E8E0D0;">'
+        + '<input type="number" min="1" max="50" value="'+(task.prof||2)+'" '
+        + 'onchange="ESTADO.preObraCustom['+faseIdx+'].disciplinas['+di+'].tasks['+ti+'].prof=parseInt(this.value)||1;onCfgChange();gRender();" '
+        + 'style="width:52px;height:28px;padding:0 6px;border:1px solid #E0D8C8;border-radius:4px;font-size:13px;text-align:center;background:#FFFDF8;color:#3A2800;">'
+        + '</td>'
+        + '<td style="width:60px;padding:4px;text-align:center;">'
+        + '<button onclick="_poMoverTarefa('+faseIdx+','+di+','+ti+',-1)" '
+        + 'style="width:24px;height:24px;background:#F2EDE4;border:1px solid #D8C8A8;border-radius:3px;cursor:pointer;font-size:12px;color:#7A5A30;">↑</button>'
+        + '<button onclick="_poMoverTarefa('+faseIdx+','+di+','+ti+',1)" '
+        + 'style="width:24px;height:24px;background:#F2EDE4;border:1px solid #D8C8A8;border-radius:3px;cursor:pointer;font-size:12px;color:#7A5A30;">↓</button>'
+        + '</td>'
+        + '<td style="width:32px;padding:4px;text-align:center;">'
+        + '<button onclick="_poRemoverTarefaDisc('+faseIdx+','+di+','+ti+')" '
+        + 'style="width:24px;height:24px;background:rgba(180,20,20,.08);border:1px solid rgba(180,20,20,.2);border-radius:3px;cursor:pointer;font-size:12px;color:#B41414;">✕</button>'
+        + '</td>'
+        + '</tr>';
+    }).join('');
+
+    ov.innerHTML = '<div style="background:#FFF8F0;border-radius:12px;box-shadow:0 8px 40px rgba(0,0,0,.3);width:100%;max-width:520px;max-height:85vh;display:flex;flex-direction:column;overflow:hidden;">'
+      + '<div style="height:5px;background:linear-gradient(to right,'+_discCors[0]+','+_discCors[1]+');border-radius:12px 12px 0 0;flex-shrink:0;"></div>'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 18px 10px;border-bottom:1px solid #EEE4C8;">'
+      + '<div>'
+      + '<div style="font-family:var(--font,sans-serif);font-size:15px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#3A2800;">'+disc.label+'</div>'
+      + '<div style="font-size:10px;color:#9A8A6A;margin-top:2px;">'+(tasks.length)+' atividade(s) configurada(s)</div>'
+      + '</div>'
+      + '<button onclick="document.getElementById(\'modal-po-disc\').remove();_poRenderModal('+faseIdx+');" '
+      + 'style="width:28px;height:28px;background:none;border:none;cursor:pointer;font-size:18px;color:#9A8A6A;">✕</button>'
+      + '</div>'
+      + '<div style="flex:1;overflow-y:auto;">'
+      + '<table style="width:100%;border-collapse:collapse;">'
+      + '<thead><tr style="background:#F2EDE4;">'
+      + '<th style="width:28px;padding:8px 4px;border-right:1px solid #E8E0D0;"></th>'
+      + '<th style="text-align:left;padding:8px 12px;font-family:var(--font,sans-serif);font-size:12px;font-weight:700;letter-spacing:.06em;color:#7A5A30;border-right:1px solid #E8E0D0;">Atividade</th>'
+      + '<th style="width:70px;padding:8px 4px;font-family:var(--font,sans-serif);font-size:11px;font-weight:700;color:#9A8A6A;border-right:1px solid #E8E0D0;text-align:center;">Efetivo</th>'
+      + '<th style="width:60px;padding:8px 4px;font-family:var(--font,sans-serif);font-size:11px;font-weight:700;color:#9A8A6A;border-right:1px solid #E8E0D0;text-align:center;">Ordem</th>'
+      + '<th style="width:32px;"></th>'
+      + '</tr></thead>'
+      + '<tbody>'+rows+'</tbody>'
+      + '</table>'
+      + '</div>'
+      + '<div style="padding:10px 16px;border-top:1px solid #EEE4C8;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">'
+      + '<button onclick="_poAdicionarTarefaDisc('+faseIdx+','+di+')" '
+      + 'style="height:30px;padding:0 14px;background:#F2EDE4;border:1px solid #D8C8A8;border-radius:5px;font-family:var(--font,sans-serif);font-size:10px;font-weight:700;color:#7A5A30;cursor:pointer;">+ Atividade</button>'
+      + '<button id="po-disc-save" onclick="document.getElementById(\'modal-po-disc\').remove();_poRenderModal('+faseIdx+');onCfgChange();gRender();" '
+      + 'style="height:30px;padding:0 20px;background:'+_discCors[1]+';border:none;border-radius:5px;font-family:var(--font,sans-serif);font-size:11px;font-weight:700;color:#fff;cursor:pointer;letter-spacing:.04em;">Salvar</button>'
+      + '</div>'
+      + '</div>';
+
+    window._poDiscRender = render;
+  }
+
+  render();
+}
+window._poOpenDiscModal = _poOpenDiscModal;
+
+function _poAdicionarTarefaDisc(faseIdx, di) {
+  ESTADO.preObraCustom[faseIdx].disciplinas[di].tasks.push({n:'Nova atividade', prof:2});
+  onCfgChange();
+  if (window._poDiscRender) window._poDiscRender();
+}
+window._poAdicionarTarefaDisc = _poAdicionarTarefaDisc;
+
+function _poRemoverTarefaDisc(faseIdx, di, ti) {
+  ESTADO.preObraCustom[faseIdx].disciplinas[di].tasks.splice(ti, 1);
+  onCfgChange();
+  if (window._poDiscRender) window._poDiscRender();
+}
+window._poRemoverTarefaDisc = _poRemoverTarefaDisc;
+
+function _poMoverTarefa(faseIdx, di, ti, dir) {
+  var tasks = ESTADO.preObraCustom[faseIdx].disciplinas[di].tasks;
+  var newIdx = ti + dir;
+  if (newIdx < 0 || newIdx >= tasks.length) return;
+  var moved = tasks.splice(ti, 1)[0];
+  tasks.splice(newIdx, 0, moved);
+  onCfgChange();
+  if (window._poDiscRender) window._poDiscRender();
+}
+window._poMoverTarefa = _poMoverTarefa;
 
 function abrirGerenciarTPO() {
   document.getElementById('modal-tpo-overlay')?.remove();
