@@ -1142,7 +1142,7 @@ function _poRenderModal(faseIdx) {
       + '</div>'
       + tasksHtml
       + '<div style="padding:6px 10px;">'
-      + '<button onclick="_poOpenDiscModal('+faseIdx+','+di+')" '
+      + '<button data-po-open-disc data-fi="'+faseIdx+'" data-di="'+di+'" '
       + 'style="font-size:10px;color:var(--accent);background:none;border:none;cursor:pointer;font-family:var(--font);font-weight:700;">✏ Editar tarefas</button>'
       + '</div>'
       + '</div>';
@@ -1172,6 +1172,13 @@ function _poRenderModal(faseIdx) {
     + '<button onclick="fecharModalPreObra()" style="height:32px;padding:0 16px;background:var(--bg-surface2);border:1px solid var(--border);border-radius:6px;font-family:var(--font);font-size:10px;font-weight:700;color:var(--txt-muted);cursor:pointer;">Cancelar</button>'
     + '<button onclick="_poSalvar('+faseIdx+')" style="height:32px;padding:0 20px;background:var(--accent);border:none;border-radius:6px;font-family:var(--font);font-size:10px;font-weight:700;color:#0D1117;cursor:pointer;">✓ Salvar</button>'
     + '</div></div></div>';
+
+  // Listener para abrir modal de disciplina
+  ov.querySelectorAll('[data-po-open-disc]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      _poOpenDiscModal(parseInt(btn.dataset.fi), parseInt(btn.dataset.di));
+    });
+  });
 }
 
 function _poAdicionarDisc(faseIdx) {
