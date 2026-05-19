@@ -1110,29 +1110,45 @@ function _poRenderModal(faseIdx) {
   var discs = custom.disciplinas || [];
 
   var discsHtml = discs.map(function(disc, di) {
-    return '<div style="display:flex;align-items:center;gap:8px;padding:10px 12px;border:1px solid var(--border);border-radius:8px;margin-bottom:8px;background:var(--bg-surface);">'
-      + '<div style="flex:1;min-width:0;">'
+    var tasksHtml = (disc.tasks||[]).map(function(task, ti) {
+      return '<div style="display:flex;align-items:center;gap:6px;padding:5px 8px 5px 32px;border-bottom:0.5px solid var(--border);">'
+        + '<input type="text" value="'+task.n.replace(/"/g,'&quot;')+'" '
+        + 'onchange="ESTADO.preObraCustom['+faseIdx+'].disciplinas['+di+'].tasks['+ti+'].n=this.value;onCfgChange();" '
+        + 'style="flex:1;height:26px;padding:0 6px;border:0.5px solid var(--border);border-radius:4px;background:var(--bg-surface2);color:var(--txt);font-size:11px;">'
+        + '<label style="font-size:10px;color:var(--txt-muted);white-space:nowrap;flex-shrink:0;">Efetivo</label>'
+        + '<input type="number" min="1" max="50" value="'+(task.prof||2)+'" '
+        + 'onchange="ESTADO.preObraCustom['+faseIdx+'].disciplinas['+di+'].tasks['+ti+'].prof=parseInt(this.value)||1;onCfgChange();gRender();" '
+        + 'style="width:44px;height:26px;padding:0 4px;border:0.5px solid var(--border);border-radius:4px;background:var(--bg-surface2);color:var(--txt);font-size:11px;text-align:center;">'
+        + '<button onclick="_poRemoverTarefa('+faseIdx+','+di+','+ti+')" '
+        + 'style="width:22px;height:22px;background:none;border:none;cursor:pointer;font-size:12px;color:var(--txt-dim);" title="Remover tarefa">✕</button>'
+        + '</div>';
+    }).join('');
+
+    return '<div style="border:1px solid var(--border);border-radius:8px;margin-bottom:10px;overflow:hidden;">'
+      + '<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg-surface2);border-bottom:1px solid var(--border);">'
       + '<input type="text" value="'+disc.label.replace(/"/g,'&quot;')+'" '
       + 'onchange="ESTADO.preObraCustom['+faseIdx+'].disciplinas['+di+'].label=this.value;onCfgChange();" '
-      + 'style="width:100%;height:28px;padding:0 8px;border:0.5px solid var(--border);border-radius:4px;background:var(--bg-surface2);color:var(--txt);font-size:12px;font-weight:700;">'
-      + '<div style="font-size:10px;color:var(--txt-muted);margin-top:3px;">'+(disc.tasks||[]).length+' tarefas</div>'
-      + '</div>'
+      + 'style="flex:1;height:28px;padding:0 8px;border:0.5px solid var(--border);border-radius:4px;background:var(--bg-surface);color:var(--txt);font-size:12px;font-weight:700;">'
       + '<label style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--txt-muted);cursor:pointer;flex-shrink:0;">'
       + '<input type="checkbox" '+(disc.ativo!==false?'checked':'')+' '
       + 'onchange="ESTADO.preObraCustom['+faseIdx+'].disciplinas['+di+'].ativo=this.checked;onCfgChange();gRender();" '
-      + 'style="accent-color:var(--accent);">Ativa</label>'
+      + 'style="accent-color:var(--accent);"> Ativa</label>'
       + '<button onclick="_poMoverDisc('+faseIdx+','+di+',-1)" title="Mover para cima" '
-      + 'style="width:28px;height:28px;background:var(--bg-surface2);border:1px solid var(--border);border-radius:4px;cursor:pointer;font-size:13px;">↑</button>'
+      + 'style="width:26px;height:26px;background:var(--bg-surface);border:1px solid var(--border);border-radius:4px;cursor:pointer;font-size:13px;">↑</button>'
       + '<button onclick="_poMoverDisc('+faseIdx+','+di+',1)" title="Mover para baixo" '
-      + 'style="width:28px;height:28px;background:var(--bg-surface2);border:1px solid var(--border);border-radius:4px;cursor:pointer;font-size:13px;">↓</button>'
-      + '<button onclick="_poAbrirTarefas('+faseIdx+','+di+')" '
-      + 'style="height:28px;padding:0 10px;background:var(--bg-surface2);border:1px solid var(--border);border-radius:4px;font-family:var(--font);font-size:10px;font-weight:700;color:var(--txt-muted);cursor:pointer;white-space:nowrap;">📋 Tarefas</button>'
+      + 'style="width:26px;height:26px;background:var(--bg-surface);border:1px solid var(--border);border-radius:4px;cursor:pointer;font-size:13px;">↓</button>'
       + '<button onclick="_poRemoverDisc('+faseIdx+','+di+')" '
-      + 'style="width:28px;height:28px;background:rgba(180,20,20,.08);border:1px solid rgba(180,20,20,.2);border-radius:4px;font-size:11px;color:#B41414;cursor:pointer;">✕</button>'
+      + 'style="height:26px;padding:0 8px;background:rgba(180,20,20,.08);border:1px solid rgba(180,20,20,.2);border-radius:4px;font-size:10px;color:#B41414;cursor:pointer;flex-shrink:0;">✕ Disc.</button>'
+      + '</div>'
+      + tasksHtml
+      + '<div style="padding:6px 10px;">'
+      + '<button onclick="_poAdicionarTarefa('+faseIdx+','+di+')" '
+      + 'style="font-size:10px;color:var(--accent);background:none;border:none;cursor:pointer;font-family:var(--font);font-weight:700;">+ Tarefa</button>'
+      + '</div>'
       + '</div>';
   }).join('');
 
-  ov.innerHTML = '<div style="background:var(--bg-panel);border-radius:12px;box-shadow:0 24px 64px rgba(0,0,0,.45);width:100%;max-width:600px;max-height:88vh;display:flex;flex-direction:column;overflow:hidden;">'
+  ov.innerHTML = '<div style="background:var(--bg-panel);border-radius:12px;box-shadow:0 24px 64px rgba(0,0,0,.45);width:100%;max-width:620px;max-height:88vh;display:flex;flex-direction:column;overflow:hidden;">'
     + '<div style="display:flex;align-items:center;gap:10px;padding:14px 20px;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--bg-surface2);">'
     + '<div style="width:6px;height:6px;border-radius:2px;background:#C07820;flex-shrink:0;"></div>'
     + '<div style="flex:1;">'
@@ -1156,8 +1172,6 @@ function _poRenderModal(faseIdx) {
     + '<button onclick="fecharModalPreObra()" style="height:32px;padding:0 16px;background:var(--bg-surface2);border:1px solid var(--border);border-radius:6px;font-family:var(--font);font-size:10px;font-weight:700;color:var(--txt-muted);cursor:pointer;">Cancelar</button>'
     + '<button onclick="_poSalvar('+faseIdx+')" style="height:32px;padding:0 20px;background:var(--accent);border:none;border-radius:6px;font-family:var(--font);font-size:10px;font-weight:700;color:#0D1117;cursor:pointer;">✓ Salvar</button>'
     + '</div></div></div>';
-
-  _poInitDragDisc(faseIdx);
 }
 
 function _poAdicionarDisc(faseIdx) {
@@ -1169,6 +1183,18 @@ function _poAdicionarDisc(faseIdx) {
 }
 window._poAdicionarDisc = _poAdicionarDisc;
 
+
+function _poAdicionarTarefa(faseIdx, di) {
+  ESTADO.preObraCustom[faseIdx].disciplinas[di].tasks.push({n:'Nova tarefa',prof:2});
+  onCfgChange(); _poRenderModal(faseIdx);
+}
+window._poAdicionarTarefa = _poAdicionarTarefa;
+
+function _poRemoverTarefa(faseIdx, di, ti) {
+  ESTADO.preObraCustom[faseIdx].disciplinas[di].tasks.splice(ti,1);
+  onCfgChange(); gRender(); _poRenderModal(faseIdx);
+}
+window._poRemoverTarefa = _poRemoverTarefa;
 function _poMoverDisc(faseIdx, di, dir) {
   var discs = ESTADO.preObraCustom[faseIdx].disciplinas;
   var newIdx = di + dir;
