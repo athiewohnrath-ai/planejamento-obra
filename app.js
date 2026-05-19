@@ -1500,12 +1500,12 @@ function _poShowPop(faseIdx, rect) {
     // Início (somente leitura — calculado)
     + '<label style="display:flex;align-items:center;gap:8px;margin-bottom:9px;">'
     + '<span style="width:38px;font-size:9px;font-weight:700;text-transform:uppercase;color:#8A95A8;">Início</span>'
-    + '<input type="date" value="'+G.fmtISO(ini)+'" disabled style="flex:1;border:1px solid #E8E0D4;border-radius:4px;padding:5px 8px;font-size:12px;font-family:inherit;background:#F8F4EE;color:#A09080;">'
+    + '<input id="po-pop-ini" type="date" value="'+G.fmtISO(ini)+'" disabled style="flex:1;border:1px solid #E8E0D4;border-radius:4px;padding:5px 8px;font-size:12px;font-family:inherit;background:#F8F4EE;color:#A09080;">'
     + '</label>'
     // Fim (somente leitura — travado no início da obra)
     + '<label style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">'
     + '<span style="width:38px;font-size:9px;font-weight:700;text-transform:uppercase;color:#8A95A8;">Fim</span>'
-    + '<input type="date" value="'+G.fmtISO(fim)+'" disabled style="flex:1;border:1px solid #E8E0D4;border-radius:4px;padding:5px 8px;font-size:12px;font-family:inherit;background:#F8F4EE;color:#A09080;">'
+    + '<input id="po-pop-fim" type="date" value="'+G.fmtISO(fim)+'" disabled style="flex:1;border:1px solid #E8E0D4;border-radius:4px;padding:5px 8px;font-size:12px;font-family:inherit;background:#F8F4EE;color:#A09080;">'
     + '</label>'
     // Vínculo FI
     + '<div style="display:flex;align-items:center;gap:6px;margin-bottom:14px;padding:6px 8px;background:#F0F8FF;border:1px solid #C0D8F0;border-radius:5px;font-size:10px;color:#2A6090;">'
@@ -1538,11 +1538,17 @@ function _poShowPop(faseIdx, rect) {
   o.style.left = left + 'px';
 
   // Fechar ao clicar fora
+  document.removeEventListener('click', _poPopOutsideHandler);
+  window._poPopOutsideHandler = function(ev) {
+    var pop = document.getElementById('g-pop-el');
+    if (!pop || !pop.contains(ev.target)) {
+      gClosePop();
+      document.removeEventListener('click', _poPopOutsideHandler);
+    }
+  };
   setTimeout(function() {
-    document.addEventListener('click', function _close(e) {
-      if (!o.contains(e.target)) { gClosePop(); document.removeEventListener('click', _close); }
-    });
-  }, 100);
+    document.addEventListener('click', _poPopOutsideHandler);
+  }, 150);
 }
 window._poShowPop = _poShowPop;
 
@@ -1553,7 +1559,20 @@ function _poPopAdjust(faseIdx, delta) {
   var newDu = Math.max(1, du + delta);
   if (poCfg) poCfg.du = newDu;
   if (_custom) _custom.du = newDu;
-  // Atualizar display
+  // Recalcular datas
+  var obraFase = gSt.obraFases[faseIdx];
+  if (obraFase) {
+    var fim = G.addD(new Date(obraFase.obra.start), -1);
+    while (CALENDARIO.isNaoUtil(fim)) fim = G.addD(fim, -1);
+    var ini = new Date(fim), cnt = 1;
+    while (cnt < newDu) { ini = G.addD(ini, -1); if (!CALENDARIO.isNaoUtil(ini)) cnt++; }
+    while (CALENDARIO.isNaoUtil(ini)) ini = G.addD(ini, 1);
+    var elIni = document.getElementById('po-pop-ini');
+    var elFim = document.getElementById('po-pop-fim');
+    if (elIni) elIni.value = G.fmtISO(ini);
+    if (elFim) elFim.value = G.fmtISO(fim);
+  }
+  // Atualizar display DU
   var el = document.getElementById('po-pop-du');
   if (el) el.innerHTML = newDu + '<span style="font-size:11px;font-weight:400;color:#8A95A8;">dias úteis</span>';
   onCfgChange(); gRender();
@@ -1561,7 +1580,10 @@ function _poPopAdjust(faseIdx, delta) {
 window._poPopAdjust = _poPopAdjust;
 
 function _poPopAplicar(faseIdx) {
-  onCfgChange(); salvarDados(); gClosePop();
+  onCfgChange(); salvarDados();
+  gClosePop();
+  // Remover listener de fechar ao clicar fora para não bloquear próximo clique
+  document.removeEventListener('click', _poPopOutsideHandler);
 }
 window._poPopAplicar = _poPopAplicar;
 
