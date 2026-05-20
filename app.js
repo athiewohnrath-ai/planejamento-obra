@@ -1623,6 +1623,20 @@ function gSetGanttFontSize(val) {
   document.documentElement.style.setProperty('--gantt-fs', val);
   if (!ESTADO.cfg) ESTADO.cfg = {};
   ESTADO.cfg.ganttFontSize = val;
+  // Injetar CSS dinâmico para sobrescrever os font-sizes do Gantt
+  var styleId = 'gantt-fs-style';
+  var el = document.getElementById(styleId) || document.createElement('style');
+  el.id = styleId;
+  var fs9 = Math.max(7, val-1) + 'px';
+  var fs10 = val + 'px';
+  var fs12 = Math.min(16, val+2) + 'px';
+  el.textContent = [
+    '#g-lbl-col div { font-size: ' + fs10 + ' !important; }',
+    '#g-lbl-col div span { font-size: ' + fs9 + ' !important; }',
+    '#g-tl-inner div { font-size: ' + fs10 + ' !important; }',
+    '#gantt-root .bar { font-size: ' + fs9 + ' !important; }'
+  ].join('\n');
+  if (!el.parentNode) document.head.appendChild(el);
   onCfgChange(); salvarDados(); gRender();
 }
 window.gSetGanttFontSize = gSetGanttFontSize;
@@ -1653,7 +1667,7 @@ function gAplicarFontes() {
   if (!ESTADO.cfg) return;
   if (ESTADO.cfg.fonteTitulo) gSetFontetitulo(ESTADO.cfg.fonteTitulo);
   if (ESTADO.cfg.fonteTexto) gSetFonteTexto(ESTADO.cfg.fonteTexto);
-  if (ESTADO.cfg.ganttFontSize) document.documentElement.style.setProperty('--gantt-fs', ESTADO.cfg.ganttFontSize);
+  if (ESTADO.cfg.ganttFontSize) gSetGanttFontSize(ESTADO.cfg.ganttFontSize);
 }
 window.gAplicarFontes = gAplicarFontes;
 
