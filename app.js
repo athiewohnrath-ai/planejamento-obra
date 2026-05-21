@@ -1,4 +1,4 @@
-// Planejamento de Obra A|W — v5.10.09
+// Planejamento de Obra A|W — v5.10.10
 const SB_URL='https://ejneanfveoctdlltjnrs.supabase.co';
 const SB_KEY='sb_publishable_vZApDmF_C-heCrm8fXJ_XA_ATmMO3YP';
 const SB_HDR={'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
@@ -1664,6 +1664,7 @@ function gAplicarTypo() {
       'font-size:' + t.fs + 'px !important;' +
       'font-weight:' + t.fw + ' !important;' +
       'font-family:' + t.ff + ' !important;' +
+      (cls==='gn1'?'text-transform:none !important;letter-spacing:normal !important;':'') +
       '}'
     );
   });
