@@ -1,4 +1,4 @@
-// Planejamento de Obra A|W — v5.12
+// Planejamento de Obra A|W — v5.12.01
 const SB_URL='https://ejneanfveoctdlltjnrs.supabase.co';
 const SB_KEY='sb_publishable_vZApDmF_C-heCrm8fXJ_XA_ATmMO3YP';
 const SB_HDR={'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
@@ -888,6 +888,187 @@ function ouBtnAcao() {
   }
 }
 window.ouBtnAcao = ouBtnAcao;
+
+function pfSwitchTab(tab) {
+  var btnArq = document.getElementById('pf-btn-arq');
+  var btnTec = document.getElementById('pf-btn-tec');
+  var bodyArq = document.getElementById('pf-body');
+  var bodyTec = document.getElementById('pf-body-tec');
+  var ACTIVE = 'color:var(--accent);border-bottom:2px solid var(--accent);margin-bottom:-2px;';
+  var INACTIVE = 'color:rgba(255,255,255,.3);border-bottom:2px solid transparent;margin-bottom:-2px;';
+  if (tab === 'arq') {
+    if (btnArq) btnArq.setAttribute('style', btnArq.getAttribute('style').replace(/color:[^;]+;border-bottom:[^;]+;/, ACTIVE));
+    if (btnTec) btnTec.setAttribute('style', btnTec.getAttribute('style').replace(/color:[^;]+;border-bottom:[^;]+;/, INACTIVE));
+    if (bodyArq) bodyArq.style.display = 'block';
+    if (bodyTec) bodyTec.style.display = 'none';
+  } else {
+    if (btnTec) btnTec.setAttribute('style', btnTec.getAttribute('style').replace(/color:[^;]+;border-bottom:[^;]+;/, ACTIVE));
+    if (btnArq) btnArq.setAttribute('style', btnArq.getAttribute('style').replace(/color:[^;]+;border-bottom:[^;]+;/, INACTIVE));
+    if (bodyArq) bodyArq.style.display = 'none';
+    if (bodyTec) bodyTec.style.display = 'block';
+    pfRenderTec();
+  }
+}
+window.pfSwitchTab = pfSwitchTab;
+function pfRenderTec() {
+  var el = document.getElementById('pf-body-tec');
+  if (!el) return;
+  tecFornInit();
+  var forns = tecFornGetAll();
+  var fase = gSt.obraFases[0];
+  var tecSubs = fase && fase.rows && fase.rows.tec && fase.rows.tec.subs;
+
+  el.innerHTML = '';
+
+  // Título
+  var hdr = document.createElement('div');
+  hdr.style.cssText = 'font-family:var(--font);font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--txt-muted);margin-bottom:16px;';
+  hdr.textContent = 'Fornecedores de Projetos Técnicos';
+  el.appendChild(hdr);
+
+  // Tabela de fornecedores
+  var tbl = document.createElement('table');
+  tbl.style.cssText = 'width:100%;border-collapse:collapse;font-size:11px;margin-bottom:20px;';
+
+  var thead = document.createElement('thead');
+  var theadCols = ['Cód.','Disciplina','Fornecedor','Kickoff','EP','AP','EX',''];
+  var trHead = document.createElement('tr');
+  trHead.style.background = 'var(--bg-surface2)';
+  theadCols.forEach(function(col, ci) {
+    var th = document.createElement('th');
+    th.style.cssText = 'padding:8px 10px;text-align:' + (ci >= 3 && ci <= 6 ? 'center' : 'left') + ';font-size:9px;font-weight:700;text-transform:uppercase;color:var(--txt-muted);border-bottom:2px solid var(--border);';
+    th.textContent = col;
+    trHead.appendChild(th);
+  });
+  thead.appendChild(trHead);
+  tbl.appendChild(thead);
+
+  var tbody = document.createElement('tbody');
+  if (forns.length === 0) {
+    var emptyTr = document.createElement('tr');
+    var emptyTd = document.createElement('td');
+    emptyTd.colSpan = 8;
+    emptyTd.style.cssText = 'padding:20px;text-align:center;color:var(--txt-muted);font-size:12px;';
+    emptyTd.textContent = 'Nenhum fornecedor cadastrado.';
+    emptyTr.appendChild(emptyTd);
+    tbody.appendChild(emptyTr);
+  } else {
+    var tecIds = ['koTec','epTec','apTec','exTec'];
+    forns.forEach(function(f) {
+      var disc = DISCIPLINAS_TEC.find(function(d){ return d.id === f.disciplinaId; });
+      var tr = document.createElement('tr');
+      tr.style.borderBottom = '1px solid var(--border)';
+
+      // Cód
+      var td0 = document.createElement('td');
+      td0.style.cssText = 'padding:8px 10px;font-size:10px;font-weight:700;color:var(--txt-muted);white-space:nowrap;';
+      td0.textContent = f.disciplinaId;
+      tr.appendChild(td0);
+
+      // Disciplina
+      var td1 = document.createElement('td');
+      td1.style.cssText = 'padding:8px 10px;color:var(--txt);max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
+      td1.textContent = disc ? disc.label : f.disciplinaId;
+      tr.appendChild(td1);
+
+      // Nome (editável)
+      var td2 = document.createElement('td');
+      td2.style.cssText = 'padding:8px 10px;';
+      var inp = document.createElement('input');
+      inp.type = 'text';
+      inp.value = f.nome;
+      inp.style.cssText = 'width:160px;border:1px solid var(--border);border-radius:4px;padding:4px 8px;font-size:11px;background:var(--bg-surface2);color:var(--txt);font-family:var(--body);';
+      inp.addEventListener('change', (function(fid){ return function(){ tecFornRenomear(fid, this.value); }; })(f.id));
+      td2.appendChild(inp);
+      tr.appendChild(td2);
+
+      // 4 datas
+      tecIds.forEach(function(tecId) {
+        var sub = tecSubs && tecSubs[tecId];
+        var ovr = f.rowOverrides && f.rowOverrides[tecId];
+        var start = ovr ? ovr.start : (sub ? sub.start : null);
+        var du = sub ? G.diff(sub.start, sub.end) + 1 : '—';
+        var tdD = document.createElement('td');
+        tdD.style.cssText = 'padding:8px 6px;text-align:center;font-size:10px;color:var(--txt-muted);';
+        tdD.innerHTML = start
+          ? G.fmtBR(new Date(start)) + '<br><span style="font-size:9px;">' + du + ' DU</span>'
+          : '—';
+        tr.appendChild(tdD);
+      });
+
+      // Remover
+      var tdX = document.createElement('td');
+      tdX.style.cssText = 'padding:8px 6px;text-align:center;';
+      var btnX = document.createElement('button');
+      btnX.style.cssText = 'background:none;border:none;cursor:pointer;color:#E57373;font-size:14px;';
+      btnX.title = 'Remover';
+      btnX.textContent = '✕';
+      btnX.addEventListener('click', (function(fid){ return function(){ tecFornRemove(fid); pfRenderTec(); }; })(f.id));
+      tdX.appendChild(btnX);
+      tr.appendChild(tdX);
+      tbody.appendChild(tr);
+    });
+  }
+  tbl.appendChild(tbody);
+  el.appendChild(tbl);
+
+  // Formulário adicionar
+  var formDiv = document.createElement('div');
+  formDiv.style.cssText = 'border:1px solid var(--border);border-radius:8px;padding:14px;background:var(--bg-surface);';
+
+  var formTitle = document.createElement('div');
+  formTitle.style.cssText = 'font-size:10px;font-weight:700;color:var(--txt);margin-bottom:10px;';
+  formTitle.textContent = 'Adicionar fornecedor';
+  formDiv.appendChild(formTitle);
+
+  var grid = document.createElement('div');
+  grid.style.cssText = 'display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:end;';
+
+  // Select disciplina
+  var selDiv = document.createElement('div');
+  var selLbl = document.createElement('label');
+  selLbl.style.cssText = 'font-size:9px;color:var(--txt-muted);display:block;margin-bottom:4px;font-weight:600;text-transform:uppercase;';
+  selLbl.textContent = 'Disciplina';
+  var sel = document.createElement('select');
+  sel.id = 'pf-tec-add-disc';
+  sel.style.cssText = 'width:100%;height:32px;border:1px solid var(--border);border-radius:4px;background:var(--bg-surface2);color:var(--txt);font-size:11px;padding:0 8px;';
+  DISCIPLINAS_TEC.forEach(function(d) {
+    var opt = document.createElement('option');
+    opt.value = d.id;
+    opt.textContent = d.id + ' — ' + d.label;
+    sel.appendChild(opt);
+  });
+  selDiv.appendChild(selLbl); selDiv.appendChild(sel);
+  grid.appendChild(selDiv);
+
+  // Input nome
+  var nomeDiv = document.createElement('div');
+  var nomeLbl = document.createElement('label');
+  nomeLbl.style.cssText = 'font-size:9px;color:var(--txt-muted);display:block;margin-bottom:4px;font-weight:600;text-transform:uppercase;';
+  nomeLbl.textContent = 'Nome do fornecedor';
+  var nomeInp = document.createElement('input');
+  nomeInp.type = 'text';
+  nomeInp.id = 'pf-tec-add-nome';
+  nomeInp.placeholder = 'Ex: Empresa XYZ Engenharia';
+  nomeInp.style.cssText = 'width:100%;height:32px;border:1px solid var(--border);border-radius:4px;background:var(--bg-surface2);color:var(--txt);font-size:11px;padding:0 8px;box-sizing:border-box;font-family:var(--body);';
+  nomeDiv.appendChild(nomeLbl); nomeDiv.appendChild(nomeInp);
+  grid.appendChild(nomeDiv);
+
+  // Botão adicionar
+  var addBtn = document.createElement('button');
+  addBtn.style.cssText = 'height:32px;padding:0 16px;background:var(--accent,#00AEDF);color:#fff;border:none;border-radius:4px;font-family:var(--font);font-size:10px;font-weight:700;cursor:pointer;white-space:nowrap;';
+  addBtn.textContent = '+ Adicionar';
+  addBtn.addEventListener('click', function() {
+    var d = document.getElementById('pf-tec-add-disc').value;
+    var n = document.getElementById('pf-tec-add-nome').value.trim();
+    if (n) { tecFornAdd(d, n); pfRenderTec(); }
+  });
+  grid.appendChild(addBtn);
+  formDiv.appendChild(grid);
+  el.appendChild(formDiv);
+}
+window.pfRenderTec = pfRenderTec;
+window.pfRenderTec = pfRenderTec;
 
 function fecharObraUnificada() {
   document.getElementById('modal-ou-overlay').style.display = 'none';
