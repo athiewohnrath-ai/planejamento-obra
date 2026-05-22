@@ -1,4 +1,4 @@
-// Planejamento de Obra A|W — v5.11.09
+// Planejamento de Obra A|W — v5.11.10
 const SB_URL='https://ejneanfveoctdlltjnrs.supabase.co';
 const SB_KEY='sb_publishable_vZApDmF_C-heCrm8fXJ_XA_ATmMO3YP';
 const SB_HDR={'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
@@ -263,7 +263,7 @@ document.addEventListener("DOMContentLoaded",()=>{buildVizSidebar()}),document.a
   var lbl=tpl?tpl.label.substring(0,12):'';
   var payload=encodeURIComponent(JSON.stringify({type:'preObra',faseIdx:obraFaseIdx}));
     // Sidebar header
-  r.push('<div style="height:'+(G.ROW_H+8)+'px;background:'+cb+';display:flex;align-items:center;padding:0 5px 0 8px;border-bottom:1px solid #EEE0C8;border-right:2px solid #C0C8D4;font-size:10px;font-weight:700;color:#6A3810;text-transform:uppercase;letter-spacing:.04em;gap:3px;"><span style="width:5px;height:5px;border-radius:1px;background:'+cm+';flex-shrink:0;"></span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Pré-Obra'+(gSt.obraFases.length>1?' F'+(obraFaseIdx+1):'')+' '+du+' DU</span></div>');
+  r.push('<div style="height:'+(G.ROW_H+8)+'px;background:'+cb+';display:flex;align-items:center;padding:0 5px 0 8px;border-bottom:1px solid #EEE0C8;border-right:2px solid #C0C8D4;font-size:10px;font-weight:700;color:#6A3810;text-transform:uppercase;letter-spacing:.04em;gap:3px;"><span style="width:5px;height:5px;border-radius:1px;background:'+cm+';flex-shrink:0;"></span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Pré-Obra'+(gSt.obraFases.length>1?' F'+(obraFaseIdx+1):'')+' '+du+' DU</span><button onclick="abrirModalPreObra('+obraFaseIdx+')" title="Editar pré-obra" style="background:none;border:1px solid '+cm+';border-radius:3px;cursor:pointer;font-size:11px;padding:0 5px;color:'+cm+';flex-shrink:0;height:20px;">✎</button></div>');
   // Gantt: barra principal
   i.push('<div style="height:'+(G.ROW_H+8)+'px;background:'+cb+';position:relative;border-bottom:1px solid #EEE0C8;overflow:visible;">'+gGridLines(o,e,false)+gBar(xi,xw,G.ROW_H,cm,ini,fim,null,payload,true)+'</div>');
   // Disciplinas
