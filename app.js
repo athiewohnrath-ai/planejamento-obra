@@ -1,4 +1,4 @@
-// Planejamento de Obra A|W — v5.12.02
+// Planejamento de Obra A|W — v5.12.03
 const SB_URL='https://ejneanfveoctdlltjnrs.supabase.co';
 const SB_KEY='sb_publishable_vZApDmF_C-heCrm8fXJ_XA_ATmMO3YP';
 const SB_HDR={'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
@@ -888,6 +888,139 @@ function ouBtnAcao() {
   }
 }
 window.ouBtnAcao = ouBtnAcao;
+
+// ── Disciplinas e Fornecedores Técnicos ─────────────────────────────────────
+
+const DISCIPLINAS_TEC = [
+  {id:'09.001', label:'Projeto Técnico de Acessibilidade'},
+  {id:'09.006', label:'Projeto Técnico de Automação'},
+  {id:'09.007', label:'Projeto Técnico de Cabeamento de Dados e Voz / Telecomunicações'},
+  {id:'09.030', label:'Projeto Técnico de Instalação Elétrica / SPDA'},
+  {id:'09.031', label:'Projeto Técnico de Instalação Hidrossanitária e Gás'},
+  {id:'09.033', label:'Projeto Luminotécnico'},
+  {id:'09.039', label:'Projeto Técnico de Rede de Sprinklers e Hidrantes'},
+  {id:'09.041', label:'Projeto Técnico de Sistema de Ar Condicionado, Ventilação e Exaustão'},
+  {id:'09.042', label:'Projeto Técnico de Sistema de Áudio e Vídeo'},
+  {id:'09.043', label:'Projeto Técnico de Sistema de Detecção e Alarme de Incêndio'},
+  {id:'09.046', label:'Projeto Técnico de Sistema de Segurança Patrimonial (CFTV, Controle de Acesso, Alarme)'},
+  {id:'09.078', label:'Consultoria Técnica para Regularização no Corpo de Bombeiros'},
+];
+
+const FORNECEDORES_TEC_PADRAO = [
+  {id:'forn_09030_01', disciplinaId:'09.030', nome:'Tecplan Engenharia Elétrica'},
+  {id:'forn_09031_01', disciplinaId:'09.031', nome:'HidroTec Projetos'},
+  {id:'forn_09039_01', disciplinaId:'09.039', nome:'FireSafe Consultoria'},
+  {id:'forn_09041_01', disciplinaId:'09.041', nome:'ClimaPro Sistemas'},
+  {id:'forn_09043_01', disciplinaId:'09.043', nome:'Detecta Segurança'},
+];
+
+function tecFornInit() {
+  // Inicializa fornecedores técnicos no ESTADO com os padrões se ainda não existir
+  if (!ESTADO.cfg.tecFornecedores) {
+    ESTADO.cfg.tecFornecedores = FORNECEDORES_TEC_PADRAO.map(f => ({...f, rowOverrides: {}}));
+  }
+}
+window.tecFornInit = tecFornInit;
+
+function tecFornGetAll() {
+  tecFornInit();
+  return ESTADO.cfg.tecFornecedores || [];
+}
+window.tecFornGetAll = tecFornGetAll;
+
+function tecFornGetDisciLabel(id) {
+  var d = DISCIPLINAS_TEC.find(function(d){ return d.id === id; });
+  return d ? d.label : id;
+}
+window.tecFornGetDisciLabel = tecFornGetDisciLabel;
+
+function tecFornAdd(disciplinaId, nome) {
+  tecFornInit();
+  var id = 'forn_' + disciplinaId.replace('.','') + '_' + Date.now();
+  ESTADO.cfg.tecFornecedores.push({id: id, disciplinaId: disciplinaId, nome: nome, rowOverrides: {}});
+  onCfgChange(); salvarDados(); gRender(); tecFornRenderModal();
+}
+window.tecFornAdd = tecFornAdd;
+
+function tecFornRemove(id) {
+  tecFornInit();
+  ESTADO.cfg.tecFornecedores = ESTADO.cfg.tecFornecedores.filter(function(f){ return f.id !== id; });
+  onCfgChange(); salvarDados(); gRender(); tecFornRenderModal();
+}
+window.tecFornRemove = tecFornRemove;
+
+function tecFornRenderModal() {
+  var el = document.getElementById('ou-tec-content');
+  if (!el) return;
+  var forns = tecFornGetAll();
+  
+  // Agrupar por disciplina
+  var byDisc = {};
+  forns.forEach(function(f) {
+    if (!byDisc[f.disciplinaId]) byDisc[f.disciplinaId] = [];
+    byDisc[f.disciplinaId].push(f);
+  });
+
+  var html = '<div style="font-family:var(--font);font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--txt-muted);margin-bottom:14px;">Fornecedores alocados neste projeto</div>';
+  
+  // Lista de fornecedores por disciplina
+  if (forns.length === 0) {
+    html += '<div style="padding:20px;text-align:center;color:var(--txt-muted);font-size:12px;">Nenhum fornecedor cadastrado. Adicione abaixo.</div>';
+  } else {
+    html += '<table style="width:100%;border-collapse:collapse;font-size:11px;margin-bottom:20px;">';
+    html += '<thead><tr style="background:var(--bg-surface2);">'
+      + '<th style="padding:8px 10px;text-align:left;font-size:9px;font-weight:700;text-transform:uppercase;color:var(--txt-muted);border-bottom:2px solid var(--border);">Cód.</th>'
+      + '<th style="padding:8px 10px;text-align:left;font-size:9px;font-weight:700;text-transform:uppercase;color:var(--txt-muted);border-bottom:2px solid var(--border);">Disciplina</th>'
+      + '<th style="padding:8px 10px;text-align:left;font-size:9px;font-weight:700;text-transform:uppercase;color:var(--txt-muted);border-bottom:2px solid var(--border);">Fornecedor</th>'
+      + '<th style="padding:8px 10px;border-bottom:2px solid var(--border);width:32px;"></th>'
+      + '</tr></thead><tbody>';
+    
+    forns.forEach(function(f) {
+      var disc = DISCIPLINAS_TEC.find(function(d){ return d.id === f.disciplinaId; });
+      html += '<tr style="border-bottom:1px solid var(--border);">'
+        + '<td style="padding:8px 10px;font-size:10px;font-weight:700;color:var(--txt-muted);white-space:nowrap;">' + f.disciplinaId + '</td>'
+        + '<td style="padding:8px 10px;color:var(--txt);">' + (disc ? disc.label : f.disciplinaId) + '</td>'
+        + '<td style="padding:8px 10px;font-weight:600;color:var(--txt);">'
+        + '<input type="text" value="' + f.nome.replace(/"/g,'&quot;') + '" onchange="tecFornRenomear(\'' + f.id + '\',this.value)" style="width:100%;border:1px solid var(--border);border-radius:4px;padding:4px 8px;font-size:11px;background:var(--bg-surface2);color:var(--txt);font-family:var(--body);">'
+        + '</td>'
+        + '<td style="padding:8px 6px;text-align:center;">'
+        + '<button onclick="tecFornRemove(\'' + f.id + '\')" style="background:none;border:none;cursor:pointer;color:#E57373;font-size:14px;" title="Remover">✕</button>'
+        + '</td></tr>';
+    });
+    html += '</tbody></table>';
+  }
+
+  // Formulário para adicionar novo fornecedor
+  html += '<div style="border:1px solid var(--border);border-radius:8px;padding:14px;background:var(--bg-surface);">';
+  html += '<div style="font-size:10px;font-weight:700;color:var(--txt);margin-bottom:10px;">Adicionar fornecedor</div>';
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:end;">';
+  
+  var discOpts = DISCIPLINAS_TEC.map(function(d){
+    return '<option value="' + d.id + '">' + d.id + ' — ' + d.label + '</option>';
+  }).join('');
+  
+  html += '<div><label style="font-size:9px;color:var(--txt-muted);display:block;margin-bottom:4px;font-weight:600;text-transform:uppercase;">Disciplina</label>'
+    + '<select id="tec-add-disc" style="width:100%;height:32px;border:1px solid var(--border);border-radius:4px;background:var(--bg-surface2);color:var(--txt);font-size:11px;padding:0 8px;">'
+    + discOpts + '</select></div>';
+  
+  html += '<div><label style="font-size:9px;color:var(--txt-muted);display:block;margin-bottom:4px;font-weight:600;text-transform:uppercase;">Nome do fornecedor</label>'
+    + '<input type="text" id="tec-add-nome" placeholder="Ex: Empresa XYZ Engenharia" style="width:100%;height:32px;border:1px solid var(--border);border-radius:4px;background:var(--bg-surface2);color:var(--txt);font-size:11px;padding:0 8px;box-sizing:border-box;font-family:var(--body);"></div>';
+  
+  html += '<button onclick="var d=document.getElementById(\'tec-add-disc\').value,n=document.getElementById(\'tec-add-nome\').value.trim();if(n)tecFornAdd(d,n);" '
+    + 'style="height:32px;padding:0 16px;background:var(--accent,#00AEDF);color:#fff;border:none;border-radius:4px;font-family:var(--font);font-size:10px;font-weight:700;cursor:pointer;white-space:nowrap;">+ Adicionar</button>';
+  
+  html += '</div></div>';
+  
+  el.innerHTML = html;
+}
+window.tecFornRenderModal = tecFornRenderModal;
+
+function tecFornRenomear(id, nome) {
+  tecFornInit();
+  var f = ESTADO.cfg.tecFornecedores.find(function(f){ return f.id === id; });
+  if (f) { f.nome = nome; onCfgChange(); salvarDados(); gRender(); }
+}
+window.tecFornRenomear = tecFornRenomear;
 
 function pfSwitchTab(tab) {
   var btnArq = document.getElementById('pf-btn-arq');
