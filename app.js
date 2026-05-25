@@ -1,4 +1,4 @@
-// Planejamento de Obra A|W — v5.12.05
+// Planejamento de Obra A|W — v5.12.06
 const SB_URL='https://ejneanfveoctdlltjnrs.supabase.co';
 const SB_KEY='sb_publishable_vZApDmF_C-heCrm8fXJ_XA_ATmMO3YP';
 const SB_HDR={'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
@@ -1788,12 +1788,10 @@ window.tecFornRenomear = tecFornRenomear;
 function pfSwitchTab(tab) {
   var btnArq = document.getElementById('pf-btn-arq');
   var btnTec = document.getElementById('pf-btn-tec');
-  var bodyArq = document.getElementById('pf-body');
   var bodyTec = document.getElementById('pf-body-tec');
   if (btnArq) { btnArq.style.color = tab==='arq'?'var(--accent)':'rgba(255,255,255,.3)'; btnArq.style.borderBottom = tab==='arq'?'2px solid var(--accent)':'2px solid transparent'; }
   if (btnTec) { btnTec.style.color = tab==='tec'?'var(--accent)':'rgba(255,255,255,.3)'; btnTec.style.borderBottom = tab==='tec'?'2px solid var(--accent)':'2px solid transparent'; }
-  if (bodyArq) bodyArq.style.display = tab==='arq' ? 'block' : 'none';
-  if (bodyTec) { bodyTec.style.display = tab==='tec' ? 'block' : 'none'; if (tab==='tec') pfRenderTec(); }
+  if (bodyTec) { bodyTec.style.display = tab==='tec'?'flex':'none'; if (tab==='tec') pfRenderTec(); }
   window._pfTabAtual = tab;
 }
 window.pfSwitchTab = pfSwitchTab;
