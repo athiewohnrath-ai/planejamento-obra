@@ -1,4 +1,4 @@
-// Planejamento de Obra A|W — v5.12.01
+// Planejamento de Obra A|W — v5.12.02
 const SB_URL='https://ejneanfveoctdlltjnrs.supabase.co';
 const SB_KEY='sb_publishable_vZApDmF_C-heCrm8fXJ_XA_ATmMO3YP';
 const SB_HDR={'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
@@ -892,26 +892,25 @@ window.ouBtnAcao = ouBtnAcao;
 function pfSwitchTab(tab) {
   var btnArq = document.getElementById('pf-btn-arq');
   var btnTec = document.getElementById('pf-btn-tec');
-  var bodyArq = document.getElementById('pf-body');
-  var bodyTec = document.getElementById('pf-body-tec');
-  var ACTIVE = 'color:var(--accent);border-bottom:2px solid var(--accent);margin-bottom:-2px;';
-  var INACTIVE = 'color:rgba(255,255,255,.3);border-bottom:2px solid transparent;margin-bottom:-2px;';
-  if (tab === 'arq') {
-    if (btnArq) btnArq.setAttribute('style', btnArq.getAttribute('style').replace(/color:[^;]+;border-bottom:[^;]+;/, ACTIVE));
-    if (btnTec) btnTec.setAttribute('style', btnTec.getAttribute('style').replace(/color:[^;]+;border-bottom:[^;]+;/, INACTIVE));
-    if (bodyArq) bodyArq.style.display = 'block';
-    if (bodyTec) bodyTec.style.display = 'none';
+  // Estilo ativo/inativo via color diretamente
+  if (btnArq) btnArq.style.color = tab==='arq' ? 'var(--accent)' : 'rgba(255,255,255,.3)';
+  if (btnArq) btnArq.style.borderBottom = tab==='arq' ? '2px solid var(--accent)' : '2px solid transparent';
+  if (btnTec) btnTec.style.color = tab==='tec' ? 'var(--accent)' : 'rgba(255,255,255,.3)';
+  if (btnTec) btnTec.style.borderBottom = tab==='tec' ? '2px solid var(--accent)' : '2px solid transparent';
+  if (tab === 'tec') {
+    // Guardar conteúdo ARQ e mostrar TEC no mesmo pf-body
+    var body = document.getElementById('pf-body');
+    if (body) { window._pfBodyArqHTML = body.innerHTML; body.style.overflow = 'auto'; body.style.padding = '20px'; pfRenderTec(); }
   } else {
-    if (btnTec) btnTec.setAttribute('style', btnTec.getAttribute('style').replace(/color:[^;]+;border-bottom:[^;]+;/, ACTIVE));
-    if (btnArq) btnArq.setAttribute('style', btnArq.getAttribute('style').replace(/color:[^;]+;border-bottom:[^;]+;/, INACTIVE));
-    if (bodyArq) bodyArq.style.display = 'none';
-    if (bodyTec) bodyTec.style.display = 'block';
-    pfRenderTec();
+    // Restaurar conteúdo ARQ
+    var body = document.getElementById('pf-body');
+    if (body && window._pfBodyArqHTML !== undefined) { body.innerHTML = window._pfBodyArqHTML; body.style.overflow = 'hidden'; body.style.padding = ''; _pfIniciarInteracoes(); }
   }
+  window._pfTabAtual = tab;
 }
 window.pfSwitchTab = pfSwitchTab;
 function pfRenderTec() {
-  var el = document.getElementById('pf-body-tec');
+  var el = document.getElementById('pf-body');
   if (!el) return;
   tecFornInit();
   var forns = tecFornGetAll();
