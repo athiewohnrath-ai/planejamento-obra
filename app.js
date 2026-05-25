@@ -1,4 +1,4 @@
-// Planejamento de Obra A|W — v5.12.11
+// Planejamento de Obra A|W — v5.12.12
 const SB_URL='https://ejneanfveoctdlltjnrs.supabase.co';
 const SB_KEY='sb_publishable_vZApDmF_C-heCrm8fXJ_XA_ATmMO3YP';
 const SB_HDR={'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
@@ -247,6 +247,8 @@ document.addEventListener("DOMContentLoaded",()=>{buildVizSidebar()}),document.a
   tecFornGanttInit();
   var forns = ESTADO.cfg.tecFornecedores || [];
   if (!forns.length) return;
+  // Visão unificada
+  if (tecFornGetView() === 'unificado') { tecFornRenderUnificado(projFase,_r,_i,_o,_e,forns); return; }
   var tecSubs = projFase.rows && projFase.rows.tec && projFase.rows.tec.subs;
   var tecIds = G.TEC_IDS || ['koTec','epTec','apTec','exTec'];
   var tecNames = G.TEC_NAMES || {};
@@ -395,7 +397,7 @@ gObraRow(t,o,e,r,i),t.expanded&&(t.disciplinas||[]).forEach((a,n)=>{a&&a.ativo&&
   }
   spacer(2);
 })(a, _fi);
-gObraRow(a,o,e,r,i),t&&!a.expanded||(a.disciplinas||[]).forEach((t,n)=>{t&&t.ativo&&gDiscRow(a,t,n,o,e,r,i)})})}spacer(4);const l=[];for(let t=new Date(gSt.axisStart);G.diff(gSt.axisStart,t)<gSt.totalDays;t=G.addD(t,1))l.push({date:new Date(t),dow:t.getDay(),isSat:6===t.getDay(),isSun:0===t.getDay(),buffer:!1});const c=`<div style="display:flex;flex-shrink:0;height:100%;width:${e}px;">${buildDayHeaderHTML(l,gSt.dayW)}</div>`,p=`<div style="position:absolute;right:6px;top:50%;transform:translateY(-50%);display:flex;align-items:center;gap:4px;z-index:20;background:#fff;border-radius:5px;padding:2px 4px;box-shadow:0 1px 4px rgba(0,0,0,.12);"><button onclick="gZoom(-1)" style="width:26px;height:22px;border:1px solid #C8CDD8;background:#F4F5F8;color:#3A4A5A;border-radius:4px;cursor:pointer;font-size:15px;line-height:1;">−</button><span style="font-size:9px;font-weight:700;color:#5A6A7A;min-width:32px;text-align:center;">${Math.round(100*gSt.zoom)}%</span><button onclick="gZoom(1)" style="width:26px;height:22px;border:1px solid #C8CDD8;background:#F4F5F8;color:#3A4A5A;border-radius:4px;cursor:pointer;font-size:15px;line-height:1;">+</button></div>`,f=document.getElementById("g-tl-col"),u=f?f.scrollTop:0,g=f?f.scrollLeft:0;t.innerHTML=` <div style="flex-shrink:0;display:flex;height:40px;border-bottom:2px solid #009EA8;background:#fff;position:relative;"><div style="width:${G.LBL_W}px;flex-shrink:0;border-right:2px solid #C0C8D4;background:#FAFBFC;"></div><div id="g-wk-hdr-wrap" style="flex:1;overflow:hidden;position:relative;">${c}${p}</div></div><div style="flex:1;display:flex;min-height:0;overflow:hidden;"><div id="g-lbl-col" style="width:${G.LBL_W}px;flex-shrink:0;overflow:hidden;position:relative;z-index:2;"></div><div id="g-col-resize-handle" style="width:4px;flex-shrink:0;cursor:col-resize;background:transparent;transition:background .15s;" onmouseenter="this.style.background='rgba(0,222,219,.3)'" onmouseleave="this.style.background='transparent'"></div><div id="g-tl-col" style="flex:1;overflow:auto;min-width:0;"><div id="g-tl-inner" style="min-width:${gSt.zoom>1?e+"px":"100%"};"></div></div></div>`;const m=document.getElementById("g-lbl-col"),b=document.getElementById("g-tl-col"),x=(()=>{const t=document.createElement("div");t.style.cssText="overflow:scroll;width:50px;height:50px;position:absolute;visibility:hidden;",document.body.appendChild(t);const e=t.offsetWidth-t.clientWidth;return document.body.removeChild(t),e||15})();m.innerHTML=r.join("")+`<div style="height:${x}px;background:#FAFBFC;border-right:2px solid #C0C8D4;flex-shrink:0;"></div>`;const h=document.getElementById("g-tl-inner");h?h.innerHTML=i.join(""):b.innerHTML=i.join("");const A=document.getElementById("g-wk-hdr-wrap");b.addEventListener("scroll",()=>{m.scrollTop=b.scrollTop,A&&(A.scrollLeft=b.scrollLeft)}),(u||g)&&(b.scrollTop=u,b.scrollLeft=g,m.scrollTop=u),b.querySelectorAll("[data-drag]").forEach(t=>t.addEventListener("mousedown",gDragStart,{passive:!1})),b.querySelectorAll("[data-click]").forEach(t=>t.addEventListener("click",gBarClickHandler));gInitColResize();gAplicarTypo();var _gn1els=m.querySelectorAll(".gn1");_gn1els.forEach(function(el){el.style.setProperty("text-transform","none","important");el.style.setProperty("letter-spacing","normal","important");});m.querySelectorAll("[data-po-open]").forEach(function(el){el.addEventListener("click",function(){abrirModalPreObra(parseInt(el.dataset.poOpen));});});m.querySelectorAll("[data-po-disc-open]").forEach(function(el){el.addEventListener("click",function(){_poOpenDiscModal(parseInt(el.dataset.poFi),parseInt(el.dataset.poDi));});});}function gZoomIn(){window.gZoom(1)}function gZoomOut(){window.gZoom(-1)}function gZoomReset(){gSt.zoom=1,gRender()}function gSnapForDrag(t){if("tecForn"===t.type){return{fornId:t.fornId,tecId:t.tecId};}if("proj"===t.type){const e=gSt.projFases.find(e=>e.id==t.phId);if(!e)return{};const o={};return["arq","tec"].forEach(t=>{const a=e.rows[t],n="tec"===t?G.TEC_IDS:G.SUB_IDS;o[t]={start:G.clone(a.start),end:G.clone(a.end),subs:n.reduce((t,e)=>({...t,[e]:{start:G.clone(a.subs[e]?.start||a.start),end:G.clone(a.subs[e]?.end||a.end)}}),{})}}),{ph:e,snap:o}}if("obra"===t.type||"obraSub"===t.type){const e=gSt.obraFases.find(e=>e.id==t.phId);return e?{of:e,obraSnap:{start:G.clone(e.obra.start),end:G.clone(e.obra.end)}}:{}}if("preObra"===t.type){console.log("[SNAP preObra] t="+JSON.stringify(t));const fi=t.faseIdx||0;const of=gSt.obraFases[fi];return of?{poFase:of,poFaseIdx:fi,poDu:(ESTADO.cfg.obraFases[fi]&&ESTADO.cfg.obraFases[fi].preObra&&ESTADO.cfg.obraFases[fi].preObra.du)||5}:{};}return{}}function gApplyDrag(t,e,o,a){if("tecForn"===t.type){tecFornApplyDrag(t.fornId,t.tecId,e,o);return;}if("proj"===t.type){const{ph:n,snap:r}=a;if(!n)return;if("tec"===t.rowId&&t.subId){const a=r.tec.subs[t.subId];let i=G.addD(a.start,o),s=G.addD(a.end,o);for(;CALENDARIO.isNaoUtil(i);)i=G.addD(i,1);for(;CALENDARIO.isNaoUtil(s);)s=G.addD(s,1);n.rows.tec.subs[t.subId]="move"===e?{start:i,end:s}:"right"===e?{start:a.start,end:s}:{start:i,end:a.end};const d=gCascadeTec(n.rows.tec.subs,n.rows.arq.subs,gSt._visitaDate,n.tecChains,n.tecChainTypes);return n.rows.tec.subs=d,n.rows.tec.start=new Date(Math.min(...G.TEC_IDS.map(t=>G.ms(d[t].start)))),void(n.rows.tec.end=new Date(Math.max(...G.TEC_IDS.map(t=>G.ms(d[t].end)))))}if("tec"===t.rowId&&!t.subId)return;const i="arq"===t.rowId?"tec":"arq";if(t.subId){const a=G.SUB_IDS.indexOf(t.subId);let s=G.SUB_IDS.reduce((e,o)=>({...e,[o]:{...r[t.rowId].subs[o]}}),{});if("move"===e)s[t.subId]={start:G.addD(r[t.rowId].subs[t.subId].start,o),end:G.addD(r[t.rowId].subs[t.subId].end,o)},s=G.cascade(s,n.chains[t.rowId],a,n.chainTypes?.[t.rowId],n.chainSrc?.[t.rowId]);else if("left"===e){const e=G.addD(r[t.rowId].subs[t.subId].start,o);s[t.subId]={start:G.diff(e,r[t.rowId].subs[t.subId].end)<1?G.addD(r[t.rowId].subs[t.subId].end,-1):e,end:r[t.rowId].subs[t.subId].end}}else s[t.subId]={start:r[t.rowId].subs[t.subId].start,end:G.addD(r[t.rowId].subs[t.subId].end,o)},s=G.cascade(s,n.chains[t.rowId],a,n.chainTypes?.[t.rowId],n.chainSrc?.[t.rowId]);if(n.rows[t.rowId]={...n.rows[t.rowId],subs:s,...G.parentSpan(s)},n.locked&&"tec"!==i){let s=G.SUB_IDS.reduce((t,e)=>({...t,[e]:{...r[i].subs[e]}}),{});const d=r[i].subs[t.subId];if("move"===e)s[t.subId]={start:G.addD(d.start,o),end:G.addD(d.end,o)},s=G.cascade(s,n.chains[i],a,n.chainTypes?.[i],n.chainSrc?.[i]);else if("left"===e){const e=G.addD(d.start,o);s[t.subId]={start:G.diff(e,d.end)<1?G.addD(d.end,-1):e,end:d.end}}else s[t.subId]={start:d.start,end:G.addD(d.end,o)},s=G.cascade(s,n.chains[i],a,n.chainTypes?.[i],n.chainSrc?.[i]);n.rows[i]={...n.rows[i],subs:s,...G.parentSpan(s)}}}else if("move"===e){const e=G.SUB_IDS.reduce((e,a)=>({...e,[a]:{start:G.addD(r[t.rowId].subs[a].start,o),end:G.addD(r[t.rowId].subs[a].end,o)}}),{});if(n.rows[t.rowId]={...n.rows[t.rowId],start:G.addD(r[t.rowId].start,o),end:G.addD(r[t.rowId].end,o),subs:e},n.locked&&"tec"!==i){const t=G.SUB_IDS.reduce((t,e)=>({...t,[e]:{start:G.addD(r[i].subs[e].start,o),end:G.addD(r[i].subs[e].end,o)}}),{});n.rows[i]={...n.rows[i],start:G.addD(r[i].start,o),end:G.addD(r[i].end,o),subs:t}}}}if("preObra"===t.type){const{poFase,poFaseIdx,poDu}=a;console.log("[DRAG preObra] delta="+o+" poDu="+poDu+" poFase="+!!poFase);if(!poFase)return;const delta=Math.round(o);const newDu=Math.max(1,poDu-delta);if(ESTADO.cfg.obraFases[poFaseIdx]&&ESTADO.cfg.obraFases[poFaseIdx].preObra){ESTADO.cfg.obraFases[poFaseIdx].preObra.du=newDu;}}if("obra"===t.type){const{of:t,obraSnap:n}=a;if(!t)return;if("move"===e)t.obra.start=G.addD(n.start,o),t.obra.end=G.addD(n.end,o);else if("left"===e){const e=G.addD(n.start,o);t.obra.start=G.diff(e,n.end)<7?G.addD(n.end,-7):e}else{const e=G.addD(n.end,o);t.obra.end=G.diff(n.start,e)<7?G.addD(n.start,7):e}}}function gDragStart(t){const e=t.currentTarget,o=e.dataset.mode||"move",a=JSON.parse(decodeURIComponent(e.dataset.drag));t.preventDefault(),t.stopPropagation();const n=t.clientX,r=gSnapForDrag(a);let i=!1;const onMove=t=>{const e=Math.round((t.clientX-n)/gSt.dayW);0!==e&&(i=!0),gApplyDrag(a,o,e,r),gRender()},onUp=()=>{if(document.removeEventListener("mousemove",onMove),document.removeEventListener("mouseup",onUp),i&&"move"===o&&"proj"===a.type&&a.subId){const t=gSt.projFases.find(t=>t.id==a.phId);if(t)if("tec"===a.rowId)t.tecChains||(t.tecChains={}),t.tecChains[a.subId]||(t.tecChains[a.subId]={st:!0,en:!0}),t.tecChains[a.subId].st=!1,gRender();else{const e=G.SUB_IDS.indexOf(a.subId);if(e>0){if(t.chains[a.rowId][e-1]=!1,t.locked){const o="arq"===a.rowId?"tec":"arq";t.chains[o]&&(t.chains[o][e-1]=!1)}gRender()}}}i&&"obra"===a.type&&(gSt._obraVinculadaCond=!1);if(i&&"preObra"===a.type)salvarDados();gSt.obraFases.forEach((t,e)=>{const o=ESTADO.cfg.obraFases[e];o&&(o.inicio=G.fmtISO(t.obra.start),o.prazo=G.diff(t.obra.start,t.obra.end));const a=document.getElementById(`obra-f${e}-inicio`),n=document.getElementById(`obra-f${e}-prazo`);a&&(a.value=G.fmtISO(t.obra.start)),n&&(n.value=G.diff(t.obra.start,t.obra.end))}),atualizarResumoDatas()};document.addEventListener("mousemove",onMove),document.addEventListener("mouseup",onUp)}function gBarClickHandler(t){t._wasDrag||gShowPop(JSON.parse(decodeURIComponent(t.currentTarget.dataset.click)),t.currentTarget.getBoundingClientRect())}let _alocPendingChanges=false;
+gObraRow(a,o,e,r,i),t&&!a.expanded||(a.disciplinas||[]).forEach((t,n)=>{t&&t.ativo&&gDiscRow(a,t,n,o,e,r,i)})})}spacer(4);const l=[];for(let t=new Date(gSt.axisStart);G.diff(gSt.axisStart,t)<gSt.totalDays;t=G.addD(t,1))l.push({date:new Date(t),dow:t.getDay(),isSat:6===t.getDay(),isSun:0===t.getDay(),buffer:!1});const c=`<div style="display:flex;flex-shrink:0;height:100%;width:${e}px;">${buildDayHeaderHTML(l,gSt.dayW)}</div>`,p=`<div style="position:absolute;right:6px;top:50%;transform:translateY(-50%);display:flex;align-items:center;gap:4px;z-index:20;background:#fff;border-radius:5px;padding:2px 4px;box-shadow:0 1px 4px rgba(0,0,0,.12);"><button onclick="gZoom(-1)" style="width:26px;height:22px;border:1px solid #C8CDD8;background:#F4F5F8;color:#3A4A5A;border-radius:4px;cursor:pointer;font-size:15px;line-height:1;">−</button><span style="font-size:9px;font-weight:700;color:#5A6A7A;min-width:32px;text-align:center;">${Math.round(100*gSt.zoom)}%</span><button onclick="gZoom(1)" style="width:26px;height:22px;border:1px solid #C8CDD8;background:#F4F5F8;color:#3A4A5A;border-radius:4px;cursor:pointer;font-size:15px;line-height:1;">+</button></div>`,f=document.getElementById("g-tl-col"),u=f?f.scrollTop:0,g=f?f.scrollLeft:0;t.innerHTML=` <div style="flex-shrink:0;display:flex;height:40px;border-bottom:2px solid #009EA8;background:#fff;position:relative;"><div style="width:${G.LBL_W}px;flex-shrink:0;border-right:2px solid #C0C8D4;background:#FAFBFC;"></div><div id="g-wk-hdr-wrap" style="flex:1;overflow:hidden;position:relative;">${c}${p}</div></div><div style="flex:1;display:flex;min-height:0;overflow:hidden;"><div id="g-lbl-col" style="width:${G.LBL_W}px;flex-shrink:0;overflow:hidden;position:relative;z-index:2;"></div><div id="g-col-resize-handle" style="width:4px;flex-shrink:0;cursor:col-resize;background:transparent;transition:background .15s;" onmouseenter="this.style.background='rgba(0,222,219,.3)'" onmouseleave="this.style.background='transparent'"></div><div id="g-tl-col" style="flex:1;overflow:auto;min-width:0;"><div id="g-tl-inner" style="min-width:${gSt.zoom>1?e+"px":"100%"};"></div></div></div>`;const m=document.getElementById("g-lbl-col"),b=document.getElementById("g-tl-col"),x=(()=>{const t=document.createElement("div");t.style.cssText="overflow:scroll;width:50px;height:50px;position:absolute;visibility:hidden;",document.body.appendChild(t);const e=t.offsetWidth-t.clientWidth;return document.body.removeChild(t),e||15})();m.innerHTML=r.join("")+`<div style="height:${x}px;background:#FAFBFC;border-right:2px solid #C0C8D4;flex-shrink:0;"></div>`;const h=document.getElementById("g-tl-inner");h?h.innerHTML=i.join(""):b.innerHTML=i.join("");const A=document.getElementById("g-wk-hdr-wrap");b.addEventListener("scroll",()=>{m.scrollTop=b.scrollTop,A&&(A.scrollLeft=b.scrollLeft)}),(u||g)&&(b.scrollTop=u,b.scrollLeft=g,m.scrollTop=u),b.querySelectorAll("[data-drag]").forEach(t=>t.addEventListener("mousedown",gDragStart,{passive:!1})),b.querySelectorAll("[data-click]").forEach(t=>t.addEventListener("click",gBarClickHandler));gInitColResize();gAplicarTypo();var _gn1els=m.querySelectorAll(".gn1");_gn1els.forEach(function(el){el.style.setProperty("text-transform","none","important");el.style.setProperty("letter-spacing","normal","important");});m.querySelectorAll("[data-po-open]").forEach(function(el){el.addEventListener("click",function(){abrirModalPreObra(parseInt(el.dataset.poOpen));});});m.querySelectorAll("[data-po-disc-open]").forEach(function(el){el.addEventListener("click",function(){_poOpenDiscModal(parseInt(el.dataset.poFi),parseInt(el.dataset.poDi));});});}function gZoomIn(){window.gZoom(1)}function gZoomOut(){window.gZoom(-1)}function gZoomReset(){gSt.zoom=1,gRender()}function gSnapForDrag(t){if("tecForn"===t.type){return{fornId:t.fornId,tecId:t.tecId};}if("tecFornJoint"===t.type){return{fornId:t.fornId,tecId:t.tecId,nextTecId:t.nextTecId};}if("proj"===t.type){const e=gSt.projFases.find(e=>e.id==t.phId);if(!e)return{};const o={};return["arq","tec"].forEach(t=>{const a=e.rows[t],n="tec"===t?G.TEC_IDS:G.SUB_IDS;o[t]={start:G.clone(a.start),end:G.clone(a.end),subs:n.reduce((t,e)=>({...t,[e]:{start:G.clone(a.subs[e]?.start||a.start),end:G.clone(a.subs[e]?.end||a.end)}}),{})}}),{ph:e,snap:o}}if("obra"===t.type||"obraSub"===t.type){const e=gSt.obraFases.find(e=>e.id==t.phId);return e?{of:e,obraSnap:{start:G.clone(e.obra.start),end:G.clone(e.obra.end)}}:{}}if("preObra"===t.type){console.log("[SNAP preObra] t="+JSON.stringify(t));const fi=t.faseIdx||0;const of=gSt.obraFases[fi];return of?{poFase:of,poFaseIdx:fi,poDu:(ESTADO.cfg.obraFases[fi]&&ESTADO.cfg.obraFases[fi].preObra&&ESTADO.cfg.obraFases[fi].preObra.du)||5}:{};}return{}}function gApplyDrag(t,e,o,a){if("tecForn"===t.type){tecFornApplyDrag(t.fornId,t.tecId,e,o);return;}if("tecFornModal"===t.type){tecFornAbrirModal(t.fornId);return;}if("tecFornJoint"===t.type){tecFornApplyJoint(t.fornId,t.tecId,t.nextTecId,o);return;}if("proj"===t.type){const{ph:n,snap:r}=a;if(!n)return;if("tec"===t.rowId&&t.subId){const a=r.tec.subs[t.subId];let i=G.addD(a.start,o),s=G.addD(a.end,o);for(;CALENDARIO.isNaoUtil(i);)i=G.addD(i,1);for(;CALENDARIO.isNaoUtil(s);)s=G.addD(s,1);n.rows.tec.subs[t.subId]="move"===e?{start:i,end:s}:"right"===e?{start:a.start,end:s}:{start:i,end:a.end};const d=gCascadeTec(n.rows.tec.subs,n.rows.arq.subs,gSt._visitaDate,n.tecChains,n.tecChainTypes);return n.rows.tec.subs=d,n.rows.tec.start=new Date(Math.min(...G.TEC_IDS.map(t=>G.ms(d[t].start)))),void(n.rows.tec.end=new Date(Math.max(...G.TEC_IDS.map(t=>G.ms(d[t].end)))))}if("tec"===t.rowId&&!t.subId)return;const i="arq"===t.rowId?"tec":"arq";if(t.subId){const a=G.SUB_IDS.indexOf(t.subId);let s=G.SUB_IDS.reduce((e,o)=>({...e,[o]:{...r[t.rowId].subs[o]}}),{});if("move"===e)s[t.subId]={start:G.addD(r[t.rowId].subs[t.subId].start,o),end:G.addD(r[t.rowId].subs[t.subId].end,o)},s=G.cascade(s,n.chains[t.rowId],a,n.chainTypes?.[t.rowId],n.chainSrc?.[t.rowId]);else if("left"===e){const e=G.addD(r[t.rowId].subs[t.subId].start,o);s[t.subId]={start:G.diff(e,r[t.rowId].subs[t.subId].end)<1?G.addD(r[t.rowId].subs[t.subId].end,-1):e,end:r[t.rowId].subs[t.subId].end}}else s[t.subId]={start:r[t.rowId].subs[t.subId].start,end:G.addD(r[t.rowId].subs[t.subId].end,o)},s=G.cascade(s,n.chains[t.rowId],a,n.chainTypes?.[t.rowId],n.chainSrc?.[t.rowId]);if(n.rows[t.rowId]={...n.rows[t.rowId],subs:s,...G.parentSpan(s)},n.locked&&"tec"!==i){let s=G.SUB_IDS.reduce((t,e)=>({...t,[e]:{...r[i].subs[e]}}),{});const d=r[i].subs[t.subId];if("move"===e)s[t.subId]={start:G.addD(d.start,o),end:G.addD(d.end,o)},s=G.cascade(s,n.chains[i],a,n.chainTypes?.[i],n.chainSrc?.[i]);else if("left"===e){const e=G.addD(d.start,o);s[t.subId]={start:G.diff(e,d.end)<1?G.addD(d.end,-1):e,end:d.end}}else s[t.subId]={start:d.start,end:G.addD(d.end,o)},s=G.cascade(s,n.chains[i],a,n.chainTypes?.[i],n.chainSrc?.[i]);n.rows[i]={...n.rows[i],subs:s,...G.parentSpan(s)}}}else if("move"===e){const e=G.SUB_IDS.reduce((e,a)=>({...e,[a]:{start:G.addD(r[t.rowId].subs[a].start,o),end:G.addD(r[t.rowId].subs[a].end,o)}}),{});if(n.rows[t.rowId]={...n.rows[t.rowId],start:G.addD(r[t.rowId].start,o),end:G.addD(r[t.rowId].end,o),subs:e},n.locked&&"tec"!==i){const t=G.SUB_IDS.reduce((t,e)=>({...t,[e]:{start:G.addD(r[i].subs[e].start,o),end:G.addD(r[i].subs[e].end,o)}}),{});n.rows[i]={...n.rows[i],start:G.addD(r[i].start,o),end:G.addD(r[i].end,o),subs:t}}}}if("preObra"===t.type){const{poFase,poFaseIdx,poDu}=a;console.log("[DRAG preObra] delta="+o+" poDu="+poDu+" poFase="+!!poFase);if(!poFase)return;const delta=Math.round(o);const newDu=Math.max(1,poDu-delta);if(ESTADO.cfg.obraFases[poFaseIdx]&&ESTADO.cfg.obraFases[poFaseIdx].preObra){ESTADO.cfg.obraFases[poFaseIdx].preObra.du=newDu;}}if("obra"===t.type){const{of:t,obraSnap:n}=a;if(!t)return;if("move"===e)t.obra.start=G.addD(n.start,o),t.obra.end=G.addD(n.end,o);else if("left"===e){const e=G.addD(n.start,o);t.obra.start=G.diff(e,n.end)<7?G.addD(n.end,-7):e}else{const e=G.addD(n.end,o);t.obra.end=G.diff(n.start,e)<7?G.addD(n.start,7):e}}}function gDragStart(t){const e=t.currentTarget,o=e.dataset.mode||"move",a=JSON.parse(decodeURIComponent(e.dataset.drag));t.preventDefault(),t.stopPropagation();const n=t.clientX,r=gSnapForDrag(a);let i=!1;const onMove=t=>{const e=Math.round((t.clientX-n)/gSt.dayW);0!==e&&(i=!0),gApplyDrag(a,o,e,r),gRender()},onUp=()=>{if(document.removeEventListener("mousemove",onMove),document.removeEventListener("mouseup",onUp),i&&"move"===o&&"proj"===a.type&&a.subId){const t=gSt.projFases.find(t=>t.id==a.phId);if(t)if("tec"===a.rowId)t.tecChains||(t.tecChains={}),t.tecChains[a.subId]||(t.tecChains[a.subId]={st:!0,en:!0}),t.tecChains[a.subId].st=!1,gRender();else{const e=G.SUB_IDS.indexOf(a.subId);if(e>0){if(t.chains[a.rowId][e-1]=!1,t.locked){const o="arq"===a.rowId?"tec":"arq";t.chains[o]&&(t.chains[o][e-1]=!1)}gRender()}}}i&&"obra"===a.type&&(gSt._obraVinculadaCond=!1);if(i&&"preObra"===a.type)salvarDados();gSt.obraFases.forEach((t,e)=>{const o=ESTADO.cfg.obraFases[e];o&&(o.inicio=G.fmtISO(t.obra.start),o.prazo=G.diff(t.obra.start,t.obra.end));const a=document.getElementById(`obra-f${e}-inicio`),n=document.getElementById(`obra-f${e}-prazo`);a&&(a.value=G.fmtISO(t.obra.start)),n&&(n.value=G.diff(t.obra.start,t.obra.end))}),atualizarResumoDatas()};document.addEventListener("mousemove",onMove),document.addEventListener("mouseup",onUp)}function gBarClickHandler(t){t._wasDrag||gShowPop(JSON.parse(decodeURIComponent(t.currentTarget.dataset.click)),t.currentTarget.getBoundingClientRect())}let _alocPendingChanges=false;
 function gClosePopForce(){document.getElementById("g-pop-el")?.remove(),document.getElementById("g-pop-mod-panel")?.remove(),document.removeEventListener("mousedown",gPopOutside),_alocDs=null,_alocPendingChanges=false}
 function gClosePop(){
   if(_alocDs&&_alocPendingChanges){
@@ -405,6 +407,9 @@ function gClosePop(){
   gClosePopForce();
 }function gPopOutside(t){t.target.closest("#g-pop-el")||gClosePop()}function gRefreshPop(){const t=document.getElementById("g-pop-el");if(!t||!_popDs)return;const e={left:parseFloat(t.style.left),bottom:parseFloat(t.style.top)-8,top:parseFloat(t.style.top),right:parseFloat(t.style.left)+270};gShowPop(_popDs,e)}function gShowPop(t,e){gClosePop(),_popDs=t;const o=document.createElement("div");o.id="g-pop-el";const a="proj"===t.type&&!!t.subId&&"arq"===t.rowId;o.style.cssText=a?"position:fixed;background:#fff;border-radius:10px;z-index:3000;box-shadow:0 10px 36px rgba(0,0,0,.22);border:1px solid #DDE1E8;font-family:var(--font);visibility:hidden;display:flex;align-items:stretch;":"position:fixed;background:#fff;border-radius:10px;z-index:3000;box-shadow:0 10px 36px rgba(0,0,0,.22);padding:16px 18px;border:1px solid #DDE1E8;width:270px;font-family:var(--font);visibility:hidden;";let n="";if("proj"===t.type){const e=gSt.projFases.find(e=>e.id==t.phId);if(!e)return void gClosePop();const o="arq"===t.rowId?COR.ARQ_MOM:COR.TEC_MOM,r=`Fase ${e.id} · ${"tec"===t.rowId?"Técnicos":"Arquitetura"}${t.subId?" · "+("tec"===t.rowId?t.subId?G.TEC_NAMES[t.subId]||t.subId:"Técnicos":t.subId?G.SUB_NAMES[t.subId]||t.subId:"Arquitetura"):""}`,i=t.subId?e.rows[t.rowId].subs[t.subId]:e.rows[t.rowId];let s=new Date(i.start),d=new Date(i.end);for(;CALENDARIO.isNaoUtil(s);)s=G.addD(s,1);for(;CALENDARIO.isNaoUtil(d);)d=G.addD(d,1);const l=CALENDARIO.contarDU(s,d),c=`<div style="width:260px;flex-shrink:0;padding:16px 18px;border-right:1px solid #EEF0F4;"><div style="display:flex;gap:6px;align-items:center;margin-bottom:14px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#1A2535;"><span style="width:9px;height:9px;border-radius:2px;background:${o};display:inline-block;flex-shrink:0;"></span><span style="flex:1;">${r}</span><button onclick="gClosePop()" style="border:none;background:none;cursor:pointer;color:#A0A8B8;font-size:16px;line-height:1;padding:0;">✕</button></div><label style="display:flex;align-items:center;gap:8px;margin-bottom:9px;"><span style="width:38px;font-size:9px;font-weight:700;text-transform:uppercase;color:#8A95A8;">Início</span><input type="date" id="pop-st" value="${G.fmtISO(s)}" onchange="gPopSnapUtil('pop-st');gPopUpdateDur()" style="flex:1;border:1px solid #C8CDD8;border-radius:4px;padding:5px 8px;font-size:12px;font-family:inherit;"></label><label style="display:flex;align-items:center;gap:8px;"><span style="width:38px;font-size:9px;font-weight:700;text-transform:uppercase;color:#8A95A8;">Fim</span><input type="date" id="pop-en" value="${G.fmtISO(d)}" onchange="gPopSnapUtil('pop-en');gPopUpdateDur()" style="flex:1;border:1px solid #C8CDD8;border-radius:4px;padding:5px 8px;font-size:12px;font-family:inherit;"></label><div style="margin-top:12px;border-top:1px solid #EEF0F4;padding-top:12px;"><div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#8A95A8;margin-bottom:8px;">Duração</div><div style="display:flex;align-items:center;gap:0;border:1px solid #C8CDD8;border-radius:6px;overflow:hidden;height:38px;"><button onclick="gPopAdjustDur(-7)" style="width:38px;height:100%;border:none;border-right:1px solid #C8CDD8;background:#F4F6F8;cursor:pointer;font-size:16px;font-weight:300;color:#4A5268;">−</button><button onclick="gPopAdjustDur(-1)" style="width:34px;height:100%;border:none;border-right:1px solid #C8CDD8;background:#F8F9FB;cursor:pointer;font-size:12px;color:#4A5268;">−1</button><div style="flex:1;text-align:center;"><span id="pop-dur-val" style="font-size:18px;font-weight:800;color:${o};">${l}</span><span style="font-size:9px;font-weight:700;color:#A0A8B8;margin-left:2px;">dias úteis</span></div><button onclick="gPopAdjustDur(1)" style="width:34px;height:100%;border:none;border-left:1px solid #C8CDD8;background:#F8F9FB;cursor:pointer;font-size:12px;color:#4A5268;">+1</button><button onclick="gPopAdjustDur(7)" style="width:38px;height:100%;border:none;border-left:1px solid #C8CDD8;background:#F4F6F8;cursor:pointer;font-size:16px;font-weight:300;color:#4A5268;">+</button></div><div id="pop-dur-corridos" style="font-size:9px;color:#A0A8B8;text-align:center;margin-top:4px;">${G.diff(s,d)} dias corridos</div><div style="display:flex;justify-content:flex-end;margin-top:10px;"><button onclick="gPopApply('proj')" style="background:${o};color:#fff;border:none;border-radius:5px;padding:7px 18px;font-size:11px;font-weight:700;font-family:inherit;cursor:pointer;letter-spacing:.05em;">Aplicar</button></div></div>\n${gChainSection(e,t)}\n</div>`;n=a?c+`<div id="aloc-inner" style="padding:16px;width:390px;flex-shrink:0;">${alocHtml(t)}</div>`:`<div style="display:flex;gap:6px;align-items:center;margin-bottom:14px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#1A2535;"><span style="width:9px;height:9px;border-radius:2px;background:${o};display:inline-block;flex-shrink:0;"></span><span style="flex:1;">${r}</span></div><label style="display:flex;align-items:center;gap:8px;margin-bottom:9px;"><span style="width:38px;font-size:9px;font-weight:700;text-transform:uppercase;color:#8A95A8;">Início</span><input type="date" id="pop-st" value="${G.fmtISO(s)}" onchange="gPopSnapUtil('pop-st');gPopUpdateDur()" style="flex:1;border:1px solid #C8CDD8;border-radius:4px;padding:5px 8px;font-size:12px;font-family:inherit;"></label><label style="display:flex;align-items:center;gap:8px;"><span style="width:38px;font-size:9px;font-weight:700;text-transform:uppercase;color:#8A95A8;">Fim</span><input type="date" id="pop-en" value="${G.fmtISO(d)}" onchange="gPopSnapUtil('pop-en');gPopUpdateDur()" style="flex:1;border:1px solid #C8CDD8;border-radius:4px;padding:5px 8px;font-size:12px;font-family:inherit;"></label><div style="margin-top:12px;border-top:1px solid #EEF0F4;padding-top:12px;"><div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#8A95A8;margin-bottom:8px;">Duração</div><div style="display:flex;align-items:center;gap:0;border:1px solid #C8CDD8;border-radius:6px;overflow:hidden;height:38px;"><button onclick="gPopAdjustDur(-7)" style="width:38px;height:100%;border:none;border-right:1px solid #C8CDD8;background:#F4F6F8;cursor:pointer;font-size:16px;font-weight:300;color:#4A5268;">−</button><button onclick="gPopAdjustDur(-1)" style="width:34px;height:100%;border:none;border-right:1px solid #C8CDD8;background:#F8F9FB;cursor:pointer;font-size:12px;color:#4A5268;">−1</button><div style="flex:1;text-align:center;"><span id="pop-dur-val" style="font-size:18px;font-weight:800;color:${o};">${l}</span><span style="font-size:9px;font-weight:700;color:#A0A8B8;margin-left:2px;">dias úteis</span></div><button onclick="gPopAdjustDur(1)" style="width:34px;height:100%;border:none;border-left:1px solid #C8CDD8;background:#F8F9FB;cursor:pointer;font-size:12px;color:#4A5268;">+1</button><button onclick="gPopAdjustDur(7)" style="width:38px;height:100%;border:none;border-left:1px solid #C8CDD8;background:#F4F6F8;cursor:pointer;font-size:16px;font-weight:300;color:#4A5268;">+</button></div><div id="pop-dur-corridos" style="font-size:9px;color:#A0A8B8;text-align:center;margin-top:4px;">${G.diff(s,d)} dias corridos</div><div style="display:flex;justify-content:flex-end;margin-top:10px;"><button onclick="gPopApply('proj')" style="background:${o};color:#fff;border:none;border-radius:5px;padding:7px 18px;font-size:11px;font-weight:700;font-family:inherit;cursor:pointer;letter-spacing:.05em;">Aplicar</button></div></div> ${gChainSection(e,t)} `}else if('tecForn'===t.type){
     tecFornShowPop(t.fornId, t.tecId, e);
+    return;
+  }else if('tecFornModal'===t.type){
+    tecFornAbrirModal(t.fornId);
     return;
   }else if('preObra'===t.type){
     var _poFi=t.faseIdx||0,_poOf=gSt.obraFases[_poFi],_poCo=ESTADO.cfg.obraFases[_poFi]&&ESTADO.cfg.obraFases[_poFi].preObra;
@@ -2207,6 +2212,335 @@ function tecFornResetOvr(fornId, tecId) {
   if (f && f.rowOverrides) { delete f.rowOverrides[tecId]; onCfgChange(); salvarDados(); gRender(); }
 }
 window.tecFornResetOvr = tecFornResetOvr;
+
+// ── Visão Unificada de Fornecedores Técnicos ────────────────────────────────
+
+function tecFornSetView(view) {
+  if (!ESTADO.cfg) ESTADO.cfg = {};
+  ESTADO.cfg.tecFornView = view;
+  // Atualizar botões no Config
+  var btnSep = document.getElementById('btn-tec-view-sep');
+  var btnUni = document.getElementById('btn-tec-view-uni');
+  var isUni  = view === 'unificado';
+  if (btnSep) { btnSep.style.background = isUni ? 'var(--bg-surface2)' : 'var(--accent)'; btnSep.style.color = isUni ? 'var(--txt-muted)' : '#fff'; btnSep.style.border = isUni ? '1px solid var(--border)' : '1px solid var(--accent)'; }
+  if (btnUni) { btnUni.style.background = isUni ? 'var(--accent)' : 'var(--bg-surface2)'; btnUni.style.color = isUni ? '#fff' : 'var(--txt-muted)'; btnUni.style.border = isUni ? '1px solid var(--accent)' : '1px solid var(--border)'; }
+  onCfgChange(); salvarDados(); gRender();
+}
+window.tecFornSetView = tecFornSetView;
+
+function tecFornGetView() {
+  return (ESTADO.cfg && ESTADO.cfg.tecFornView) || 'separado';
+}
+window.tecFornGetView = tecFornGetView;
+
+// Modal por fornecedor (visão unificada)
+function tecFornAbrirModal(fornId) {
+  var f = (ESTADO.cfg.tecFornecedores||[]).find(function(f){return f.id===fornId;});
+  if (!f) return;
+  var sub = (gSt.projFases[0]?.rows?.tec?.subs) || {};
+  var tecIds   = G.TEC_IDS   || ['koTec','epTec','apTec','exTec'];
+  var tecNames = G.TEC_NAMES || {koTec:'Kickoff',epTec:'EP',apTec:'AP',exTec:'EX'};
+  var colTec   = darkenHex(COR.TEC_MOM, .72);
+  var contato  = f.contato || {};
+
+  // Remover modal anterior
+  var existing = document.getElementById('modal-tec-forn');
+  if (existing) existing.remove();
+
+  var overlay = document.createElement('div');
+  overlay.id = 'modal-tec-forn';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9500;display:flex;align-items:center;justify-content:center;';
+  overlay.addEventListener('click', function(e){ if(e.target===overlay) overlay.remove(); });
+
+  var modal = document.createElement('div');
+  modal.style.cssText = 'background:var(--bg-panel,#fff);border-radius:12px;width:520px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3);font-family:var(--body,sans-serif);';
+
+  // Header
+  var hdr = document.createElement('div');
+  hdr.style.cssText = 'display:flex;align-items:center;gap:10px;padding:16px 20px;border-bottom:1px solid var(--border);background:'+colTec+';border-radius:12px 12px 0 0;';
+  hdr.innerHTML = '<div style="flex:1;">'
+    +'<div style="font-family:var(--font);font-size:13px;font-weight:700;color:#fff;">'+f.nome+'</div>'
+    +'<div style="font-size:10px;color:rgba(255,255,255,.7);margin-top:2px;">'+f.disciplinaId+' · '+(DISCIPLINAS_TEC.find(function(d){return d.id===f.disciplinaId;})||{}).label+'</div>'
+    +'</div>'
+    +'<button onclick="document.getElementById(\'modal-tec-forn\').remove()" style="background:none;border:none;cursor:pointer;color:rgba(255,255,255,.7);font-size:20px;line-height:1;padding:0;">✕</button>';
+  modal.appendChild(hdr);
+
+  // Body
+  var body = document.createElement('div');
+  body.style.cssText = 'padding:20px;';
+
+  // Contato
+  var ctDiv = document.createElement('div');
+  ctDiv.style.cssText = 'display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border);';
+  [{key:'nome',lbl:'Contato'},{key:'tel',lbl:'Telefone'},{key:'email',lbl:'E-mail'}].forEach(function(field) {
+    var wrap = document.createElement('div');
+    var lbl = document.createElement('label');
+    lbl.style.cssText = 'font-size:9px;font-weight:700;text-transform:uppercase;color:var(--txt-muted);display:block;margin-bottom:4px;letter-spacing:.06em;';
+    lbl.textContent = field.lbl;
+    var inp = document.createElement('input');
+    inp.type='text'; inp.value=contato[field.key]||''; inp.placeholder=field.lbl;
+    inp.style.cssText = 'width:100%;border:1px solid var(--border);border-radius:4px;padding:5px 8px;font-size:11px;background:var(--bg-surface2);color:var(--txt);box-sizing:border-box;font-family:var(--body);';
+    inp.addEventListener('change', (function(k){ return function(){ tecFornSetContato(f.id,k,this.value); }; })(field.key));
+    wrap.appendChild(lbl); wrap.appendChild(inp); ctDiv.appendChild(wrap);
+  });
+  body.appendChild(ctDiv);
+
+  // Título etapas
+  var etLbl = document.createElement('div');
+  etLbl.style.cssText = 'font-size:9px;font-weight:700;text-transform:uppercase;color:var(--txt-muted);margin-bottom:12px;letter-spacing:.06em;';
+  etLbl.textContent = 'Etapas';
+  body.appendChild(etLbl);
+
+  // Linhas de etapa
+  var tecColors = G.C_TEC || [];
+  tecIds.forEach(function(tecId, ti) {
+    var d = tecFornGetDates(f, sub);
+    var dt = d[tecId];
+    var start = dt.start, end = dt.end;
+    var duVal = start && end ? CALENDARIO.contarDU(new Date(start), new Date(end)) : 1;
+    var barColor = tecColors[ti % Math.max(1,tecColors.length)] || colTec;
+
+    var row = document.createElement('div');
+    row.style.cssText = 'display:grid;grid-template-columns:100px 1fr 80px 1fr 60px;gap:8px;align-items:center;margin-bottom:10px;';
+
+    // Label
+    var lbl = document.createElement('div');
+    lbl.style.cssText = 'display:flex;align-items:center;gap:6px;';
+    var dot = document.createElement('span');
+    dot.style.cssText = 'width:10px;height:10px;border-radius:'+(tecId==='koTec'?'50%':'2px')+';background:'+barColor+';flex-shrink:0;';
+    var txt = document.createElement('span');
+    txt.style.cssText = 'font-size:11px;font-weight:700;color:var(--txt);';
+    txt.textContent = tecNames[tecId]||tecId;
+    lbl.appendChild(dot); lbl.appendChild(txt);
+    row.appendChild(lbl);
+
+    // Início
+    var iniWrap = document.createElement('div');
+    var iniLbl = document.createElement('div');
+    iniLbl.style.cssText = 'font-size:9px;color:var(--txt-muted);margin-bottom:3px;';
+    iniLbl.textContent = 'Início';
+    var iniInp = document.createElement('input');
+    iniInp.type='date'; iniInp.value=start||'';
+    iniInp.style.cssText = 'width:100%;border:1px solid var(--border);border-radius:4px;padding:4px 6px;font-size:11px;background:var(--bg-surface2);color:var(--txt);box-sizing:border-box;';
+    iniInp.addEventListener('change', (function(fid,tid){ return function(){
+      tecFornSetDate(fid,tid,'start',this.value); tecFornAbrirModal(fid);
+    };})(f.id, tecId));
+    iniWrap.appendChild(iniLbl); iniWrap.appendChild(iniInp);
+    row.appendChild(iniWrap);
+
+    // DU
+    var duWrap = document.createElement('div');
+    var duLbl = document.createElement('div');
+    duLbl.style.cssText = 'font-size:9px;color:var(--txt-muted);margin-bottom:3px;';
+    duLbl.textContent = 'DU';
+    var duInp = document.createElement('input');
+    duInp.type='number'; duInp.min=1; duInp.value=duVal;
+    duInp.style.cssText = 'width:100%;border:1px solid var(--border);border-radius:4px;padding:4px 6px;font-size:11px;background:var(--bg-surface2);color:var(--txt);box-sizing:border-box;';
+    if (tecId==='koTec') { duInp.value=1; duInp.disabled=true; duInp.style.opacity='.5'; }
+    duInp.addEventListener('change', (function(fid,tid){ return function(){
+      tecFornSetDU(fid,tid,parseInt(this.value)||1); tecFornAbrirModal(fid);
+    };})(f.id, tecId));
+    duWrap.appendChild(duLbl); duWrap.appendChild(duInp);
+    row.appendChild(duWrap);
+
+    // Fim
+    var fimWrap = document.createElement('div');
+    var fimLbl = document.createElement('div');
+    fimLbl.style.cssText = 'font-size:9px;color:var(--txt-muted);margin-bottom:3px;';
+    fimLbl.textContent = 'Fim';
+    var fimInp = document.createElement('input');
+    fimInp.type='date'; fimInp.value=end||'';
+    fimInp.style.cssText = 'width:100%;border:1px solid var(--border);border-radius:4px;padding:4px 6px;font-size:11px;background:var(--bg-surface2);color:var(--txt);box-sizing:border-box;';
+    fimInp.addEventListener('change', (function(fid,tid){ return function(){
+      tecFornSetDate(fid,tid,'end',this.value); tecFornAbrirModal(fid);
+    };})(f.id, tecId));
+    fimWrap.appendChild(fimLbl); fimWrap.appendChild(fimInp);
+    row.appendChild(fimWrap);
+
+    // Reset
+    var rstBtn = document.createElement('button');
+    rstBtn.textContent='↺';
+    rstBtn.title='Restaurar original';
+    rstBtn.style.cssText='background:none;border:1px solid var(--border);border-radius:4px;cursor:pointer;color:var(--txt-muted);height:28px;width:28px;font-size:13px;margin-top:14px;';
+    rstBtn.addEventListener('click', (function(fid,tid){ return function(){
+      tecFornResetOvr(fid,tid); tecFornAbrirModal(fid);
+    };})(f.id, tecId));
+    row.appendChild(rstBtn);
+
+    body.appendChild(row);
+  });
+
+  modal.appendChild(body);
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+}
+window.tecFornAbrirModal = tecFornAbrirModal;
+
+// Setar data de início ou fim de uma etapa
+function tecFornSetDate(fornId, tecId, field, value) {
+  var f = (ESTADO.cfg.tecFornecedores||[]).find(function(f){return f.id===fornId;});
+  if (!f) return;
+  if (!f.rowOverrides) f.rowOverrides = {};
+  var sub = (gSt.projFases[0]?.rows?.tec?.subs||{})[tecId];
+  if (!f.rowOverrides[tecId]) f.rowOverrides[tecId] = {start:sub?sub.start:value, end:sub?sub.end:value};
+  f.rowOverrides[tecId][field] = value;
+  onCfgChange(); salvarDados(); gRender();
+}
+window.tecFornSetDate = tecFornSetDate;
+
+// Setar duração (DU) de uma etapa -- calcula novo fim a partir do início
+function tecFornSetDU(fornId, tecId, du) {
+  var f = (ESTADO.cfg.tecFornecedores||[]).find(function(f){return f.id===fornId;});
+  if (!f) return;
+  if (!f.rowOverrides) f.rowOverrides = {};
+  var sub = (gSt.projFases[0]?.rows?.tec?.subs||{})[tecId];
+  var start = (f.rowOverrides[tecId] && f.rowOverrides[tecId].start) || (sub && sub.start);
+  if (!start) return;
+  // Calcular fim adicionando DU dias úteis
+  var d = new Date(start); var count = 0;
+  while (count < du - 1) { d = G.addD(d, 1); if (!CALENDARIO.isNaoUtil(d)) count++; }
+  while (CALENDARIO.isNaoUtil(d)) d = G.addD(d, 1);
+  if (!f.rowOverrides[tecId]) f.rowOverrides[tecId] = {start:start, end:G.fmtISO(d)};
+  else f.rowOverrides[tecId].end = G.fmtISO(d);
+  onCfgChange(); salvarDados(); gRender();
+}
+window.tecFornSetDU = tecFornSetDU;
+
+// Renderização unificada dos fornecedores no Gantt
+function tecFornRenderUnificado(projFase, _r, _i, _o, _e, forns) {
+  var tecSubs  = projFase.rows && projFase.rows.tec && projFase.rows.tec.subs;
+  var tecIds   = G.TEC_IDS   || ['koTec','epTec','apTec','exTec'];
+  var tecNames = G.TEC_NAMES || {koTec:'KO',epTec:'EP',apTec:'AP',exTec:'EX'};
+  var tecColors = G.C_TEC   || [];
+  var colTec   = darkenHex(COR.TEC_MOM, .72);
+  var bgTec    = COR.TEC_BG;
+  var allExpanded = forns.some(function(f){return f.expanded!==false;});
+
+  // Barra principal TÉCNICOS com span global
+  var globalSpan = tecFornGetGlobalSpan(tecSubs);
+  if (globalSpan && globalSpan.start && globalSpan.end) {
+    var gxi = gPx(globalSpan.start);
+    var gxw = Math.max((G.diff(globalSpan.start,globalSpan.end)+1)*gSt.dayW, gSt.dayW);
+    var gPayload = encodeURIComponent(JSON.stringify({type:'proj',phId:projFase.id,rowId:'tec',subId:null}));
+    var gBarHtml = gBar(gxi,gxw,G.ROW_H,colTec,new Date(G.fmtISO(globalSpan.start)),new Date(G.fmtISO(globalSpan.end)),null,gPayload,true);
+    _i[_i.length-1] = '<div style="height:'+G.ROW_H+'px;background:'+bgTec+';position:relative;border-bottom:1px solid #E4EAF0;overflow:hidden;">'+gGridLines(_o,_e,false)+gBarHtml+'</div>';
+    var _tb = '<button onclick="tecFornToggleAll()" style="background:none;border:1px solid #C8D4D8;border-radius:3px;cursor:pointer;font-size:8px;padding:0 3px;color:#6A7A8A;font-weight:700;line-height:14px;margin-left:2px;">'+(allExpanded?'\u25b2\u25b2':'\u25bc\u25bc')+'</button>';
+    if (_r.length > 0) { var _ls=_r.length-1; var _old=_r[_ls]; var _cut=_old.lastIndexOf('</div>'); if(_cut>=0) _r[_ls]=_old.slice(0,_cut)+_tb+'</div>'+_old.slice(_cut+6); }
+  }
+
+  // Uma linha por fornecedor
+  forns.forEach(function(forn) {
+    var dates  = tecFornGetDates(forn, tecSubs);
+    var bgH    = '#EDF4F0', bdH = '#D8EAE0';
+    var ROW_H  = G.ROW_H;
+
+    // Header do fornecedor -- com botão para abrir modal
+    _r.push('<div class="gn1" style="height:'+ROW_H+'px;background:'+bgH+';display:flex;align-items:center;padding:0 5px 0 20px;border-bottom:1px solid '+bdH+';border-right:2px solid #C0C8D4;gap:4px;">'
+      +'<span style="width:4px;height:4px;border-radius:1px;background:'+colTec+';flex-shrink:0;"></span>'
+      +'<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700;color:'+colTec+';font-size:9px;">'+forn.nome+'</span>'
+      +'<span style="font-size:8px;color:#6A9A7A;flex-shrink:0;margin-right:2px;">'+forn.disciplinaId+'</span>'
+      +'<button data-fid="'+forn.id+'" onclick="tecFornAbrirModal(this.dataset.fid)" style="background:none;border:1px solid #C8D4D8;border-radius:3px;cursor:pointer;font-size:8px;padding:0 5px;color:#6A7A8A;font-weight:700;line-height:14px;">\u270e</button>'
+      +'</div>');
+
+    // Linha da barra unificada
+    var barLine = '<div style="height:'+ROW_H+'px;background:'+bgH+';position:relative;border-bottom:1px solid '+bdH+';overflow:hidden;">'
+      +gGridLines(_o,_e,false);
+
+    // Construir segmentos sequenciais
+    var segments = [];
+    tecIds.forEach(function(tecId, ti) {
+      var d = dates[tecId];
+      if (!d || !d.start || !d.end) return;
+      segments.push({tecId:tecId, ti:ti, start:d.start, end:d.end});
+    });
+
+    if (segments.length > 0) {
+      var totalStart = segments[0].start;
+      var totalEnd   = segments[segments.length-1].end;
+      var totalXi    = gPx(totalStart);
+      var totalXw    = Math.max((G.diff(totalStart,totalEnd)+1)*gSt.dayW, gSt.dayW);
+      var barH       = Math.max(10, ROW_H-8);
+      var barTop     = (ROW_H-barH)/2;
+
+      // Container da barra total (fundo)
+      barLine += '<div style="position:absolute;top:'+barTop+'px;left:'+totalXi+'px;width:'+totalXw+'px;height:'+barH+'px;border-radius:4px;background:rgba(0,0,0,.08);">';
+
+      // Cada segmento
+      segments.forEach(function(seg, si) {
+        var segXi  = gPx(seg.start) - totalXi;
+        var segXw  = Math.max((G.diff(seg.start,seg.end)+1)*gSt.dayW, gSt.dayW);
+        var isKO   = seg.tecId === 'koTec';
+        var alpha  = 1.0 - si*0.18;
+        var segColor = tecColors[seg.ti % Math.max(1,tecColors.length)] || colTec;
+        var du     = CALENDARIO.contarDU(new Date(seg.start), new Date(seg.end));
+        var lbl    = (tecNames[seg.tecId]||seg.tecId)+' '+G.fmtBR(new Date(seg.end));
+
+        // Drag payload para mover o segmento inteiro
+        var dragMove  = encodeURIComponent(JSON.stringify({type:'tecForn',fornId:forn.id,tecId:seg.tecId,mode:'segMove'}));
+        // Drag payload para junção (fim do seg / início do próximo)
+        var dragJoint = si < segments.length-1
+          ? encodeURIComponent(JSON.stringify({type:'tecFornJoint',fornId:forn.id,tecId:seg.tecId,nextTecId:segments[si+1].tecId}))
+          : null;
+        // Click para abrir modal
+        var clickP    = encodeURIComponent(JSON.stringify({type:'tecFornModal',fornId:forn.id}));
+
+        if (isKO) {
+          // Losango para kickoff
+          var cx = segXi + segXw/2, cy = barH/2, size = Math.min(barH*0.4, 8);
+          barLine += '<div data-click="'+clickP+'" title="Kickoff · '+G.fmtBR(new Date(seg.start))+'" '
+            +'style="position:absolute;left:'+segXi+'px;width:'+segXw+'px;height:'+barH+'px;cursor:pointer;display:flex;align-items:center;justify-content:center;">'
+            +'<svg width="'+segXw+'" height="'+barH+'" style="overflow:visible;">'
+            +'<polygon points="'+cx+','+(cy-size)+' '+(cx+size)+','+cy+' '+cx+','+(cy+size)+' '+(cx-size)+','+cy+'" fill="'+segColor+'" stroke="rgba(255,255,255,.3)" stroke-width="1"/>'
+            +'</svg></div>';
+        } else {
+          // Segmento retangular
+          var radius_l = si===1 ? '0' : '0'; // sem radius interno
+          var radius_r = si===segments.length-1 ? '0 4px 4px 0' : '0';
+          barLine += '<div data-drag="'+dragMove+'" data-mode="move" data-click="'+clickP+'" '
+            +'style="position:absolute;left:'+segXi+'px;width:'+segXw+'px;height:'+barH+'px;'
+            +'background:'+segColor+';opacity:'+alpha+';cursor:grab;'
+            +'border-radius:'+radius_r+';display:flex;align-items:center;overflow:visible;">'
+            // Texto prazo à direita do segmento
+            +'<span style="position:absolute;left:calc(100% + 3px);white-space:nowrap;font-size:8px;font-weight:700;color:'+segColor+';pointer-events:none;">'+lbl+'</span>';
+
+          // Handle de junção (borda direita) se não é o último
+          if (dragJoint) {
+            barLine += '<div data-drag="'+dragJoint+'" data-mode="joint" '
+              +'style="position:absolute;right:-4px;top:-2px;bottom:-2px;width:8px;cursor:ew-resize;z-index:2;'
+              +'background:rgba(255,255,255,.4);border-radius:2px;border:1px solid rgba(255,255,255,.6);"></div>';
+          }
+          barLine += '</div>';
+        }
+      });
+
+      barLine += '</div>'; // fechar container
+    }
+
+    barLine += '</div>';
+    _i.push(barLine);
+  });
+}
+window.tecFornRenderUnificado = tecFornRenderUnificado;
+
+function tecFornApplyJoint(fornId, tecId, nextTecId, deltaDays) {
+  var f = (ESTADO.cfg.tecFornecedores||[]).find(function(f){return f.id===fornId;});
+  if (!f) return;
+  if (!f.rowOverrides) f.rowOverrides = {};
+  var sub1 = (gSt.projFases[0]?.rows?.tec?.subs||{})[tecId];
+  var sub2 = (gSt.projFases[0]?.rows?.tec?.subs||{})[nextTecId];
+  var d1 = f.rowOverrides[tecId] || {start:sub1?sub1.start:null, end:sub1?sub1.end:null};
+  var d2 = f.rowOverrides[nextTecId] || {start:sub2?sub2.start:null, end:sub2?sub2.end:null};
+  if (!d1.end || !d2.start) return;
+  // Mover fim do seg1 e início do seg2
+  var newEnd1   = G.addD(new Date(d1.end),   deltaDays);
+  var newStart2 = G.addD(new Date(d2.start), deltaDays);
+  while (CALENDARIO.isNaoUtil(newEnd1))   newEnd1   = G.addD(newEnd1,   deltaDays>0?1:-1);
+  while (CALENDARIO.isNaoUtil(newStart2)) newStart2 = G.addD(newStart2, deltaDays>0?1:-1);
+  f.rowOverrides[tecId]     = {start:d1.start, end:G.fmtISO(newEnd1)};
+  f.rowOverrides[nextTecId] = {start:G.fmtISO(newStart2), end:d2.end};
+  onCfgChange(); salvarDados(); gRender();
+}
+window.tecFornApplyJoint = tecFornApplyJoint;
 
 function abrirGerenciarTPO() {
   document.getElementById('modal-tpo-overlay')?.remove();
