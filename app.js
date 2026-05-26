@@ -1,4 +1,4 @@
-// Planejamento de Obra A|W — v5.12.12
+// Planejamento de Obra A|W — v5.12.13
 const SB_URL='https://ejneanfveoctdlltjnrs.supabase.co';
 const SB_KEY='sb_publishable_vZApDmF_C-heCrm8fXJ_XA_ATmMO3YP';
 const SB_HDR={'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
@@ -284,7 +284,7 @@ document.addEventListener("DOMContentLoaded",()=>{buildVizSidebar()}),document.a
       +'<span style="width:4px;height:4px;border-radius:1px;background:'+colTec+';flex-shrink:0;"></span>'
       +'<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700;color:'+colTec+';font-size:9px;">'+forn.nome+'</span>'
       +'<span style="font-size:8px;color:#6A9A7A;flex-shrink:0;margin-right:2px;">'+forn.disciplinaId+'</span>'
-      +'<button data-fid="'+forn.id+'" onclick="tecFornToggle(this.dataset.fid)" style="background:none;border:1px solid #C8D4D8;border-radius:3px;cursor:pointer;font-size:8px;padding:0 4px;color:#6A7A8A;font-weight:700;line-height:14px;">'+(isExp?'\u25b2':'\u25bc')+'</button>'
+      +'<button data-fid="'+forn.id+'" onclick="tecFornAbrirModal(this.dataset.fid)" style="background:none;border:1px solid #C8D4D8;border-radius:3px;cursor:pointer;font-size:8px;padding:0 5px;color:#6A7A8A;font-weight:700;line-height:14px;margin-right:2px;">✎</button>'+'<button data-fid="'+forn.id+'" onclick="tecFornToggle(this.dataset.fid)" style="background:none;border:1px solid #C8D4D8;border-radius:3px;cursor:pointer;font-size:8px;padding:0 4px;color:#6A7A8A;font-weight:700;line-height:14px;">'+(isExp?'\u25b2':'\u25bc')+'</button>'
       +'</div>');
 
     // Barra span do fornecedor
@@ -397,7 +397,7 @@ gObraRow(t,o,e,r,i),t.expanded&&(t.disciplinas||[]).forEach((a,n)=>{a&&a.ativo&&
   }
   spacer(2);
 })(a, _fi);
-gObraRow(a,o,e,r,i),t&&!a.expanded||(a.disciplinas||[]).forEach((t,n)=>{t&&t.ativo&&gDiscRow(a,t,n,o,e,r,i)})})}spacer(4);const l=[];for(let t=new Date(gSt.axisStart);G.diff(gSt.axisStart,t)<gSt.totalDays;t=G.addD(t,1))l.push({date:new Date(t),dow:t.getDay(),isSat:6===t.getDay(),isSun:0===t.getDay(),buffer:!1});const c=`<div style="display:flex;flex-shrink:0;height:100%;width:${e}px;">${buildDayHeaderHTML(l,gSt.dayW)}</div>`,p=`<div style="position:absolute;right:6px;top:50%;transform:translateY(-50%);display:flex;align-items:center;gap:4px;z-index:20;background:#fff;border-radius:5px;padding:2px 4px;box-shadow:0 1px 4px rgba(0,0,0,.12);"><button onclick="gZoom(-1)" style="width:26px;height:22px;border:1px solid #C8CDD8;background:#F4F5F8;color:#3A4A5A;border-radius:4px;cursor:pointer;font-size:15px;line-height:1;">−</button><span style="font-size:9px;font-weight:700;color:#5A6A7A;min-width:32px;text-align:center;">${Math.round(100*gSt.zoom)}%</span><button onclick="gZoom(1)" style="width:26px;height:22px;border:1px solid #C8CDD8;background:#F4F5F8;color:#3A4A5A;border-radius:4px;cursor:pointer;font-size:15px;line-height:1;">+</button></div>`,f=document.getElementById("g-tl-col"),u=f?f.scrollTop:0,g=f?f.scrollLeft:0;t.innerHTML=` <div style="flex-shrink:0;display:flex;height:40px;border-bottom:2px solid #009EA8;background:#fff;position:relative;"><div style="width:${G.LBL_W}px;flex-shrink:0;border-right:2px solid #C0C8D4;background:#FAFBFC;"></div><div id="g-wk-hdr-wrap" style="flex:1;overflow:hidden;position:relative;">${c}${p}</div></div><div style="flex:1;display:flex;min-height:0;overflow:hidden;"><div id="g-lbl-col" style="width:${G.LBL_W}px;flex-shrink:0;overflow:hidden;position:relative;z-index:2;"></div><div id="g-col-resize-handle" style="width:4px;flex-shrink:0;cursor:col-resize;background:transparent;transition:background .15s;" onmouseenter="this.style.background='rgba(0,222,219,.3)'" onmouseleave="this.style.background='transparent'"></div><div id="g-tl-col" style="flex:1;overflow:auto;min-width:0;"><div id="g-tl-inner" style="min-width:${gSt.zoom>1?e+"px":"100%"};"></div></div></div>`;const m=document.getElementById("g-lbl-col"),b=document.getElementById("g-tl-col"),x=(()=>{const t=document.createElement("div");t.style.cssText="overflow:scroll;width:50px;height:50px;position:absolute;visibility:hidden;",document.body.appendChild(t);const e=t.offsetWidth-t.clientWidth;return document.body.removeChild(t),e||15})();m.innerHTML=r.join("")+`<div style="height:${x}px;background:#FAFBFC;border-right:2px solid #C0C8D4;flex-shrink:0;"></div>`;const h=document.getElementById("g-tl-inner");h?h.innerHTML=i.join(""):b.innerHTML=i.join("");const A=document.getElementById("g-wk-hdr-wrap");b.addEventListener("scroll",()=>{m.scrollTop=b.scrollTop,A&&(A.scrollLeft=b.scrollLeft)}),(u||g)&&(b.scrollTop=u,b.scrollLeft=g,m.scrollTop=u),b.querySelectorAll("[data-drag]").forEach(t=>t.addEventListener("mousedown",gDragStart,{passive:!1})),b.querySelectorAll("[data-click]").forEach(t=>t.addEventListener("click",gBarClickHandler));gInitColResize();gAplicarTypo();var _gn1els=m.querySelectorAll(".gn1");_gn1els.forEach(function(el){el.style.setProperty("text-transform","none","important");el.style.setProperty("letter-spacing","normal","important");});m.querySelectorAll("[data-po-open]").forEach(function(el){el.addEventListener("click",function(){abrirModalPreObra(parseInt(el.dataset.poOpen));});});m.querySelectorAll("[data-po-disc-open]").forEach(function(el){el.addEventListener("click",function(){_poOpenDiscModal(parseInt(el.dataset.poFi),parseInt(el.dataset.poDi));});});}function gZoomIn(){window.gZoom(1)}function gZoomOut(){window.gZoom(-1)}function gZoomReset(){gSt.zoom=1,gRender()}function gSnapForDrag(t){if("tecForn"===t.type){return{fornId:t.fornId,tecId:t.tecId};}if("tecFornJoint"===t.type){return{fornId:t.fornId,tecId:t.tecId,nextTecId:t.nextTecId};}if("proj"===t.type){const e=gSt.projFases.find(e=>e.id==t.phId);if(!e)return{};const o={};return["arq","tec"].forEach(t=>{const a=e.rows[t],n="tec"===t?G.TEC_IDS:G.SUB_IDS;o[t]={start:G.clone(a.start),end:G.clone(a.end),subs:n.reduce((t,e)=>({...t,[e]:{start:G.clone(a.subs[e]?.start||a.start),end:G.clone(a.subs[e]?.end||a.end)}}),{})}}),{ph:e,snap:o}}if("obra"===t.type||"obraSub"===t.type){const e=gSt.obraFases.find(e=>e.id==t.phId);return e?{of:e,obraSnap:{start:G.clone(e.obra.start),end:G.clone(e.obra.end)}}:{}}if("preObra"===t.type){console.log("[SNAP preObra] t="+JSON.stringify(t));const fi=t.faseIdx||0;const of=gSt.obraFases[fi];return of?{poFase:of,poFaseIdx:fi,poDu:(ESTADO.cfg.obraFases[fi]&&ESTADO.cfg.obraFases[fi].preObra&&ESTADO.cfg.obraFases[fi].preObra.du)||5}:{};}return{}}function gApplyDrag(t,e,o,a){if("tecForn"===t.type){tecFornApplyDrag(t.fornId,t.tecId,e,o);return;}if("tecFornModal"===t.type){tecFornAbrirModal(t.fornId);return;}if("tecFornJoint"===t.type){tecFornApplyJoint(t.fornId,t.tecId,t.nextTecId,o);return;}if("proj"===t.type){const{ph:n,snap:r}=a;if(!n)return;if("tec"===t.rowId&&t.subId){const a=r.tec.subs[t.subId];let i=G.addD(a.start,o),s=G.addD(a.end,o);for(;CALENDARIO.isNaoUtil(i);)i=G.addD(i,1);for(;CALENDARIO.isNaoUtil(s);)s=G.addD(s,1);n.rows.tec.subs[t.subId]="move"===e?{start:i,end:s}:"right"===e?{start:a.start,end:s}:{start:i,end:a.end};const d=gCascadeTec(n.rows.tec.subs,n.rows.arq.subs,gSt._visitaDate,n.tecChains,n.tecChainTypes);return n.rows.tec.subs=d,n.rows.tec.start=new Date(Math.min(...G.TEC_IDS.map(t=>G.ms(d[t].start)))),void(n.rows.tec.end=new Date(Math.max(...G.TEC_IDS.map(t=>G.ms(d[t].end)))))}if("tec"===t.rowId&&!t.subId)return;const i="arq"===t.rowId?"tec":"arq";if(t.subId){const a=G.SUB_IDS.indexOf(t.subId);let s=G.SUB_IDS.reduce((e,o)=>({...e,[o]:{...r[t.rowId].subs[o]}}),{});if("move"===e)s[t.subId]={start:G.addD(r[t.rowId].subs[t.subId].start,o),end:G.addD(r[t.rowId].subs[t.subId].end,o)},s=G.cascade(s,n.chains[t.rowId],a,n.chainTypes?.[t.rowId],n.chainSrc?.[t.rowId]);else if("left"===e){const e=G.addD(r[t.rowId].subs[t.subId].start,o);s[t.subId]={start:G.diff(e,r[t.rowId].subs[t.subId].end)<1?G.addD(r[t.rowId].subs[t.subId].end,-1):e,end:r[t.rowId].subs[t.subId].end}}else s[t.subId]={start:r[t.rowId].subs[t.subId].start,end:G.addD(r[t.rowId].subs[t.subId].end,o)},s=G.cascade(s,n.chains[t.rowId],a,n.chainTypes?.[t.rowId],n.chainSrc?.[t.rowId]);if(n.rows[t.rowId]={...n.rows[t.rowId],subs:s,...G.parentSpan(s)},n.locked&&"tec"!==i){let s=G.SUB_IDS.reduce((t,e)=>({...t,[e]:{...r[i].subs[e]}}),{});const d=r[i].subs[t.subId];if("move"===e)s[t.subId]={start:G.addD(d.start,o),end:G.addD(d.end,o)},s=G.cascade(s,n.chains[i],a,n.chainTypes?.[i],n.chainSrc?.[i]);else if("left"===e){const e=G.addD(d.start,o);s[t.subId]={start:G.diff(e,d.end)<1?G.addD(d.end,-1):e,end:d.end}}else s[t.subId]={start:d.start,end:G.addD(d.end,o)},s=G.cascade(s,n.chains[i],a,n.chainTypes?.[i],n.chainSrc?.[i]);n.rows[i]={...n.rows[i],subs:s,...G.parentSpan(s)}}}else if("move"===e){const e=G.SUB_IDS.reduce((e,a)=>({...e,[a]:{start:G.addD(r[t.rowId].subs[a].start,o),end:G.addD(r[t.rowId].subs[a].end,o)}}),{});if(n.rows[t.rowId]={...n.rows[t.rowId],start:G.addD(r[t.rowId].start,o),end:G.addD(r[t.rowId].end,o),subs:e},n.locked&&"tec"!==i){const t=G.SUB_IDS.reduce((t,e)=>({...t,[e]:{start:G.addD(r[i].subs[e].start,o),end:G.addD(r[i].subs[e].end,o)}}),{});n.rows[i]={...n.rows[i],start:G.addD(r[i].start,o),end:G.addD(r[i].end,o),subs:t}}}}if("preObra"===t.type){const{poFase,poFaseIdx,poDu}=a;console.log("[DRAG preObra] delta="+o+" poDu="+poDu+" poFase="+!!poFase);if(!poFase)return;const delta=Math.round(o);const newDu=Math.max(1,poDu-delta);if(ESTADO.cfg.obraFases[poFaseIdx]&&ESTADO.cfg.obraFases[poFaseIdx].preObra){ESTADO.cfg.obraFases[poFaseIdx].preObra.du=newDu;}}if("obra"===t.type){const{of:t,obraSnap:n}=a;if(!t)return;if("move"===e)t.obra.start=G.addD(n.start,o),t.obra.end=G.addD(n.end,o);else if("left"===e){const e=G.addD(n.start,o);t.obra.start=G.diff(e,n.end)<7?G.addD(n.end,-7):e}else{const e=G.addD(n.end,o);t.obra.end=G.diff(n.start,e)<7?G.addD(n.start,7):e}}}function gDragStart(t){const e=t.currentTarget,o=e.dataset.mode||"move",a=JSON.parse(decodeURIComponent(e.dataset.drag));t.preventDefault(),t.stopPropagation();const n=t.clientX,r=gSnapForDrag(a);let i=!1;const onMove=t=>{const e=Math.round((t.clientX-n)/gSt.dayW);0!==e&&(i=!0),gApplyDrag(a,o,e,r),gRender()},onUp=()=>{if(document.removeEventListener("mousemove",onMove),document.removeEventListener("mouseup",onUp),i&&"move"===o&&"proj"===a.type&&a.subId){const t=gSt.projFases.find(t=>t.id==a.phId);if(t)if("tec"===a.rowId)t.tecChains||(t.tecChains={}),t.tecChains[a.subId]||(t.tecChains[a.subId]={st:!0,en:!0}),t.tecChains[a.subId].st=!1,gRender();else{const e=G.SUB_IDS.indexOf(a.subId);if(e>0){if(t.chains[a.rowId][e-1]=!1,t.locked){const o="arq"===a.rowId?"tec":"arq";t.chains[o]&&(t.chains[o][e-1]=!1)}gRender()}}}i&&"obra"===a.type&&(gSt._obraVinculadaCond=!1);if(i&&"preObra"===a.type)salvarDados();gSt.obraFases.forEach((t,e)=>{const o=ESTADO.cfg.obraFases[e];o&&(o.inicio=G.fmtISO(t.obra.start),o.prazo=G.diff(t.obra.start,t.obra.end));const a=document.getElementById(`obra-f${e}-inicio`),n=document.getElementById(`obra-f${e}-prazo`);a&&(a.value=G.fmtISO(t.obra.start)),n&&(n.value=G.diff(t.obra.start,t.obra.end))}),atualizarResumoDatas()};document.addEventListener("mousemove",onMove),document.addEventListener("mouseup",onUp)}function gBarClickHandler(t){t._wasDrag||gShowPop(JSON.parse(decodeURIComponent(t.currentTarget.dataset.click)),t.currentTarget.getBoundingClientRect())}let _alocPendingChanges=false;
+gObraRow(a,o,e,r,i),t&&!a.expanded||(a.disciplinas||[]).forEach((t,n)=>{t&&t.ativo&&gDiscRow(a,t,n,o,e,r,i)})})}spacer(4);const l=[];for(let t=new Date(gSt.axisStart);G.diff(gSt.axisStart,t)<gSt.totalDays;t=G.addD(t,1))l.push({date:new Date(t),dow:t.getDay(),isSat:6===t.getDay(),isSun:0===t.getDay(),buffer:!1});const c=`<div style="display:flex;flex-shrink:0;height:100%;width:${e}px;">${buildDayHeaderHTML(l,gSt.dayW)}</div>`,p=`<div style="position:absolute;right:6px;top:50%;transform:translateY(-50%);display:flex;align-items:center;gap:4px;z-index:20;background:#fff;border-radius:5px;padding:2px 4px;box-shadow:0 1px 4px rgba(0,0,0,.12);"><button onclick="gZoom(-1)" style="width:26px;height:22px;border:1px solid #C8CDD8;background:#F4F5F8;color:#3A4A5A;border-radius:4px;cursor:pointer;font-size:15px;line-height:1;">−</button><span style="font-size:9px;font-weight:700;color:#5A6A7A;min-width:32px;text-align:center;">${Math.round(100*gSt.zoom)}%</span><button onclick="gZoom(1)" style="width:26px;height:22px;border:1px solid #C8CDD8;background:#F4F5F8;color:#3A4A5A;border-radius:4px;cursor:pointer;font-size:15px;line-height:1;">+</button></div>`,f=document.getElementById("g-tl-col"),u=f?f.scrollTop:0,g=f?f.scrollLeft:0;t.innerHTML=` <div style="flex-shrink:0;display:flex;height:40px;border-bottom:2px solid #009EA8;background:#fff;position:relative;"><div style="width:${G.LBL_W}px;flex-shrink:0;border-right:2px solid #C0C8D4;background:#FAFBFC;"></div><div id="g-wk-hdr-wrap" style="flex:1;overflow:hidden;position:relative;">${c}${p}</div></div><div style="flex:1;display:flex;min-height:0;overflow:hidden;"><div id="g-lbl-col" style="width:${G.LBL_W}px;flex-shrink:0;overflow:hidden;position:relative;z-index:2;"></div><div id="g-col-resize-handle" style="width:4px;flex-shrink:0;cursor:col-resize;background:transparent;transition:background .15s;" onmouseenter="this.style.background='rgba(0,222,219,.3)'" onmouseleave="this.style.background='transparent'"></div><div id="g-tl-col" style="flex:1;overflow:auto;min-width:0;"><div id="g-tl-inner" style="min-width:${gSt.zoom>1?e+"px":"100%"};"></div></div></div>`;const m=document.getElementById("g-lbl-col"),b=document.getElementById("g-tl-col"),x=(()=>{const t=document.createElement("div");t.style.cssText="overflow:scroll;width:50px;height:50px;position:absolute;visibility:hidden;",document.body.appendChild(t);const e=t.offsetWidth-t.clientWidth;return document.body.removeChild(t),e||15})();m.innerHTML=r.join("")+`<div style="height:${x}px;background:#FAFBFC;border-right:2px solid #C0C8D4;flex-shrink:0;"></div>`;const h=document.getElementById("g-tl-inner");h?h.innerHTML=i.join(""):b.innerHTML=i.join("");const A=document.getElementById("g-wk-hdr-wrap");b.addEventListener("scroll",()=>{m.scrollTop=b.scrollTop,A&&(A.scrollLeft=b.scrollLeft)}),(u||g)&&(b.scrollTop=u,b.scrollLeft=g,m.scrollTop=u),b.querySelectorAll("[data-drag]").forEach(t=>t.addEventListener("mousedown",gDragStart,{passive:!1})),b.querySelectorAll("[data-click]").forEach(t=>t.addEventListener("click",gBarClickHandler));gInitColResize();gAplicarTypo();var _gn1els=m.querySelectorAll(".gn1");_gn1els.forEach(function(el){el.style.setProperty("text-transform","none","important");el.style.setProperty("letter-spacing","normal","important");});m.querySelectorAll("[data-po-open]").forEach(function(el){el.addEventListener("click",function(){abrirModalPreObra(parseInt(el.dataset.poOpen));});});m.querySelectorAll("[data-po-disc-open]").forEach(function(el){el.addEventListener("click",function(){_poOpenDiscModal(parseInt(el.dataset.poFi),parseInt(el.dataset.poDi));});});}function gZoomIn(){window.gZoom(1)}function gZoomOut(){window.gZoom(-1)}function gZoomReset(){gSt.zoom=1,gRender()}function gSnapForDrag(t){if("tecForn"===t.type){return{fornId:t.fornId,tecId:t.tecId};}if("tecFornAll"===t.type){return{fornId:t.fornId};}if("tecFornJoint"===t.type){return{fornId:t.fornId,tecId:t.tecId,nextTecId:t.nextTecId};}if("proj"===t.type){const e=gSt.projFases.find(e=>e.id==t.phId);if(!e)return{};const o={};return["arq","tec"].forEach(t=>{const a=e.rows[t],n="tec"===t?G.TEC_IDS:G.SUB_IDS;o[t]={start:G.clone(a.start),end:G.clone(a.end),subs:n.reduce((t,e)=>({...t,[e]:{start:G.clone(a.subs[e]?.start||a.start),end:G.clone(a.subs[e]?.end||a.end)}}),{})}}),{ph:e,snap:o}}if("obra"===t.type||"obraSub"===t.type){const e=gSt.obraFases.find(e=>e.id==t.phId);return e?{of:e,obraSnap:{start:G.clone(e.obra.start),end:G.clone(e.obra.end)}}:{}}if("preObra"===t.type){console.log("[SNAP preObra] t="+JSON.stringify(t));const fi=t.faseIdx||0;const of=gSt.obraFases[fi];return of?{poFase:of,poFaseIdx:fi,poDu:(ESTADO.cfg.obraFases[fi]&&ESTADO.cfg.obraFases[fi].preObra&&ESTADO.cfg.obraFases[fi].preObra.du)||5}:{};}return{}}function gApplyDrag(t,e,o,a){if("tecForn"===t.type){tecFornApplyDrag(t.fornId,t.tecId,e,o);return;}if("tecFornAll"===t.type){tecFornApplyAll(t.fornId,e);return;}if("tecFornModal"===t.type){tecFornAbrirModal(t.fornId);return;}if("tecFornJoint"===t.type){tecFornApplyJoint(t.fornId,t.tecId,t.nextTecId,o);return;}if("proj"===t.type){const{ph:n,snap:r}=a;if(!n)return;if("tec"===t.rowId&&t.subId){const a=r.tec.subs[t.subId];let i=G.addD(a.start,o),s=G.addD(a.end,o);for(;CALENDARIO.isNaoUtil(i);)i=G.addD(i,1);for(;CALENDARIO.isNaoUtil(s);)s=G.addD(s,1);n.rows.tec.subs[t.subId]="move"===e?{start:i,end:s}:"right"===e?{start:a.start,end:s}:{start:i,end:a.end};const d=gCascadeTec(n.rows.tec.subs,n.rows.arq.subs,gSt._visitaDate,n.tecChains,n.tecChainTypes);return n.rows.tec.subs=d,n.rows.tec.start=new Date(Math.min(...G.TEC_IDS.map(t=>G.ms(d[t].start)))),void(n.rows.tec.end=new Date(Math.max(...G.TEC_IDS.map(t=>G.ms(d[t].end)))))}if("tec"===t.rowId&&!t.subId)return;const i="arq"===t.rowId?"tec":"arq";if(t.subId){const a=G.SUB_IDS.indexOf(t.subId);let s=G.SUB_IDS.reduce((e,o)=>({...e,[o]:{...r[t.rowId].subs[o]}}),{});if("move"===e)s[t.subId]={start:G.addD(r[t.rowId].subs[t.subId].start,o),end:G.addD(r[t.rowId].subs[t.subId].end,o)},s=G.cascade(s,n.chains[t.rowId],a,n.chainTypes?.[t.rowId],n.chainSrc?.[t.rowId]);else if("left"===e){const e=G.addD(r[t.rowId].subs[t.subId].start,o);s[t.subId]={start:G.diff(e,r[t.rowId].subs[t.subId].end)<1?G.addD(r[t.rowId].subs[t.subId].end,-1):e,end:r[t.rowId].subs[t.subId].end}}else s[t.subId]={start:r[t.rowId].subs[t.subId].start,end:G.addD(r[t.rowId].subs[t.subId].end,o)},s=G.cascade(s,n.chains[t.rowId],a,n.chainTypes?.[t.rowId],n.chainSrc?.[t.rowId]);if(n.rows[t.rowId]={...n.rows[t.rowId],subs:s,...G.parentSpan(s)},n.locked&&"tec"!==i){let s=G.SUB_IDS.reduce((t,e)=>({...t,[e]:{...r[i].subs[e]}}),{});const d=r[i].subs[t.subId];if("move"===e)s[t.subId]={start:G.addD(d.start,o),end:G.addD(d.end,o)},s=G.cascade(s,n.chains[i],a,n.chainTypes?.[i],n.chainSrc?.[i]);else if("left"===e){const e=G.addD(d.start,o);s[t.subId]={start:G.diff(e,d.end)<1?G.addD(d.end,-1):e,end:d.end}}else s[t.subId]={start:d.start,end:G.addD(d.end,o)},s=G.cascade(s,n.chains[i],a,n.chainTypes?.[i],n.chainSrc?.[i]);n.rows[i]={...n.rows[i],subs:s,...G.parentSpan(s)}}}else if("move"===e){const e=G.SUB_IDS.reduce((e,a)=>({...e,[a]:{start:G.addD(r[t.rowId].subs[a].start,o),end:G.addD(r[t.rowId].subs[a].end,o)}}),{});if(n.rows[t.rowId]={...n.rows[t.rowId],start:G.addD(r[t.rowId].start,o),end:G.addD(r[t.rowId].end,o),subs:e},n.locked&&"tec"!==i){const t=G.SUB_IDS.reduce((t,e)=>({...t,[e]:{start:G.addD(r[i].subs[e].start,o),end:G.addD(r[i].subs[e].end,o)}}),{});n.rows[i]={...n.rows[i],start:G.addD(r[i].start,o),end:G.addD(r[i].end,o),subs:t}}}}if("preObra"===t.type){const{poFase,poFaseIdx,poDu}=a;console.log("[DRAG preObra] delta="+o+" poDu="+poDu+" poFase="+!!poFase);if(!poFase)return;const delta=Math.round(o);const newDu=Math.max(1,poDu-delta);if(ESTADO.cfg.obraFases[poFaseIdx]&&ESTADO.cfg.obraFases[poFaseIdx].preObra){ESTADO.cfg.obraFases[poFaseIdx].preObra.du=newDu;}}if("obra"===t.type){const{of:t,obraSnap:n}=a;if(!t)return;if("move"===e)t.obra.start=G.addD(n.start,o),t.obra.end=G.addD(n.end,o);else if("left"===e){const e=G.addD(n.start,o);t.obra.start=G.diff(e,n.end)<7?G.addD(n.end,-7):e}else{const e=G.addD(n.end,o);t.obra.end=G.diff(n.start,e)<7?G.addD(n.start,7):e}}}function gDragStart(t){const e=t.currentTarget,o=e.dataset.mode||"move",a=JSON.parse(decodeURIComponent(e.dataset.drag));t.preventDefault(),t.stopPropagation();const n=t.clientX,r=gSnapForDrag(a);let i=!1;const _dragThresh=3;const onMove=t=>{const _rawPx=t.clientX-n;const e=Math.round(_rawPx/gSt.dayW);Math.abs(_rawPx)>_dragThresh&&e!==0&&(i=!0);if(i&&e!==0){gApplyDrag(a,o,e,r);gRender();}},onUp=()=>{if(document.removeEventListener("mousemove",onMove),document.removeEventListener("mouseup",onUp),i&&"move"===o&&"proj"===a.type&&a.subId){const t=gSt.projFases.find(t=>t.id==a.phId);if(t)if("tec"===a.rowId)t.tecChains||(t.tecChains={}),t.tecChains[a.subId]||(t.tecChains[a.subId]={st:!0,en:!0}),t.tecChains[a.subId].st=!1,gRender();else{const e=G.SUB_IDS.indexOf(a.subId);if(e>0){if(t.chains[a.rowId][e-1]=!1,t.locked){const o="arq"===a.rowId?"tec":"arq";t.chains[o]&&(t.chains[o][e-1]=!1)}gRender()}}}i&&"obra"===a.type&&(gSt._obraVinculadaCond=!1);if(i&&"preObra"===a.type)salvarDados();gSt.obraFases.forEach((t,e)=>{const o=ESTADO.cfg.obraFases[e];o&&(o.inicio=G.fmtISO(t.obra.start),o.prazo=G.diff(t.obra.start,t.obra.end));const a=document.getElementById(`obra-f${e}-inicio`),n=document.getElementById(`obra-f${e}-prazo`);a&&(a.value=G.fmtISO(t.obra.start)),n&&(n.value=G.diff(t.obra.start,t.obra.end))}),atualizarResumoDatas()};document.addEventListener("mousemove",onMove),document.addEventListener("mouseup",onUp)}function gBarClickHandler(t){t._wasDrag||gShowPop(JSON.parse(decodeURIComponent(t.currentTarget.dataset.click)),t.currentTarget.getBoundingClientRect())}let _alocPendingChanges=false;
 function gClosePopForce(){document.getElementById("g-pop-el")?.remove(),document.getElementById("g-pop-mod-panel")?.remove(),document.removeEventListener("mousedown",gPopOutside),_alocDs=null,_alocPendingChanges=false}
 function gClosePop(){
   if(_alocDs&&_alocPendingChanges){
@@ -2234,146 +2234,7 @@ function tecFornGetView() {
 window.tecFornGetView = tecFornGetView;
 
 // Modal por fornecedor (visão unificada)
-function tecFornAbrirModal(fornId) {
-  var f = (ESTADO.cfg.tecFornecedores||[]).find(function(f){return f.id===fornId;});
-  if (!f) return;
-  var sub = (gSt.projFases[0]?.rows?.tec?.subs) || {};
-  var tecIds   = G.TEC_IDS   || ['koTec','epTec','apTec','exTec'];
-  var tecNames = G.TEC_NAMES || {koTec:'Kickoff',epTec:'EP',apTec:'AP',exTec:'EX'};
-  var colTec   = darkenHex(COR.TEC_MOM, .72);
-  var contato  = f.contato || {};
 
-  // Remover modal anterior
-  var existing = document.getElementById('modal-tec-forn');
-  if (existing) existing.remove();
-
-  var overlay = document.createElement('div');
-  overlay.id = 'modal-tec-forn';
-  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9500;display:flex;align-items:center;justify-content:center;';
-  overlay.addEventListener('click', function(e){ if(e.target===overlay) overlay.remove(); });
-
-  var modal = document.createElement('div');
-  modal.style.cssText = 'background:var(--bg-panel,#fff);border-radius:12px;width:520px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3);font-family:var(--body,sans-serif);';
-
-  // Header
-  var hdr = document.createElement('div');
-  hdr.style.cssText = 'display:flex;align-items:center;gap:10px;padding:16px 20px;border-bottom:1px solid var(--border);background:'+colTec+';border-radius:12px 12px 0 0;';
-  hdr.innerHTML = '<div style="flex:1;">'
-    +'<div style="font-family:var(--font);font-size:13px;font-weight:700;color:#fff;">'+f.nome+'</div>'
-    +'<div style="font-size:10px;color:rgba(255,255,255,.7);margin-top:2px;">'+f.disciplinaId+' · '+(DISCIPLINAS_TEC.find(function(d){return d.id===f.disciplinaId;})||{}).label+'</div>'
-    +'</div>'
-    +'<button onclick="document.getElementById(\'modal-tec-forn\').remove()" style="background:none;border:none;cursor:pointer;color:rgba(255,255,255,.7);font-size:20px;line-height:1;padding:0;">✕</button>';
-  modal.appendChild(hdr);
-
-  // Body
-  var body = document.createElement('div');
-  body.style.cssText = 'padding:20px;';
-
-  // Contato
-  var ctDiv = document.createElement('div');
-  ctDiv.style.cssText = 'display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border);';
-  [{key:'nome',lbl:'Contato'},{key:'tel',lbl:'Telefone'},{key:'email',lbl:'E-mail'}].forEach(function(field) {
-    var wrap = document.createElement('div');
-    var lbl = document.createElement('label');
-    lbl.style.cssText = 'font-size:9px;font-weight:700;text-transform:uppercase;color:var(--txt-muted);display:block;margin-bottom:4px;letter-spacing:.06em;';
-    lbl.textContent = field.lbl;
-    var inp = document.createElement('input');
-    inp.type='text'; inp.value=contato[field.key]||''; inp.placeholder=field.lbl;
-    inp.style.cssText = 'width:100%;border:1px solid var(--border);border-radius:4px;padding:5px 8px;font-size:11px;background:var(--bg-surface2);color:var(--txt);box-sizing:border-box;font-family:var(--body);';
-    inp.addEventListener('change', (function(k){ return function(){ tecFornSetContato(f.id,k,this.value); }; })(field.key));
-    wrap.appendChild(lbl); wrap.appendChild(inp); ctDiv.appendChild(wrap);
-  });
-  body.appendChild(ctDiv);
-
-  // Título etapas
-  var etLbl = document.createElement('div');
-  etLbl.style.cssText = 'font-size:9px;font-weight:700;text-transform:uppercase;color:var(--txt-muted);margin-bottom:12px;letter-spacing:.06em;';
-  etLbl.textContent = 'Etapas';
-  body.appendChild(etLbl);
-
-  // Linhas de etapa
-  var tecColors = G.C_TEC || [];
-  tecIds.forEach(function(tecId, ti) {
-    var d = tecFornGetDates(f, sub);
-    var dt = d[tecId];
-    var start = dt.start, end = dt.end;
-    var duVal = start && end ? CALENDARIO.contarDU(new Date(start), new Date(end)) : 1;
-    var barColor = tecColors[ti % Math.max(1,tecColors.length)] || colTec;
-
-    var row = document.createElement('div');
-    row.style.cssText = 'display:grid;grid-template-columns:100px 1fr 80px 1fr 60px;gap:8px;align-items:center;margin-bottom:10px;';
-
-    // Label
-    var lbl = document.createElement('div');
-    lbl.style.cssText = 'display:flex;align-items:center;gap:6px;';
-    var dot = document.createElement('span');
-    dot.style.cssText = 'width:10px;height:10px;border-radius:'+(tecId==='koTec'?'50%':'2px')+';background:'+barColor+';flex-shrink:0;';
-    var txt = document.createElement('span');
-    txt.style.cssText = 'font-size:11px;font-weight:700;color:var(--txt);';
-    txt.textContent = tecNames[tecId]||tecId;
-    lbl.appendChild(dot); lbl.appendChild(txt);
-    row.appendChild(lbl);
-
-    // Início
-    var iniWrap = document.createElement('div');
-    var iniLbl = document.createElement('div');
-    iniLbl.style.cssText = 'font-size:9px;color:var(--txt-muted);margin-bottom:3px;';
-    iniLbl.textContent = 'Início';
-    var iniInp = document.createElement('input');
-    iniInp.type='date'; iniInp.value=start||'';
-    iniInp.style.cssText = 'width:100%;border:1px solid var(--border);border-radius:4px;padding:4px 6px;font-size:11px;background:var(--bg-surface2);color:var(--txt);box-sizing:border-box;';
-    iniInp.addEventListener('change', (function(fid,tid){ return function(){
-      tecFornSetDate(fid,tid,'start',this.value); tecFornAbrirModal(fid);
-    };})(f.id, tecId));
-    iniWrap.appendChild(iniLbl); iniWrap.appendChild(iniInp);
-    row.appendChild(iniWrap);
-
-    // DU
-    var duWrap = document.createElement('div');
-    var duLbl = document.createElement('div');
-    duLbl.style.cssText = 'font-size:9px;color:var(--txt-muted);margin-bottom:3px;';
-    duLbl.textContent = 'DU';
-    var duInp = document.createElement('input');
-    duInp.type='number'; duInp.min=1; duInp.value=duVal;
-    duInp.style.cssText = 'width:100%;border:1px solid var(--border);border-radius:4px;padding:4px 6px;font-size:11px;background:var(--bg-surface2);color:var(--txt);box-sizing:border-box;';
-    if (tecId==='koTec') { duInp.value=1; duInp.disabled=true; duInp.style.opacity='.5'; }
-    duInp.addEventListener('change', (function(fid,tid){ return function(){
-      tecFornSetDU(fid,tid,parseInt(this.value)||1); tecFornAbrirModal(fid);
-    };})(f.id, tecId));
-    duWrap.appendChild(duLbl); duWrap.appendChild(duInp);
-    row.appendChild(duWrap);
-
-    // Fim
-    var fimWrap = document.createElement('div');
-    var fimLbl = document.createElement('div');
-    fimLbl.style.cssText = 'font-size:9px;color:var(--txt-muted);margin-bottom:3px;';
-    fimLbl.textContent = 'Fim';
-    var fimInp = document.createElement('input');
-    fimInp.type='date'; fimInp.value=end||'';
-    fimInp.style.cssText = 'width:100%;border:1px solid var(--border);border-radius:4px;padding:4px 6px;font-size:11px;background:var(--bg-surface2);color:var(--txt);box-sizing:border-box;';
-    fimInp.addEventListener('change', (function(fid,tid){ return function(){
-      tecFornSetDate(fid,tid,'end',this.value); tecFornAbrirModal(fid);
-    };})(f.id, tecId));
-    fimWrap.appendChild(fimLbl); fimWrap.appendChild(fimInp);
-    row.appendChild(fimWrap);
-
-    // Reset
-    var rstBtn = document.createElement('button');
-    rstBtn.textContent='↺';
-    rstBtn.title='Restaurar original';
-    rstBtn.style.cssText='background:none;border:1px solid var(--border);border-radius:4px;cursor:pointer;color:var(--txt-muted);height:28px;width:28px;font-size:13px;margin-top:14px;';
-    rstBtn.addEventListener('click', (function(fid,tid){ return function(){
-      tecFornResetOvr(fid,tid); tecFornAbrirModal(fid);
-    };})(f.id, tecId));
-    row.appendChild(rstBtn);
-
-    body.appendChild(row);
-  });
-
-  modal.appendChild(body);
-  overlay.appendChild(modal);
-  document.body.appendChild(overlay);
-}
 window.tecFornAbrirModal = tecFornAbrirModal;
 
 // Setar data de início ou fim de uma etapa
@@ -2407,119 +2268,7 @@ function tecFornSetDU(fornId, tecId, du) {
 window.tecFornSetDU = tecFornSetDU;
 
 // Renderização unificada dos fornecedores no Gantt
-function tecFornRenderUnificado(projFase, _r, _i, _o, _e, forns) {
-  var tecSubs  = projFase.rows && projFase.rows.tec && projFase.rows.tec.subs;
-  var tecIds   = G.TEC_IDS   || ['koTec','epTec','apTec','exTec'];
-  var tecNames = G.TEC_NAMES || {koTec:'KO',epTec:'EP',apTec:'AP',exTec:'EX'};
-  var tecColors = G.C_TEC   || [];
-  var colTec   = darkenHex(COR.TEC_MOM, .72);
-  var bgTec    = COR.TEC_BG;
-  var allExpanded = forns.some(function(f){return f.expanded!==false;});
 
-  // Barra principal TÉCNICOS com span global
-  var globalSpan = tecFornGetGlobalSpan(tecSubs);
-  if (globalSpan && globalSpan.start && globalSpan.end) {
-    var gxi = gPx(globalSpan.start);
-    var gxw = Math.max((G.diff(globalSpan.start,globalSpan.end)+1)*gSt.dayW, gSt.dayW);
-    var gPayload = encodeURIComponent(JSON.stringify({type:'proj',phId:projFase.id,rowId:'tec',subId:null}));
-    var gBarHtml = gBar(gxi,gxw,G.ROW_H,colTec,new Date(G.fmtISO(globalSpan.start)),new Date(G.fmtISO(globalSpan.end)),null,gPayload,true);
-    _i[_i.length-1] = '<div style="height:'+G.ROW_H+'px;background:'+bgTec+';position:relative;border-bottom:1px solid #E4EAF0;overflow:hidden;">'+gGridLines(_o,_e,false)+gBarHtml+'</div>';
-    var _tb = '<button onclick="tecFornToggleAll()" style="background:none;border:1px solid #C8D4D8;border-radius:3px;cursor:pointer;font-size:8px;padding:0 3px;color:#6A7A8A;font-weight:700;line-height:14px;margin-left:2px;">'+(allExpanded?'\u25b2\u25b2':'\u25bc\u25bc')+'</button>';
-    if (_r.length > 0) { var _ls=_r.length-1; var _old=_r[_ls]; var _cut=_old.lastIndexOf('</div>'); if(_cut>=0) _r[_ls]=_old.slice(0,_cut)+_tb+'</div>'+_old.slice(_cut+6); }
-  }
-
-  // Uma linha por fornecedor
-  forns.forEach(function(forn) {
-    var dates  = tecFornGetDates(forn, tecSubs);
-    var bgH    = '#EDF4F0', bdH = '#D8EAE0';
-    var ROW_H  = G.ROW_H;
-
-    // Header do fornecedor -- com botão para abrir modal
-    _r.push('<div class="gn1" style="height:'+ROW_H+'px;background:'+bgH+';display:flex;align-items:center;padding:0 5px 0 20px;border-bottom:1px solid '+bdH+';border-right:2px solid #C0C8D4;gap:4px;">'
-      +'<span style="width:4px;height:4px;border-radius:1px;background:'+colTec+';flex-shrink:0;"></span>'
-      +'<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700;color:'+colTec+';font-size:9px;">'+forn.nome+'</span>'
-      +'<span style="font-size:8px;color:#6A9A7A;flex-shrink:0;margin-right:2px;">'+forn.disciplinaId+'</span>'
-      +'<button data-fid="'+forn.id+'" onclick="tecFornAbrirModal(this.dataset.fid)" style="background:none;border:1px solid #C8D4D8;border-radius:3px;cursor:pointer;font-size:8px;padding:0 5px;color:#6A7A8A;font-weight:700;line-height:14px;">\u270e</button>'
-      +'</div>');
-
-    // Linha da barra unificada
-    var barLine = '<div style="height:'+ROW_H+'px;background:'+bgH+';position:relative;border-bottom:1px solid '+bdH+';overflow:hidden;">'
-      +gGridLines(_o,_e,false);
-
-    // Construir segmentos sequenciais
-    var segments = [];
-    tecIds.forEach(function(tecId, ti) {
-      var d = dates[tecId];
-      if (!d || !d.start || !d.end) return;
-      segments.push({tecId:tecId, ti:ti, start:d.start, end:d.end});
-    });
-
-    if (segments.length > 0) {
-      var totalStart = segments[0].start;
-      var totalEnd   = segments[segments.length-1].end;
-      var totalXi    = gPx(totalStart);
-      var totalXw    = Math.max((G.diff(totalStart,totalEnd)+1)*gSt.dayW, gSt.dayW);
-      var barH       = Math.max(10, ROW_H-8);
-      var barTop     = (ROW_H-barH)/2;
-
-      // Container da barra total (fundo)
-      barLine += '<div style="position:absolute;top:'+barTop+'px;left:'+totalXi+'px;width:'+totalXw+'px;height:'+barH+'px;border-radius:4px;background:rgba(0,0,0,.08);">';
-
-      // Cada segmento
-      segments.forEach(function(seg, si) {
-        var segXi  = gPx(seg.start) - totalXi;
-        var segXw  = Math.max((G.diff(seg.start,seg.end)+1)*gSt.dayW, gSt.dayW);
-        var isKO   = seg.tecId === 'koTec';
-        var alpha  = 1.0 - si*0.18;
-        var segColor = tecColors[seg.ti % Math.max(1,tecColors.length)] || colTec;
-        var du     = CALENDARIO.contarDU(new Date(seg.start), new Date(seg.end));
-        var lbl    = (tecNames[seg.tecId]||seg.tecId)+' '+G.fmtBR(new Date(seg.end));
-
-        // Drag payload para mover o segmento inteiro
-        var dragMove  = encodeURIComponent(JSON.stringify({type:'tecForn',fornId:forn.id,tecId:seg.tecId,mode:'segMove'}));
-        // Drag payload para junção (fim do seg / início do próximo)
-        var dragJoint = si < segments.length-1
-          ? encodeURIComponent(JSON.stringify({type:'tecFornJoint',fornId:forn.id,tecId:seg.tecId,nextTecId:segments[si+1].tecId}))
-          : null;
-        // Click para abrir modal
-        var clickP    = encodeURIComponent(JSON.stringify({type:'tecFornModal',fornId:forn.id}));
-
-        if (isKO) {
-          // Losango para kickoff
-          var cx = segXi + segXw/2, cy = barH/2, size = Math.min(barH*0.4, 8);
-          barLine += '<div data-click="'+clickP+'" title="Kickoff · '+G.fmtBR(new Date(seg.start))+'" '
-            +'style="position:absolute;left:'+segXi+'px;width:'+segXw+'px;height:'+barH+'px;cursor:pointer;display:flex;align-items:center;justify-content:center;">'
-            +'<svg width="'+segXw+'" height="'+barH+'" style="overflow:visible;">'
-            +'<polygon points="'+cx+','+(cy-size)+' '+(cx+size)+','+cy+' '+cx+','+(cy+size)+' '+(cx-size)+','+cy+'" fill="'+segColor+'" stroke="rgba(255,255,255,.3)" stroke-width="1"/>'
-            +'</svg></div>';
-        } else {
-          // Segmento retangular
-          var radius_l = si===1 ? '0' : '0'; // sem radius interno
-          var radius_r = si===segments.length-1 ? '0 4px 4px 0' : '0';
-          barLine += '<div data-drag="'+dragMove+'" data-mode="move" data-click="'+clickP+'" '
-            +'style="position:absolute;left:'+segXi+'px;width:'+segXw+'px;height:'+barH+'px;'
-            +'background:'+segColor+';opacity:'+alpha+';cursor:grab;'
-            +'border-radius:'+radius_r+';display:flex;align-items:center;overflow:visible;">'
-            // Texto prazo à direita do segmento
-            +'<span style="position:absolute;left:calc(100% + 3px);white-space:nowrap;font-size:8px;font-weight:700;color:'+segColor+';pointer-events:none;">'+lbl+'</span>';
-
-          // Handle de junção (borda direita) se não é o último
-          if (dragJoint) {
-            barLine += '<div data-drag="'+dragJoint+'" data-mode="joint" '
-              +'style="position:absolute;right:-4px;top:-2px;bottom:-2px;width:8px;cursor:ew-resize;z-index:2;'
-              +'background:rgba(255,255,255,.4);border-radius:2px;border:1px solid rgba(255,255,255,.6);"></div>';
-          }
-          barLine += '</div>';
-        }
-      });
-
-      barLine += '</div>'; // fechar container
-    }
-
-    barLine += '</div>';
-    _i.push(barLine);
-  });
-}
 window.tecFornRenderUnificado = tecFornRenderUnificado;
 
 function tecFornApplyJoint(fornId, tecId, nextTecId, deltaDays) {
@@ -2541,6 +2290,392 @@ function tecFornApplyJoint(fornId, tecId, nextTecId, deltaDays) {
   onCfgChange(); salvarDados(); gRender();
 }
 window.tecFornApplyJoint = tecFornApplyJoint;
+
+// ── Modal único de fornecedor (versão separada e unificada) ─────────────────
+function tecFornAbrirModal(fornId) {
+  var f = (ESTADO.cfg.tecFornecedores||[]).find(function(f){return f.id===fornId;});
+  if (!f) return;
+  var subs = (gSt.projFases[0]?.rows?.tec?.subs) || {};
+  var tecIds   = G.TEC_IDS   || ['koTec','epTec','apTec','exTec'];
+  var tecNames = G.TEC_NAMES || {koTec:'Kickoff',epTec:'EP',apTec:'AP',exTec:'EX'};
+  var tecColors = G.C_TEC || [];
+  var colTec   = darkenHex(COR.TEC_MOM, .72);
+  var contato  = f.contato || {};
+  var existing = document.getElementById('modal-tec-forn');
+  if (existing) existing.remove();
+
+  var overlay = document.createElement('div');
+  overlay.id = 'modal-tec-forn';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.52);z-index:9500;display:flex;align-items:center;justify-content:center;';
+  overlay.addEventListener('click', function(e){ if(e.target===overlay) overlay.remove(); });
+
+  var modal = document.createElement('div');
+  modal.style.cssText = 'background:var(--bg-panel,#fff);border-radius:12px;width:560px;max-height:88vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.32);font-family:var(--body,sans-serif);';
+
+  // Header
+  var hdr = document.createElement('div');
+  hdr.style.cssText = 'padding:16px 20px;border-bottom:3px solid '+colTec+';display:flex;align-items:flex-start;gap:10px;';
+  var disc = (DISCIPLINAS_TEC||[]).find(function(d){return d.id===f.disciplinaId;});
+  hdr.innerHTML = '<div style="width:10px;height:10px;border-radius:2px;background:'+colTec+';flex-shrink:0;margin-top:3px;"></div>'
+    +'<div style="flex:1;">'
+    +'<div style="font-family:var(--font);font-size:13px;font-weight:700;color:var(--txt);">'+f.nome+'</div>'
+    +'<div style="font-size:10px;color:var(--txt-muted);margin-top:2px;">'+f.disciplinaId+(disc?' · '+disc.label:'')+'</div>'
+    +'</div>'
+    +'<button onclick="document.getElementById(\'modal-tec-forn\').remove()" style="background:none;border:none;cursor:pointer;color:var(--txt-muted);font-size:18px;line-height:1;padding:0;">✕</button>';
+  modal.appendChild(hdr);
+
+  var body = document.createElement('div');
+  body.style.cssText = 'padding:18px 20px;';
+
+  // Contato
+  var ctSec = document.createElement('div');
+  ctSec.style.cssText = 'margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid var(--border);';
+  var ctTitle = document.createElement('div');
+  ctTitle.style.cssText = 'font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--txt-muted);margin-bottom:10px;';
+  ctTitle.textContent = 'Ponto de contato';
+  ctSec.appendChild(ctTitle);
+  var ctGrid = document.createElement('div');
+  ctGrid.style.cssText = 'display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;';
+  [{key:'nome',lbl:'Nome',ph:'Nome do contato'},{key:'tel',lbl:'Telefone',ph:'(11) 00000-0000'},{key:'email',lbl:'E-mail',ph:'email@empresa.com'}].forEach(function(field) {
+    var w = document.createElement('div');
+    var l = document.createElement('label');
+    l.style.cssText = 'font-size:9px;font-weight:600;text-transform:uppercase;color:var(--txt-muted);display:block;margin-bottom:3px;letter-spacing:.05em;';
+    l.textContent = field.lbl;
+    var inp = document.createElement('input');
+    inp.type='text'; inp.value=contato[field.key]||''; inp.placeholder=field.ph;
+    inp.style.cssText = 'width:100%;border:1px solid var(--border);border-radius:4px;padding:5px 8px;font-size:11px;background:var(--bg-surface2);color:var(--txt);box-sizing:border-box;font-family:var(--body);';
+    inp.addEventListener('change',(function(k){return function(){tecFornSetContato(f.id,k,this.value);f.contato=f.contato||{};f.contato[k]=this.value;};})(field.key));
+    w.appendChild(l); w.appendChild(inp); ctGrid.appendChild(w);
+  });
+  ctSec.appendChild(ctGrid);
+  body.appendChild(ctSec);
+
+  // Etapas
+  var etTitle = document.createElement('div');
+  etTitle.style.cssText = 'font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--txt-muted);margin-bottom:12px;';
+  etTitle.textContent = 'Etapas — datas encadeadas';
+  body.appendChild(etTitle);
+
+  // Montar datas atuais
+  function getDates() {
+    var result = {};
+    tecIds.forEach(function(tid) {
+      var sub = subs[tid];
+      var ovr = f.rowOverrides && f.rowOverrides[tid];
+      result[tid] = {
+        start: (ovr&&ovr.start) || (sub&&sub.start) || '',
+        end:   (ovr&&ovr.end)   || (sub&&sub.end)   || ''
+      };
+    });
+    return result;
+  }
+
+  // Rerender etapas
+  function renderEtapas() {
+    etGrid.innerHTML = '';
+    var dates = getDates();
+
+    tecIds.forEach(function(tecId, ti) {
+      var d = dates[tecId];
+      var barColor = tecColors[ti%Math.max(1,tecColors.length)] || colTec;
+      var du = d.start && d.end ? CALENDARIO.contarDU(new Date(d.start), new Date(d.end)) : 0;
+      var isKO = tecId === 'koTec';
+
+      // Linha
+      var row = document.createElement('div');
+      row.style.cssText = 'display:grid;grid-template-columns:90px 1fr 60px 1fr 30px;gap:6px;align-items:center;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--border);';
+
+      // Label com cor
+      var lbl = document.createElement('div');
+      lbl.style.cssText = 'display:flex;align-items:center;gap:6px;';
+      var dot = document.createElement('span');
+      if (isKO) {
+        dot.innerHTML = '<svg width="12" height="12" viewBox="0 0 12 12"><polygon points="6,0 12,6 6,12 0,6" fill="'+colTec+'"/></svg>';
+      } else {
+        dot.style.cssText = 'width:12px;height:10px;border-radius:2px;background:'+barColor+';flex-shrink:0;border-top:3px solid '+darkenHex(barColor,-.3)+';';
+      }
+      var ltxt = document.createElement('span');
+      ltxt.style.cssText = 'font-size:11px;font-weight:700;color:var(--txt);';
+      ltxt.textContent = tecNames[tecId]||tecId;
+      lbl.appendChild(dot); lbl.appendChild(ltxt);
+      row.appendChild(lbl);
+
+      // Início
+      var iniW = document.createElement('div');
+      var iniL = document.createElement('div');
+      iniL.style.cssText = 'font-size:9px;color:var(--txt-muted);margin-bottom:2px;';
+      iniL.textContent = 'Início';
+      var iniI = document.createElement('input');
+      iniI.type='date'; iniI.value=d.start||'';
+      iniI.style.cssText = 'width:100%;border:1px solid var(--border);border-radius:4px;padding:4px 5px;font-size:11px;background:var(--bg-surface2);color:var(--txt);box-sizing:border-box;';
+      if (isKO) {
+        iniI.addEventListener('change',(function(tid){return function(){
+          if (!f.rowOverrides) f.rowOverrides={};
+          if (!f.rowOverrides[tid]) f.rowOverrides[tid]={};
+          f.rowOverrides[tid].start=this.value;
+          // KO sempre 1 dia
+          f.rowOverrides[tid].end=this.value;
+          // Encadear: próxima etapa começa no dia seguinte útil
+          tecFornEncadear(f.id, tid);
+          onCfgChange(); salvarDados(); gRender(); renderEtapas();
+        };})(tecId));
+      } else {
+        iniI.readOnly = true;
+        iniI.style.opacity = '.6';
+        iniI.title = 'Calculado automaticamente pelo encadeamento';
+      }
+      iniW.appendChild(iniL); iniW.appendChild(iniI); row.appendChild(iniW);
+
+      // DU
+      var duW = document.createElement('div');
+      var duL = document.createElement('div');
+      duL.style.cssText = 'font-size:9px;color:var(--txt-muted);margin-bottom:2px;';
+      duL.textContent = 'DU';
+      var duI = document.createElement('input');
+      duI.type='number'; duI.min=1; duI.value=isKO?1:Math.max(1,du);
+      duI.style.cssText = 'width:100%;border:1px solid var(--border);border-radius:4px;padding:4px 5px;font-size:11px;background:var(--bg-surface2);color:var(--txt);box-sizing:border-box;text-align:center;';
+      if (isKO) { duI.value=1; duI.disabled=true; duI.style.opacity='.5'; }
+      duI.addEventListener('change',(function(tid){return function(){
+        var newDU = Math.max(1,parseInt(this.value)||1);
+        tecFornSetDU(f.id, tid, newDU);
+        tecFornEncadear(f.id, tid);
+        onCfgChange(); salvarDados(); gRender(); renderEtapas();
+      };})(tecId));
+      duW.appendChild(duL); duW.appendChild(duI); row.appendChild(duW);
+
+      // Fim
+      var fimW = document.createElement('div');
+      var fimL = document.createElement('div');
+      fimL.style.cssText = 'font-size:9px;color:var(--txt-muted);margin-bottom:2px;';
+      fimL.textContent = 'Fim';
+      var fimI = document.createElement('input');
+      fimI.type='date'; fimI.value=d.end||'';
+      fimI.style.cssText = 'width:100%;border:1px solid var(--border);border-radius:4px;padding:4px 5px;font-size:11px;background:var(--bg-surface2);color:var(--txt);box-sizing:border-box;';
+      fimI.readOnly = true; fimI.style.opacity = '.6';
+      fimI.title = 'Calculado automaticamente';
+      fimW.appendChild(fimL); fimW.appendChild(fimI); row.appendChild(fimW);
+
+      // Reset
+      var rst = document.createElement('button');
+      rst.textContent='↺'; rst.title='Restaurar';
+      rst.style.cssText='background:none;border:1px solid var(--border);border-radius:4px;cursor:pointer;color:var(--txt-muted);height:28px;width:28px;font-size:12px;margin-top:12px;';
+      rst.addEventListener('click',(function(tid){return function(){
+        if(f.rowOverrides) delete f.rowOverrides[tid];
+        // Resetar encadeamento
+        onCfgChange(); salvarDados(); gRender(); renderEtapas();
+      };})(tecId));
+      row.appendChild(rst);
+      etGrid.appendChild(row);
+    });
+  }
+
+  var etGrid = document.createElement('div');
+  body.appendChild(etGrid);
+  renderEtapas();
+
+  modal.appendChild(body);
+
+  // Footer
+  var foot = document.createElement('div');
+  foot.style.cssText = 'padding:12px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;';
+  var btnClose = document.createElement('button');
+  btnClose.textContent = 'Fechar';
+  btnClose.style.cssText = 'height:32px;padding:0 20px;background:var(--accent,#00AEDF);color:#fff;border:none;border-radius:6px;font-family:var(--font);font-size:10px;font-weight:700;cursor:pointer;letter-spacing:.06em;text-transform:uppercase;';
+  btnClose.addEventListener('click',function(){overlay.remove();});
+  foot.appendChild(btnClose);
+  modal.appendChild(foot);
+
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+}
+window.tecFornAbrirModal = tecFornAbrirModal;
+
+// Encadear etapas: após alterar tecId, atualiza as próximas
+function tecFornEncadear(fornId, fromTecId) {
+  var f = (ESTADO.cfg.tecFornecedores||[]).find(function(f){return f.id===fornId;});
+  if (!f) return;
+  if (!f.rowOverrides) f.rowOverrides = {};
+  var subs  = (gSt.projFases[0]?.rows?.tec?.subs) || {};
+  var tecIds = G.TEC_IDS || ['koTec','epTec','apTec','exTec'];
+  var fromIdx = tecIds.indexOf(fromTecId);
+  if (fromIdx < 0) return;
+  // Propagar a partir do próximo
+  for (var i = fromIdx; i < tecIds.length - 1; i++) {
+    var curId  = tecIds[i];
+    var nxtId  = tecIds[i+1];
+    var curSub = subs[curId];
+    var curOvr = f.rowOverrides[curId] || {start:curSub&&curSub.start, end:curSub&&curSub.end};
+    if (!curOvr.end) break;
+    // Próxima começa no dia útil seguinte
+    var nxtStart = G.addD(new Date(curOvr.end), 1);
+    while (CALENDARIO.isNaoUtil(nxtStart)) nxtStart = G.addD(nxtStart, 1);
+    var nxtSub = subs[nxtId];
+    var nxtOvr = f.rowOverrides[nxtId] || {start:nxtSub&&nxtSub.start, end:nxtSub&&nxtSub.end};
+    // Manter duração original do próximo
+    var oldStart = new Date(nxtOvr.start||nxtStart);
+    var oldEnd   = new Date(nxtOvr.end||nxtStart);
+    var du = CALENDARIO.contarDU(oldStart, oldEnd);
+    // Calcular novo fim mantendo DU
+    var nxtEnd = new Date(nxtStart); var cnt=0;
+    while (cnt < du-1) { nxtEnd=G.addD(nxtEnd,1); if(!CALENDARIO.isNaoUtil(nxtEnd)) cnt++; }
+    f.rowOverrides[nxtId] = {start:G.fmtISO(nxtStart), end:G.fmtISO(nxtEnd)};
+  }
+}
+window.tecFornEncadear = tecFornEncadear;
+
+// ── Renderização unificada (proposta 4: borda-topo + tom progressivo) ───────
+function tecFornRenderUnificado(projFase, _r, _i, _o, _e, forns) {
+  var tecSubs   = projFase.rows && projFase.rows.tec && projFase.rows.tec.subs;
+  var tecIds    = G.TEC_IDS    || ['koTec','epTec','apTec','exTec'];
+  var tecNames  = G.TEC_NAMES  || {koTec:'KO',epTec:'EP',apTec:'AP',exTec:'EX'};
+  var tecColors = G.C_TEC      || [];
+  var colTec    = darkenHex(COR.TEC_MOM, .72);
+  var bgTec     = COR.TEC_BG;
+  var allExpanded = forns.some(function(f){return f.expanded!==false;});
+
+  // Barra principal TÉCNICOS
+  var globalSpan = tecFornGetGlobalSpan(tecSubs);
+  if (globalSpan && globalSpan.start && globalSpan.end) {
+    var gxi = gPx(globalSpan.start);
+    var gxw = Math.max((G.diff(globalSpan.start,globalSpan.end)+1)*gSt.dayW, gSt.dayW);
+    var gPayload = encodeURIComponent(JSON.stringify({type:'proj',phId:projFase.id,rowId:'tec',subId:null}));
+    var gBarH = gBar(gxi,gxw,G.ROW_H,colTec,new Date(G.fmtISO(globalSpan.start)),new Date(G.fmtISO(globalSpan.end)),null,gPayload,true);
+    _i[_i.length-1] = '<div style="height:'+G.ROW_H+'px;background:'+bgTec+';position:relative;border-bottom:1px solid #E4EAF0;overflow:hidden;">'+gGridLines(_o,_e,false)+gBarH+'</div>';
+    var _tb = '<button onclick="tecFornToggleAll()" style="background:none;border:1px solid #C8D4D8;border-radius:3px;cursor:pointer;font-size:8px;padding:0 3px;color:#6A7A8A;font-weight:700;line-height:14px;margin-left:2px;">'+(allExpanded?'\u25b2\u25b2':'\u25bc\u25bc')+'</button>';
+    if (_r.length > 0) { var _ls=_r.length-1; var _old=_r[_ls]; var _cut=_old.lastIndexOf('</div>'); if(_cut>=0) _r[_ls]=_old.slice(0,_cut)+_tb+'</div>'+_old.slice(_cut+6); }
+  }
+
+  // Paleta proposta 4: borda-topo escura + tons progressivos
+  var tonsProp4 = [
+    {bg:'#1a5c4a', border:'#0f3d2e'},  // EP: escuro
+    {bg:'#4aaa84', border:'#0f3d2e'},  // AP: médio
+    {bg:'#7dd4b2', border:'#0f3d2e'},  // EX: claro
+  ];
+
+  forns.forEach(function(forn) {
+    var dates = tecFornGetDates(forn, tecSubs);
+    var bgH = '#EDF4F0', bdH = '#D8EAE0';
+    var ROW_H = G.ROW_H;
+    var clickP = encodeURIComponent(JSON.stringify({type:'tecFornModal',fornId:forn.id}));
+
+    // Header
+    _r.push('<div class="gn1" style="height:'+ROW_H+'px;background:'+bgH+';display:flex;align-items:center;padding:0 5px 0 20px;border-bottom:1px solid '+bdH+';border-right:2px solid #C0C8D4;gap:4px;">'
+      +'<span style="width:4px;height:4px;border-radius:1px;background:'+colTec+';flex-shrink:0;"></span>'
+      +'<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700;color:'+colTec+';font-size:9px;">'+forn.nome+'</span>'
+      +'<span style="font-size:8px;color:#6A9A7A;flex-shrink:0;margin-right:2px;">'+forn.disciplinaId+'</span>'
+      +'<button data-fid="'+forn.id+'" onclick="tecFornAbrirModal(this.dataset.fid)" style="background:none;border:1px solid #C8D4D8;border-radius:3px;cursor:pointer;font-size:8px;padding:0 5px;color:#6A7A8A;font-weight:700;line-height:14px;">\u270e</button>'
+      +'</div>');
+
+    // Linha da barra unificada
+    // Calcular todos os segmentos
+    var segs = [];
+    tecIds.forEach(function(tecId, ti) {
+      var d = dates[tecId];
+      if (!d || !d.start || !d.end) return;
+      segs.push({tecId:tecId, ti:ti, start:d.start, end:d.end});
+    });
+
+    if (segs.length === 0) {
+      _i.push('<div style="height:'+ROW_H+'px;background:'+bgH+';position:relative;border-bottom:1px solid '+bdH+';">'+gGridLines(_o,_e,false)+'</div>');
+      return;
+    }
+
+    var totalStart = segs[0].start;
+    var totalEnd   = segs[segs.length-1].end;
+    var totalXi    = gPx(totalStart);
+    var totalXw    = Math.max((G.diff(totalStart,totalEnd)+1)*gSt.dayW, gSt.dayW);
+    var barH       = Math.max(12, ROW_H-8);
+    var barTop     = (ROW_H-barH)/2;
+
+    // Construir rótulo único à direita: EP 10D · AP 10D · EX 8D
+    var lblParts = [];
+    segs.forEach(function(seg) {
+      if (seg.tecId === 'koTec') return; // KO não entra no rótulo
+      var du = CALENDARIO.contarDU(new Date(seg.start), new Date(seg.end));
+      lblParts.push((tecNames[seg.tecId]||seg.tecId)+' '+du+'D');
+    });
+    var lblStr = lblParts.join(' · ');
+
+    // Drag payload para mover toda a barra (KO->EX)
+    var dragAll  = encodeURIComponent(JSON.stringify({type:'tecFornAll',fornId:forn.id}));
+
+    var barLine = '<div style="height:'+ROW_H+'px;background:'+bgH+';position:relative;border-bottom:1px solid '+bdH+';overflow:visible;">'
+      +gGridLines(_o,_e,false);
+
+    // Container da barra
+    barLine += '<div style="position:absolute;top:'+barTop+'px;left:'+totalXi+'px;width:'+totalXw+'px;height:'+barH+'px;">';
+
+    segs.forEach(function(seg, si) {
+      var segXi = gPx(seg.start) - totalXi;
+      var segXw = Math.max((G.diff(seg.start,seg.end)+1)*gSt.dayW, gSt.dayW);
+      var isKO  = seg.tecId === 'koTec';
+
+      if (isKO) {
+        // Losango escuro
+        var cx = segXi + segXw/2, cy = barH/2;
+        var sz = Math.min(barH*0.38, 7);
+        barLine += '<svg style="position:absolute;left:0;top:0;overflow:visible;" width="'+totalXw+'" height="'+barH+'">'
+          +'<polygon points="'+cx+','+(cy-sz)+' '+(cx+sz)+','+cy+' '+cx+','+(cy+sz)+' '+(cx-sz)+','+cy+'"'
+          +' fill="#0f3d2e" stroke="rgba(255,255,255,.3)" stroke-width="1"/>'
+          +'</svg>';
+      } else {
+        var palIdx = si - 1; // EP=0, AP=1, EX=2
+        if (palIdx < 0) palIdx = 0;
+        var pal = tonsProp4[Math.min(palIdx, tonsProp4.length-1)];
+        var isLast = si === segs.length-1;
+        var br_l = si===1?'0':'0';
+        var br_r = isLast?'0 3px 3px 0':'0';
+
+        // Drag handle de junção (borda direita, exceto no último)
+        var jointP = !isLast
+          ? encodeURIComponent(JSON.stringify({type:'tecFornJoint',fornId:forn.id,tecId:seg.tecId,nextTecId:segs[si+1].tecId}))
+          : null;
+
+        barLine += '<div data-drag="'+dragAll+'" data-mode="move" data-click="'+clickP+'"'
+          +' style="position:absolute;left:'+segXi+'px;width:'+segXw+'px;height:'+barH+'px;'
+          +'background:'+pal.bg+';border-radius:'+br_r+';cursor:grab;overflow:hidden;">'
+          // Borda topo escura (proposta 4)
+          +'<div style="position:absolute;top:0;left:0;right:0;height:3px;background:'+pal.border+';border-radius:2px 2px 0 0;"></div>';
+
+        // Handle de junção
+        if (jointP) {
+          barLine += '<div data-drag="'+jointP+'" data-mode="joint"'
+            +' style="position:absolute;right:-4px;top:0;bottom:0;width:8px;cursor:ew-resize;z-index:3;'
+            +'background:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.7);border-radius:2px;"></div>';
+        }
+        barLine += '</div>';
+      }
+    });
+
+    // Rótulo único à direita da barra total
+    barLine += '<div style="position:absolute;left:'+(totalXw+6)+'px;top:50%;transform:translateY(-50%);white-space:nowrap;font-size:9px;font-weight:700;color:'+colTec+';pointer-events:none;">'+lblStr+'</div>';
+
+    barLine += '</div>'; // fechar container
+    barLine += '</div>'; // fechar linha
+    _i.push(barLine);
+  });
+}
+window.tecFornRenderUnificado = tecFornRenderUnificado;
+
+function tecFornApplyAll(fornId, deltaDays) {
+  var f = (ESTADO.cfg.tecFornecedores||[]).find(function(f){return f.id===fornId;});
+  if (!f) return;
+  if (!f.rowOverrides) f.rowOverrides = {};
+  var subs = (gSt.projFases[0]?.rows?.tec?.subs) || {};
+  var tecIds = G.TEC_IDS || ['koTec','epTec','apTec','exTec'];
+  tecIds.forEach(function(tecId) {
+    var sub = subs[tecId];
+    var ovr = f.rowOverrides[tecId] || {start:sub&&sub.start, end:sub&&sub.end};
+    if (!ovr.start || !ovr.end) return;
+    var ns = G.addD(new Date(ovr.start), deltaDays);
+    var ne = G.addD(new Date(ovr.end),   deltaDays);
+    while (CALENDARIO.isNaoUtil(ns)) ns = G.addD(ns, deltaDays>0?1:-1);
+    while (CALENDARIO.isNaoUtil(ne)) ne = G.addD(ne, deltaDays>0?1:-1);
+    f.rowOverrides[tecId] = {start:G.fmtISO(ns), end:G.fmtISO(ne)};
+  });
+  onCfgChange(); salvarDados(); gRender();
+}
+window.tecFornApplyAll = tecFornApplyAll;
 
 function abrirGerenciarTPO() {
   document.getElementById('modal-tpo-overlay')?.remove();
