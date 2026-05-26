@@ -1,4 +1,4 @@
-// Planejamento de Obra A|W — v5.12.13
+// Planejamento de Obra A|W — v5.12.14
 const SB_URL='https://ejneanfveoctdlltjnrs.supabase.co';
 const SB_KEY='sb_publishable_vZApDmF_C-heCrm8fXJ_XA_ATmMO3YP';
 const SB_HDR={'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
@@ -2358,13 +2358,14 @@ function tecFornAbrirModal(fornId) {
 
   // Montar datas atuais
   function getDates() {
+    function toISO(v) { if(!v) return ''; if(typeof v==='string') return v.slice(0,10); if(v instanceof Date) return G.fmtISO(v); return ''; }
     var result = {};
     tecIds.forEach(function(tid) {
       var sub = subs[tid];
       var ovr = f.rowOverrides && f.rowOverrides[tid];
       result[tid] = {
-        start: (ovr&&ovr.start) || (sub&&sub.start) || '',
-        end:   (ovr&&ovr.end)   || (sub&&sub.end)   || ''
+        start: toISO((ovr&&ovr.start) || (sub&&sub.start)) || '',
+        end:   toISO((ovr&&ovr.end)   || (sub&&sub.end))   || ''
       };
     });
     return result;
