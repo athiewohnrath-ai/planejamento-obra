@@ -287,13 +287,18 @@ document.addEventListener("DOMContentLoaded",()=>{buildVizSidebar()}),document.a
       +'<button data-fid="'+forn.id+'" onclick="tecFornAbrirModal(this.dataset.fid)" style="background:none;border:1px solid #C8D4D8;border-radius:3px;cursor:pointer;font-size:8px;padding:0 5px;color:#6A7A8A;font-weight:700;line-height:14px;margin-right:2px;">✎</button>'+'<button data-fid="'+forn.id+'" onclick="tecFornToggle(this.dataset.fid)" style="background:none;border:1px solid #C8D4D8;border-radius:3px;cursor:pointer;font-size:8px;padding:0 4px;color:#6A7A8A;font-weight:700;line-height:14px;">'+(isExp?'\u25b2':'\u25bc')+'</button>'
       +'</div>');
 
-    // Barra span do fornecedor
+    // Barra span do fornecedor (resumo — arrastável move tudo)
+    var spanDragP = encodeURIComponent(JSON.stringify({type:'tecFornAll',fornId:forn.id}));
     if (span && span.start && span.end) {
       var sxi = gPx(span.start);
       var sxw = Math.max((G.diff(span.start,span.end)+1)*gSt.dayW, gSt.dayW);
-      _i.push('<div style="height:'+G.ROW_H+'px;background:'+bgH+';position:relative;border-bottom:1px solid '+bdH+';overflow:hidden;">'
+      var sBarH = Math.max(8, G.ROW_H - 10);
+      _i.push('<div style="height:'+G.ROW_H+'px;background:'+bgH+';position:relative;border-bottom:1px solid '+bdH+';overflow:visible;">'
         +gGridLines(_o,_e,false)
-        +'<div style="position:absolute;top:50%;transform:translateY(-50%);left:'+sxi+'px;width:'+sxw+'px;height:10px;background:'+colTec+';border-radius:3px;opacity:.5;"></div>'
+        +'<div data-drag="'+spanDragP+'" data-mode="move" data-click="'+spanDragP+'"'
+        +' style="position:absolute;top:50%;margin-top:-'+Math.round(sBarH/2)+'px;left:'+sxi+'px;width:'+sxw+'px;height:'+sBarH+'px;'
+        +'background:'+colTec+';border-radius:4px;opacity:0.45;cursor:grab;pointer-events:auto;">'
+        +'</div>'
         +'</div>');
     } else {
       _i.push('<div style="height:'+G.ROW_H+'px;background:'+bgH+';position:relative;border-bottom:1px solid '+bdH+';">'+gGridLines(_o,_e,false)+'</div>');
@@ -311,17 +316,21 @@ document.addEventListener("DOMContentLoaded",()=>{buildVizSidebar()}),document.a
         var du = CALENDARIO.contarDU(G.parseD(d.start), G.parseD(d.end));
         var lbl = du+'DU · '+G.fmtBR(G.parseD(d.start))+' – '+G.fmtBR(G.parseD(d.end));
         var dragP = encodeURIComponent(JSON.stringify({type:'tecForn',fornId:forn.id,tecId:tecId}));
+        var barHt = Math.max(10, G.SUB_H - 8);
+        var barTop = Math.round((G.SUB_H - barHt) / 2);
         var barH = '<div data-drag="'+dragP+'" data-mode="move" data-click="'+dragP+'" '
-          +'style="position:absolute;top:50%;transform:translateY(-50%);left:'+xi+'px;width:'+xw+'px;'
-          +'height:'+Math.max(10,G.SUB_H-6)+'px;background:'+barColor+';border-radius:3px;cursor:grab;overflow:hidden;display:flex;align-items:center;">'
-          +'<div data-drag="'+dragP+'" data-mode="left" style="position:absolute;left:0;top:0;bottom:0;width:6px;cursor:w-resize;"></div>'
-          +'<span class="gn2" style="flex:1;text-align:center;font-size:9px;font-weight:700;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.4);pointer-events:none;white-space:nowrap;overflow:hidden;padding:0 8px;">'+lbl+'</span>'
-          +'<div data-drag="'+dragP+'" data-mode="right" style="position:absolute;right:0;top:0;bottom:0;width:6px;cursor:e-resize;"></div>'
+          +'style="position:absolute;top:'+barTop+'px;left:'+xi+'px;width:'+xw+'px;'
+          +'height:'+barHt+'px;background:linear-gradient(135deg,'+barColor+'EE,'+barColor+'BB);'
+          +'border-radius:4px;border:1px solid rgba(255,255,255,.2);box-shadow:0 2px 5px rgba(0,0,0,.18);'
+          +'cursor:grab;overflow:hidden;display:flex;align-items:center;pointer-events:auto;">'
+          +'<div data-drag="'+dragP+'" data-mode="left" style="position:absolute;left:0;top:0;bottom:0;width:7px;background:rgba(0,0,0,.18);border-radius:4px 0 0 4px;cursor:ew-resize;z-index:5;pointer-events:auto;"></div>'
+          +'<span style="flex:1;text-align:center;font-size:9px;font-weight:700;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.4);pointer-events:none;white-space:nowrap;overflow:hidden;padding:0 10px;">'+lbl+'</span>'
+          +'<div data-drag="'+dragP+'" data-mode="right" style="position:absolute;right:0;top:0;bottom:0;width:7px;background:rgba(0,0,0,.18);border-radius:0 4px 4px 0;cursor:ew-resize;z-index:5;pointer-events:auto;"></div>'
           +'</div>';
         _r.push('<div class="gn1" style="height:'+G.SUB_H+'px;background:#F5FAF7;display:flex;align-items:center;padding:0 5px 0 28px;border-bottom:1px solid #E8F4EC;border-right:2px solid #C0C8D4;">'
           +'<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#4A8A6A;font-size:9px;">'+(tecNames[tecId]||tecId)+'</span>'
           +'</div>');
-        _i.push('<div style="height:'+G.SUB_H+'px;background:#F5FAF7;position:relative;border-bottom:1px solid #E8F4EC;overflow:hidden;">'
+        _i.push('<div style="height:'+G.SUB_H+'px;background:#F5FAF7;position:relative;border-bottom:1px solid #E8F4EC;overflow:visible;">'
           +gGridLines(_o,_e,false)+barH+'</div>');
       });
     }
@@ -2145,18 +2154,22 @@ window.tecFornGetGlobalSpan = tecFornGetGlobalSpan;
 function tecFornApplyDrag(fornId, tecId, mode, deltaDays) {
   var f = (ESTADO.cfg.tecFornecedores||[]).find(function(f){return f.id===fornId;});
   if (!f) return;
+  if (!f.rowOverrides) f.rowOverrides = {};
   var sub = (gSt.projFases[0]?.rows?.tec?.subs || {})[tecId];
-  var ovr = f.rowOverrides[tecId] || {
-    start: sub ? sub.start : null,
-    end:   sub ? sub.end   : null
+  var _toDate = function(v) {
+    if(!v) return null;
+    if(v instanceof Date) return new Date(v);
+    if(typeof v==='string') return G.parseD(v);
+    return null;
   };
-  var newStart = ovr.start ? G.addD(new Date(ovr.start), deltaDays) : null;
-  var newEnd   = ovr.end   ? G.addD(new Date(ovr.end),   deltaDays) : null;
-  if (newStart) while (CALENDARIO.isNaoUtil(newStart)) newStart = G.addD(newStart, 1);
-  if (newEnd)   while (CALENDARIO.isNaoUtil(newEnd))   newEnd   = G.addD(newEnd,   1);
-  if (mode === 'move')  f.rowOverrides[tecId] = {start: newStart, end: newEnd};
-  if (mode === 'right') f.rowOverrides[tecId] = {start: ovr.start, end: newEnd};
-  if (mode === 'left')  f.rowOverrides[tecId] = {start: newStart, end: ovr.end};
+  var curStart = _toDate((f.rowOverrides[tecId] && f.rowOverrides[tecId].start) || (sub && sub.start));
+  var curEnd   = _toDate((f.rowOverrides[tecId] && f.rowOverrides[tecId].end)   || (sub && sub.end));
+  if (!curStart || !curEnd) return;
+  var newStart = new Date(curStart), newEnd = new Date(curEnd);
+  if (mode === 'move' || mode === 'left')  { newStart = G.addD(curStart, deltaDays); while(CALENDARIO.isNaoUtil(newStart)) newStart = G.addD(newStart, deltaDays>0?1:-1); }
+  if (mode === 'move' || mode === 'right') { newEnd   = G.addD(curEnd,   deltaDays); while(CALENDARIO.isNaoUtil(newEnd))   newEnd   = G.addD(newEnd,   deltaDays>0?1:-1); }
+  if (G.ms(newEnd) < G.ms(newStart)) { if(mode==='left') newStart=G.addD(newEnd,-1); else newEnd=G.addD(newStart,1); }
+  f.rowOverrides[tecId] = {start: G.fmtISO(newStart), end: G.fmtISO(newEnd)};
   onCfgChange(); salvarDados(); gRender();
 }
 window.tecFornApplyDrag = tecFornApplyDrag;
