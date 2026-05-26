@@ -1,4 +1,4 @@
-// Planejamento de Obra A|W — v5.12.17
+// Planejamento de Obra A|W — v5.12.18
 const SB_URL='https://ejneanfveoctdlltjnrs.supabase.co';
 const SB_KEY='sb_publishable_vZApDmF_C-heCrm8fXJ_XA_ATmMO3YP';
 const SB_HDR={'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
@@ -2470,14 +2470,47 @@ function tecFornAbrirModal(fornId) {
         if (tid === 'koTec') return; // KO sempre 1 dia
         var ds2 = getDates();
         var dt2 = ds2[tid];
-        var curDU = dt2.start && dt2.end ? CALENDARIO.contarDU(new Date(dt2.start), new Date(dt2.end)) : 1;
-        var newDU = curDU + delta;
+        if (!dt2.end) return;
+
+        // Mover o fim da etapa atual em delta dias úteis
+        var curEnd = new Date(dt2.end);
+        var newEnd = G.addD(curEnd, delta);
+        // Pular fins de semana na direção correta
+        if (delta > 0) while (CALENDARIO.isNaoUtil(newEnd)) newEnd = G.addD(newEnd, 1);
+        else           while (CALENDARIO.isNaoUtil(newEnd)) newEnd = G.addD(newEnd, -1);
+
+        // Verificar que a duração resultante não fica < 1
+        if (!dt2.start) return;
+        var newDU = CALENDARIO.contarDU(new Date(dt2.start), newEnd);
         if (newDU < 1) {
           alert('A duração de uma etapa não pode ser zero ou negativa.');
           return;
         }
-        var ok = tecFornSetDU(f.id, tid, newDU);
-        if (!ok) return;
+
+        // Verificar que a próxima etapa não fica com duração negativa
+        var tecIds2 = G.TEC_IDS || ['koTec','epTec','apTec','exTec'];
+        var tidIdx = tecIds2.indexOf(tid);
+        if (tidIdx >= 0 && tidIdx < tecIds2.length - 1) {
+          var nxtId = tecIds2[tidIdx + 1];
+          var nxtD  = ds2[nxtId];
+          if (nxtD && nxtD.end) {
+            // Novo início da próxima = newEnd + 1 dia útil
+            var nxtNewStart = G.addD(newEnd, 1);
+            while (CALENDARIO.isNaoUtil(nxtNewStart)) nxtNewStart = G.addD(nxtNewStart, 1);
+            var nxtNewDU = CALENDARIO.contarDU(nxtNewStart, new Date(nxtD.end));
+            if (nxtNewDU < 1) {
+              alert('Esta alteração deixaria a etapa seguinte com duração zero ou negativa.');
+              return;
+            }
+          }
+        }
+
+        // Salvar novo fim da etapa atual
+        if (!f.rowOverrides) f.rowOverrides = {};
+        if (!f.rowOverrides[tid]) f.rowOverrides[tid] = {start: dt2.start, end: G.fmtISO(newEnd)};
+        else f.rowOverrides[tid].end = G.fmtISO(newEnd);
+
+        // Atualizar APENAS o início da próxima etapa
         tecFornEncadear(f.id, tid);
         onCfgChange(); salvarDados(); gRender(); renderEtapas();
       }
