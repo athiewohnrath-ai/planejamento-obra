@@ -1,4 +1,4 @@
-// Planejamento de Obra A|W — v5.12.16
+// Planejamento de Obra A|W — v5.12.17
 const SB_URL='https://ejneanfveoctdlltjnrs.supabase.co';
 const SB_KEY='sb_publishable_vZApDmF_C-heCrm8fXJ_XA_ATmMO3YP';
 const SB_HDR={'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
@@ -2253,20 +2253,28 @@ window.tecFornSetDate = tecFornSetDate;
 
 // Setar duração (DU) de uma etapa -- calcula novo fim a partir do início
 function tecFornSetDU(fornId, tecId, du) {
+  if (du < 1) return false; // proteção
   var f = (ESTADO.cfg.tecFornecedores||[]).find(function(f){return f.id===fornId;});
-  if (!f) return;
+  if (!f) return false;
   if (!f.rowOverrides) f.rowOverrides = {};
-  var sub = (gSt.projFases[0]?.rows?.tec?.subs||{})[tecId];
-  var start = (f.rowOverrides[tecId] && f.rowOverrides[tecId].start) || (sub && sub.start);
-  if (!start) return;
-  // Calcular fim adicionando DU dias úteis
+  var allSubs = {};
+  gSt.projFases.forEach(function(pf){ var s=pf.rows&&pf.rows.tec&&pf.rows.tec.subs; if(s) Object.assign(allSubs,s); });
+  var sub = allSubs[tecId];
+  var ovr = f.rowOverrides[tecId];
+  var start = (ovr && ovr.start) || (sub && sub.start);
+  if (!start) return false;
+  // Converter para ISO se for Date
+  if (start instanceof Date) start = G.fmtISO(start);
+  // Calcular novo fim: start + (du-1) dias úteis
   var d = new Date(start); var count = 0;
   while (count < du - 1) { d = G.addD(d, 1); if (!CALENDARIO.isNaoUtil(d)) count++; }
   while (CALENDARIO.isNaoUtil(d)) d = G.addD(d, 1);
-  if (!f.rowOverrides[tecId]) f.rowOverrides[tecId] = {start:start, end:G.fmtISO(d)};
-  else f.rowOverrides[tecId].end = G.fmtISO(d);
-  onCfgChange(); salvarDados(); gRender();
+  var newEnd = G.fmtISO(d);
+  if (!f.rowOverrides[tecId]) f.rowOverrides[tecId] = {start: start, end: newEnd};
+  else { f.rowOverrides[tecId].start = start; f.rowOverrides[tecId].end = newEnd; }
+  return true;
 }
+window.tecFornSetDU = tecFornSetDU;
 window.tecFornSetDU = tecFornSetDU;
 
 // Renderização unificada dos fornecedores no Gantt
@@ -2416,10 +2424,11 @@ function tecFornAbrirModal(fornId) {
         iniI.style.cssText = 'width:100%;border:none;background:transparent;font-size:11px;color:var(--txt);outline:none;padding:0;';
         iniI.addEventListener('change',(function(tid){ return function(){
           if (!f.rowOverrides) f.rowOverrides={};
+          // KO: sempre 1 dia, fim = início
           if (!f.rowOverrides[tid]) f.rowOverrides[tid]={start:'',end:''};
           f.rowOverrides[tid].start=this.value;
-          f.rowOverrides[tid].end=this.value;
-          tecFornEncadear(f.id,tid);
+          f.rowOverrides[tid].end=this.value; // KO dura 1 dia
+          tecFornEncadear(f.id,tid); // só atualiza início do EP
           onCfgChange(); salvarDados(); gRender(); renderEtapas();
         };})(tecId));
         iniV.appendChild(iniI);
@@ -2458,11 +2467,17 @@ function tecFornAbrirModal(fornId) {
       btnP.style.cssText='width:28px;height:100%;border:none;border-left:1px solid var(--border);background:var(--bg-surface2);cursor:pointer;font-size:15px;color:var(--txt-muted);flex-shrink:0;';
       if(isKO){btnP.disabled=true;btnP.style.opacity='.4';}
       function ajustarDU(tid, delta) {
+        if (tid === 'koTec') return; // KO sempre 1 dia
         var ds2 = getDates();
         var dt2 = ds2[tid];
         var curDU = dt2.start && dt2.end ? CALENDARIO.contarDU(new Date(dt2.start), new Date(dt2.end)) : 1;
-        var newDU = Math.max(1, curDU + delta);
-        tecFornSetDU(f.id, tid, newDU);
+        var newDU = curDU + delta;
+        if (newDU < 1) {
+          alert('A duração de uma etapa não pode ser zero ou negativa.');
+          return;
+        }
+        var ok = tecFornSetDU(f.id, tid, newDU);
+        if (!ok) return;
         tecFornEncadear(f.id, tid);
         onCfgChange(); salvarDados(); gRender(); renderEtapas();
       }
@@ -2507,34 +2522,39 @@ window.tecFornAbrirModal = tecFornAbrirModal;
 
 // Encadear etapas: após alterar tecId, atualiza as próximas
 function tecFornEncadear(fornId, fromTecId) {
+  // Propaga APENAS o início da próxima etapa com base no fim da atual
   var f = (ESTADO.cfg.tecFornecedores||[]).find(function(f){return f.id===fornId;});
   if (!f) return;
   if (!f.rowOverrides) f.rowOverrides = {};
-  var subs = {};
-  gSt.projFases.forEach(function(pf){ var s=pf.rows&&pf.rows.tec&&pf.rows.tec.subs; if(s) Object.assign(subs,s); });
+  var allSubs = {};
+  gSt.projFases.forEach(function(pf){ var s=pf.rows&&pf.rows.tec&&pf.rows.tec.subs; if(s) Object.assign(allSubs,s); });
   var tecIds = G.TEC_IDS || ['koTec','epTec','apTec','exTec'];
   var fromIdx = tecIds.indexOf(fromTecId);
-  if (fromIdx < 0) return;
-  // Propagar a partir do próximo
-  for (var i = fromIdx; i < tecIds.length - 1; i++) {
-    var curId  = tecIds[i];
-    var nxtId  = tecIds[i+1];
-    var curSub = subs[curId];
-    var curOvr = f.rowOverrides[curId] || {start:curSub&&curSub.start, end:curSub&&curSub.end};
-    if (!curOvr.end) break;
-    // Próxima começa no dia útil seguinte
-    var nxtStart = G.addD(new Date(curOvr.end), 1);
-    while (CALENDARIO.isNaoUtil(nxtStart)) nxtStart = G.addD(nxtStart, 1);
-    var nxtSub = subs[nxtId];
-    var nxtOvr = f.rowOverrides[nxtId] || {start:nxtSub&&nxtSub.start, end:nxtSub&&nxtSub.end};
-    // Manter duração original do próximo
-    var oldStart = new Date(nxtOvr.start||nxtStart);
-    var oldEnd   = new Date(nxtOvr.end||nxtStart);
-    var du = CALENDARIO.contarDU(oldStart, oldEnd);
-    // Calcular novo fim mantendo DU
-    var nxtEnd = new Date(nxtStart); var cnt=0;
-    while (cnt < du-1) { nxtEnd=G.addD(nxtEnd,1); if(!CALENDARIO.isNaoUtil(nxtEnd)) cnt++; }
-    f.rowOverrides[nxtId] = {start:G.fmtISO(nxtStart), end:G.fmtISO(nxtEnd)};
+  if (fromIdx < 0 || fromIdx >= tecIds.length - 1) return;
+
+  var curId = tecIds[fromIdx];
+  var nxtId = tecIds[fromIdx + 1];
+
+  // Pegar fim da etapa atual
+  var curOvr = f.rowOverrides[curId];
+  var curSub = allSubs[curId];
+  var curEnd = (curOvr && curOvr.end) || (curSub && curSub.end);
+  if (!curEnd) return;
+
+  // Calcular próximo dia útil após o fim da etapa atual
+  var nxtStart = G.addD(new Date(curEnd), 1);
+  while (CALENDARIO.isNaoUtil(nxtStart)) nxtStart = G.addD(nxtStart, 1);
+  var nxtStartISO = G.fmtISO(nxtStart);
+
+  // Salvar apenas o início da próxima etapa, mantendo o fim intacto
+  if (!f.rowOverrides[nxtId]) {
+    var nxtSub = allSubs[nxtId];
+    f.rowOverrides[nxtId] = {
+      start: nxtStartISO,
+      end: (nxtSub && nxtSub.end) ? G.fmtISO(new Date(nxtSub.end)) : nxtStartISO
+    };
+  } else {
+    f.rowOverrides[nxtId].start = nxtStartISO;
   }
 }
 window.tecFornEncadear = tecFornEncadear;
