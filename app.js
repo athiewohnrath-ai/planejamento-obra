@@ -1,4 +1,4 @@
-// Planejamento de Obra A|W — v5.12.14
+// Planejamento de Obra A|W — v5.12.15
 const SB_URL='https://ejneanfveoctdlltjnrs.supabase.co';
 const SB_KEY='sb_publishable_vZApDmF_C-heCrm8fXJ_XA_ATmMO3YP';
 const SB_HDR={'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
@@ -2357,11 +2357,13 @@ function tecFornAbrirModal(fornId) {
   body.appendChild(etTitle);
 
   // Montar datas atuais
+  function toISO(v) { if(!v) return ''; if(typeof v==='string') return v.slice(0,10); if(v instanceof Date) return G.fmtISO(v); return ''; }
   function getDates() {
-    function toISO(v) { if(!v) return ''; if(typeof v==='string') return v.slice(0,10); if(v instanceof Date) return G.fmtISO(v); return ''; }
+    var freshSubs = {};
+    gSt.projFases.forEach(function(pf) { var s=pf.rows&&pf.rows.tec&&pf.rows.tec.subs; if(s) Object.assign(freshSubs,s); });
     var result = {};
     tecIds.forEach(function(tid) {
-      var sub = subs[tid];
+      var sub = freshSubs[tid];
       var ovr = f.rowOverrides && f.rowOverrides[tid];
       result[tid] = {
         start: toISO((ovr&&ovr.start) || (sub&&sub.start)) || '',
@@ -2384,88 +2386,114 @@ function tecFornAbrirModal(fornId) {
 
       // Linha
       var row = document.createElement('div');
-      row.style.cssText = 'display:grid;grid-template-columns:90px 1fr 60px 1fr 30px;gap:6px;align-items:center;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--border);';
+      row.style.cssText = 'margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--border);';
 
-      // Label com cor
-      var lbl = document.createElement('div');
-      lbl.style.cssText = 'display:flex;align-items:center;gap:6px;';
+      // Header da linha: label + reset
+      var hRow = document.createElement('div');
+      hRow.style.cssText = 'display:flex;align-items:center;gap:8px;margin-bottom:8px;';
+
+      // Dot/losango
       var dot = document.createElement('span');
       if (isKO) {
         dot.innerHTML = '<svg width="12" height="12" viewBox="0 0 12 12"><polygon points="6,0 12,6 6,12 0,6" fill="'+colTec+'"/></svg>';
       } else {
-        dot.style.cssText = 'width:12px;height:10px;border-radius:2px;background:'+barColor+';flex-shrink:0;border-top:3px solid '+darkenHex(barColor,-.3)+';';
+        dot.style.cssText = 'width:12px;height:10px;border-radius:2px;background:'+barColor+';flex-shrink:0;border-top:3px solid #0f3d2e;display:inline-block;';
       }
+      hRow.appendChild(dot);
+
       var ltxt = document.createElement('span');
-      ltxt.style.cssText = 'font-size:11px;font-weight:700;color:var(--txt);';
+      ltxt.style.cssText = 'font-size:12px;font-weight:700;color:var(--txt);flex:1;';
       ltxt.textContent = tecNames[tecId]||tecId;
-      lbl.appendChild(dot); lbl.appendChild(ltxt);
-      row.appendChild(lbl);
+      hRow.appendChild(ltxt);
+
+      var rst = document.createElement('button');
+      rst.textContent = '↺ Restaurar';
+      rst.style.cssText = 'background:none;border:1px solid var(--border);border-radius:4px;cursor:pointer;color:var(--txt-muted);font-size:10px;padding:2px 8px;';
+      rst.addEventListener('click',(function(tid){ return function(){
+        if(f.rowOverrides) delete f.rowOverrides[tid];
+        onCfgChange(); salvarDados(); gRender(); renderEtapas();
+      };})(tecId));
+      hRow.appendChild(rst);
+      row.appendChild(hRow);
+
+      // Grid de datas
+      var dRow = document.createElement('div');
+      dRow.style.cssText = 'display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:end;';
 
       // Início
       var iniW = document.createElement('div');
       var iniL = document.createElement('div');
-      iniL.style.cssText = 'font-size:9px;color:var(--txt-muted);margin-bottom:2px;';
+      iniL.style.cssText = 'font-size:9px;color:var(--txt-muted);margin-bottom:3px;font-weight:600;text-transform:uppercase;';
       iniL.textContent = 'Início';
-      var iniI = document.createElement('input');
-      iniI.type='date'; iniI.value=d.start||'';
-      iniI.style.cssText = 'width:100%;border:1px solid var(--border);border-radius:4px;padding:4px 5px;font-size:11px;background:var(--bg-surface2);color:var(--txt);box-sizing:border-box;';
+      var iniV = document.createElement('div');
+      iniV.style.cssText = 'border:1px solid var(--border);border-radius:4px;padding:6px 10px;font-size:12px;background:var(--bg-surface2);color:var(--txt);min-height:32px;display:flex;align-items:center;';
+      iniV.textContent = d.start ? G.fmtBR(new Date(d.start)) : '—';
       if (isKO) {
-        iniI.addEventListener('change',(function(tid){return function(){
+        var iniI = document.createElement('input');
+        iniI.type='date'; iniI.value=d.start||'';
+        iniI.style.cssText = 'width:100%;border:none;background:transparent;font-size:12px;color:var(--txt);outline:none;';
+        iniI.addEventListener('change',(function(tid){ return function(){
           if (!f.rowOverrides) f.rowOverrides={};
           if (!f.rowOverrides[tid]) f.rowOverrides[tid]={};
           f.rowOverrides[tid].start=this.value;
-          // KO sempre 1 dia
           f.rowOverrides[tid].end=this.value;
-          // Encadear: próxima etapa começa no dia seguinte útil
-          tecFornEncadear(f.id, tid);
+          tecFornEncadear(f.id,tid);
           onCfgChange(); salvarDados(); gRender(); renderEtapas();
         };})(tecId));
+        iniV.textContent='';
+        iniV.appendChild(iniI);
       } else {
-        iniI.readOnly = true;
-        iniI.style.opacity = '.6';
-        iniI.title = 'Calculado automaticamente pelo encadeamento';
+        iniV.style.opacity='.7';
       }
-      iniW.appendChild(iniL); iniW.appendChild(iniI); row.appendChild(iniW);
-
-      // DU
-      var duW = document.createElement('div');
-      var duL = document.createElement('div');
-      duL.style.cssText = 'font-size:9px;color:var(--txt-muted);margin-bottom:2px;';
-      duL.textContent = 'DU';
-      var duI = document.createElement('input');
-      duI.type='number'; duI.min=1; duI.value=isKO?1:Math.max(1,du);
-      duI.style.cssText = 'width:100%;border:1px solid var(--border);border-radius:4px;padding:4px 5px;font-size:11px;background:var(--bg-surface2);color:var(--txt);box-sizing:border-box;text-align:center;';
-      if (isKO) { duI.value=1; duI.disabled=true; duI.style.opacity='.5'; }
-      duI.addEventListener('change',(function(tid){return function(){
-        var newDU = Math.max(1,parseInt(this.value)||1);
-        tecFornSetDU(f.id, tid, newDU);
-        tecFornEncadear(f.id, tid);
-        onCfgChange(); salvarDados(); gRender(); renderEtapas();
-      };})(tecId));
-      duW.appendChild(duL); duW.appendChild(duI); row.appendChild(duW);
+      iniW.appendChild(iniL); iniW.appendChild(iniV); dRow.appendChild(iniW);
 
       // Fim
       var fimW = document.createElement('div');
       var fimL = document.createElement('div');
-      fimL.style.cssText = 'font-size:9px;color:var(--txt-muted);margin-bottom:2px;';
+      fimL.style.cssText = 'font-size:9px;color:var(--txt-muted);margin-bottom:3px;font-weight:600;text-transform:uppercase;';
       fimL.textContent = 'Fim';
-      var fimI = document.createElement('input');
-      fimI.type='date'; fimI.value=d.end||'';
-      fimI.style.cssText = 'width:100%;border:1px solid var(--border);border-radius:4px;padding:4px 5px;font-size:11px;background:var(--bg-surface2);color:var(--txt);box-sizing:border-box;';
-      fimI.readOnly = true; fimI.style.opacity = '.6';
-      fimI.title = 'Calculado automaticamente';
-      fimW.appendChild(fimL); fimW.appendChild(fimI); row.appendChild(fimW);
+      var fimV = document.createElement('div');
+      fimV.style.cssText = 'border:1px solid var(--border);border-radius:4px;padding:6px 10px;font-size:12px;background:var(--bg-surface2);color:var(--txt);opacity:.7;';
+      fimV.textContent = d.end ? G.fmtBR(new Date(d.end)) : '—';
+      fimW.appendChild(fimL); fimW.appendChild(fimV); dRow.appendChild(fimW);
 
-      // Reset
-      var rst = document.createElement('button');
-      rst.textContent='↺'; rst.title='Restaurar';
-      rst.style.cssText='background:none;border:1px solid var(--border);border-radius:4px;cursor:pointer;color:var(--txt-muted);height:28px;width:28px;font-size:12px;margin-top:12px;';
-      rst.addEventListener('click',(function(tid){return function(){
-        if(f.rowOverrides) delete f.rowOverrides[tid];
-        // Resetar encadeamento
+      // DU com botões +/-
+      var duW = document.createElement('div');
+      var duL = document.createElement('div');
+      duL.style.cssText = 'font-size:9px;color:var(--txt-muted);margin-bottom:3px;font-weight:600;text-transform:uppercase;';
+      duL.textContent = 'Dias úteis';
+      var duCtrl = document.createElement('div');
+      duCtrl.style.cssText = 'display:flex;align-items:center;border:1px solid var(--border);border-radius:4px;overflow:hidden;height:32px;';
+
+      var btnM = document.createElement('button');
+      btnM.textContent='−';
+      btnM.style.cssText='width:32px;height:100%;border:none;border-right:1px solid var(--border);background:var(--bg-surface2);cursor:pointer;font-size:16px;color:var(--txt-muted);flex-shrink:0;';
+      if(isKO) { btnM.disabled=true; btnM.style.opacity='.4'; }
+
+      var duNum = document.createElement('span');
+      duNum.style.cssText='flex:1;text-align:center;font-size:13px;font-weight:700;color:var(--txt);';
+      duNum.textContent = isKO ? 1 : Math.max(1,du);
+
+      var btnP = document.createElement('button');
+      btnP.textContent='+';
+      btnP.style.cssText='width:32px;height:100%;border:none;border-left:1px solid var(--border);background:var(--bg-surface2);cursor:pointer;font-size:16px;color:var(--txt-muted);flex-shrink:0;';
+      if(isKO) { btnP.disabled=true; btnP.style.opacity='.4'; }
+
+      function ajustarDU(tid, delta) {
+        var ds = getDates();
+        var dt = ds[tid];
+        var curDU = dt.start && dt.end ? CALENDARIO.contarDU(new Date(dt.start), new Date(dt.end)) : 1;
+        var newDU = Math.max(1, curDU + delta);
+        tecFornSetDU(f.id, tid, newDU);
+        tecFornEncadear(f.id, tid);
         onCfgChange(); salvarDados(); gRender(); renderEtapas();
-      };})(tecId));
-      row.appendChild(rst);
+      }
+      btnM.addEventListener('click',(function(tid){ return function(){ ajustarDU(tid,-1); };})(tecId));
+      btnP.addEventListener('click',(function(tid){ return function(){ ajustarDU(tid,+1); };})(tecId));
+
+      duCtrl.appendChild(btnM); duCtrl.appendChild(duNum); duCtrl.appendChild(btnP);
+      duW.appendChild(duL); duW.appendChild(duCtrl); dRow.appendChild(duW);
+      row.appendChild(dRow)
       etGrid.appendChild(row);
     });
   }
