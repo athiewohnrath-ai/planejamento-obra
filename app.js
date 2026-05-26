@@ -1,4 +1,4 @@
-// Planejamento de Obra A|W — v5.12.19
+// Planejamento de Obra A|W — v5.12.20
 const SB_URL='https://ejneanfveoctdlltjnrs.supabase.co';
 const SB_KEY='sb_publishable_vZApDmF_C-heCrm8fXJ_XA_ATmMO3YP';
 const SB_HDR={'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
@@ -304,8 +304,9 @@ document.addEventListener("DOMContentLoaded",()=>{buildVizSidebar()}),document.a
       tecIds.forEach(function(tecId, ti) {
         var d = dates[tecId];
         if (!d || !d.start || !d.end) return;
-        var xi = gPx(d.start);
-        var xw = Math.max((G.diff(d.start,d.end)+1)*gSt.dayW, gSt.dayW);
+        var _ds=G.parseD(d.start),_de=G.parseD(d.end);
+        var xi = gPx(_ds);
+        var xw = Math.max((G.diff(_ds,_de)+1)*gSt.dayW, gSt.dayW);
         var barColor = tecColors[ti % Math.max(1,tecColors.length)] || colTec;
         var du = CALENDARIO.contarDU(new Date(d.start), new Date(d.end));
         var lbl = du+'DU · '+G.fmtBR(new Date(d.start))+' – '+G.fmtBR(new Date(d.end));
@@ -2091,14 +2092,15 @@ window.tecFornToggleAll = tecFornToggleAll;
 
 // Calcular datas efetivas de um fornecedor (respeitando overrides)
 function tecFornGetDates(forn, tecSubs) {
+  function _toISO(v) { if(!v) return null; if(typeof v==='string') return v.slice(0,10); if(v instanceof Date) return G.fmtISO(v); return null; }
   var result = {};
   var tecIds = G.TEC_IDS || ['koTec','epTec','apTec','exTec'];
   tecIds.forEach(function(tecId) {
     var sub = tecSubs && tecSubs[tecId];
     var ovr = forn.rowOverrides && forn.rowOverrides[tecId];
     result[tecId] = {
-      start: ovr ? ovr.start : (sub ? sub.start : null),
-      end:   ovr ? ovr.end   : (sub ? sub.end   : null)
+      start: _toISO((ovr && ovr.start) || (sub && sub.start)),
+      end:   _toISO((ovr && ovr.end)   || (sub && sub.end))
     };
   });
   return result;
@@ -2109,9 +2111,10 @@ window.tecFornGetDates = tecFornGetDates;
 function tecFornGetSpan(forn, tecSubs) {
   var dates = tecFornGetDates(forn, tecSubs);
   var starts = [], ends = [];
+  function parseFornDate(v) { if(!v) return null; if(v instanceof Date) return v; return G.parseD(v); }
   Object.values(dates).forEach(function(d) {
-    if (d.start) starts.push(new Date(d.start));
-    if (d.end)   ends.push(new Date(d.end));
+    if (d.start) starts.push(parseFornDate(d.start));
+    if (d.end)   ends.push(parseFornDate(d.end));
   });
   if (!starts.length) return null;
   return {
@@ -2652,8 +2655,9 @@ function tecFornRenderUnificado(projFase, _r, _i, _o, _e, forns) {
 
     var totalStart = segs[0].start;
     var totalEnd   = segs[segs.length-1].end;
-    var totalXi    = gPx(totalStart);
-    var totalXw    = Math.max((G.diff(totalStart,totalEnd)+1)*gSt.dayW, gSt.dayW);
+    var _ts=G.parseD(totalStart),_te=G.parseD(totalEnd);
+    var totalXi    = gPx(_ts);
+    var totalXw    = Math.max((G.diff(_ts,_te)+1)*gSt.dayW, gSt.dayW);
     var barH       = Math.max(12, ROW_H-8);
     var barTop     = (ROW_H-barH)/2;
 
