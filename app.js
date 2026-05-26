@@ -1,4 +1,4 @@
-// Planejamento de Obra A|W — v5.12.20
+// Planejamento de Obra A|W — v5.12.21
 const SB_URL='https://ejneanfveoctdlltjnrs.supabase.co';
 const SB_KEY='sb_publishable_vZApDmF_C-heCrm8fXJ_XA_ATmMO3YP';
 const SB_HDR={'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
@@ -308,8 +308,8 @@ document.addEventListener("DOMContentLoaded",()=>{buildVizSidebar()}),document.a
         var xi = gPx(_ds);
         var xw = Math.max((G.diff(_ds,_de)+1)*gSt.dayW, gSt.dayW);
         var barColor = tecColors[ti % Math.max(1,tecColors.length)] || colTec;
-        var du = CALENDARIO.contarDU(new Date(d.start), new Date(d.end));
-        var lbl = du+'DU · '+G.fmtBR(new Date(d.start))+' – '+G.fmtBR(new Date(d.end));
+        var du = CALENDARIO.contarDU(G.parseD(d.start), G.parseD(d.end));
+        var lbl = du+'DU · '+G.fmtBR(G.parseD(d.start))+' – '+G.fmtBR(G.parseD(d.end));
         var dragP = encodeURIComponent(JSON.stringify({type:'tecForn',fornId:forn.id,tecId:tecId}));
         var barH = '<div data-drag="'+dragP+'" data-mode="move" data-click="'+dragP+'" '
           +'style="position:absolute;top:50%;transform:translateY(-50%);left:'+xi+'px;width:'+xw+'px;'
@@ -2680,8 +2680,9 @@ function tecFornRenderUnificado(projFase, _r, _i, _o, _e, forns) {
     barLine += '<div style="position:absolute;top:'+barTop+'px;left:'+totalXi+'px;width:'+totalXw+'px;height:'+barH+'px;">';
 
     segs.forEach(function(seg, si) {
-      var segXi = gPx(seg.start) - totalXi;
-      var segXw = Math.max((G.diff(seg.start,seg.end)+1)*gSt.dayW, gSt.dayW);
+      var _ss2=G.parseD(seg.start),_se2=G.parseD(seg.end);
+      var segXi = gPx(_ss2) - totalXi;
+      var segXw = Math.max((G.diff(_ss2,_se2)+1)*gSt.dayW, gSt.dayW);
       var isKO  = seg.tecId === 'koTec';
 
       if (isKO) {
