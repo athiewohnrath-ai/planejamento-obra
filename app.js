@@ -264,7 +264,7 @@ function gGridLines(t,e,o){const a=[];return t.forEach((t,n)=>{const r=Math.roun
     var gxi = gPx(globalSpan.start);
     var gxw = Math.max((G.diff(globalSpan.start,globalSpan.end)+1)*gSt.dayW, gSt.dayW);
     var gPayload = encodeURIComponent(JSON.stringify({type:'proj',phId:projFase.id,rowId:'tec',subId:null}));
-    var gBarHtml = gBar(gxi,gxw,G.ROW_H,colTec,G.fmtISO(globalSpan.start),G.fmtISO(globalSpan.end),null,gPayload,true);
+    var gBarHtml = gBar(gxi,gxw,G.ROW_H,colTec,G.fmtISO(globalSpan.start),G.fmtISO(globalSpan.end),null,gPayload,false);
     var lastTlIdx = _i.length-1;
     _i[lastTlIdx] = '<div style="height:'+G.ROW_H+'px;background:'+bgTec+';position:relative;border-bottom:1px solid #E4EAF0;overflow:hidden;">'+gGridLinesTec(_o,_e,colTec)+gBarHtml+'</div>';
     // Injetar botão ▲▲/▼▼ no último r.push (header TÉCNICOS)
@@ -2626,7 +2626,7 @@ function tecFornRenderUnificado(projFase, _r, _i, _o, _e, forns) {
     var gxi = gPx(globalSpan.start);
     var gxw = Math.max((G.diff(globalSpan.start,globalSpan.end)+1)*gSt.dayW, gSt.dayW);
     var gPayload = encodeURIComponent(JSON.stringify({type:'proj',phId:projFase.id,rowId:'tec',subId:null}));
-    var gBarH = gBar(gxi,gxw,G.ROW_H,colTec,new Date(G.fmtISO(globalSpan.start)),new Date(G.fmtISO(globalSpan.end)),null,gPayload,true);
+    var gBarH = gBar(gxi,gxw,G.ROW_H,colTec,new Date(G.fmtISO(globalSpan.start)),new Date(G.fmtISO(globalSpan.end)),null,gPayload,false);
     _i[_i.length-1] = '<div style="height:'+G.ROW_H+'px;background:'+bgTec+';position:relative;border-bottom:1px solid #E4EAF0;overflow:hidden;">'+gGridLinesTec(_o,_e,colTec)+gBarH+'</div>';
     var _tb = '<button onclick="tecFornToggleAll()" style="background:none;border:1px solid #C8D4D8;border-radius:3px;cursor:pointer;font-size:8px;padding:0 3px;color:#6A7A8A;font-weight:700;line-height:14px;margin-left:2px;">'+(allExpanded?'\u25b2\u25b2':'\u25bc\u25bc')+'</button>';
     if (_r.length > 0) { var _ls=_r.length-1; var _old=_r[_ls]; var _cut=_old.lastIndexOf('</div>'); if(_cut>=0) _r[_ls]=_old.slice(0,_cut)+_tb+'</div>'+_old.slice(_cut+6); }
