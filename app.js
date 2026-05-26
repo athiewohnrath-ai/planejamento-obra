@@ -1,4 +1,4 @@
-// Planejamento de Obra A|W — v5.12.18
+// Planejamento de Obra A|W — v5.12.19
 const SB_URL='https://ejneanfveoctdlltjnrs.supabase.co';
 const SB_KEY='sb_publishable_vZApDmF_C-heCrm8fXJ_XA_ATmMO3YP';
 const SB_HDR={'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
@@ -2266,7 +2266,7 @@ function tecFornSetDU(fornId, tecId, du) {
   // Converter para ISO se for Date
   if (start instanceof Date) start = G.fmtISO(start);
   // Calcular novo fim: start + (du-1) dias úteis
-  var d = new Date(start); var count = 0;
+  var d = (typeof start === "string") ? G.parseD(start) : new Date(start); var count = 0;
   while (count < du - 1) { d = G.addD(d, 1); if (!CALENDARIO.isNaoUtil(d)) count++; }
   while (CALENDARIO.isNaoUtil(d)) d = G.addD(d, 1);
   var newEnd = G.fmtISO(d);
@@ -2473,7 +2473,7 @@ function tecFornAbrirModal(fornId) {
         if (!dt2.end) return;
 
         // Mover o fim da etapa atual em delta dias úteis
-        var curEnd = new Date(dt2.end);
+        var curEnd = G.parseD(dt2.end);
         var newEnd = G.addD(curEnd, delta);
         // Pular fins de semana na direção correta
         if (delta > 0) while (CALENDARIO.isNaoUtil(newEnd)) newEnd = G.addD(newEnd, 1);
@@ -2481,7 +2481,7 @@ function tecFornAbrirModal(fornId) {
 
         // Verificar que a duração resultante não fica < 1
         if (!dt2.start) return;
-        var newDU = CALENDARIO.contarDU(new Date(dt2.start), newEnd);
+        var newDU = CALENDARIO.contarDU(G.parseD(dt2.start), newEnd);
         if (newDU < 1) {
           alert('A duração de uma etapa não pode ser zero ou negativa.');
           return;
@@ -2497,7 +2497,7 @@ function tecFornAbrirModal(fornId) {
             // Novo início da próxima = newEnd + 1 dia útil
             var nxtNewStart = G.addD(newEnd, 1);
             while (CALENDARIO.isNaoUtil(nxtNewStart)) nxtNewStart = G.addD(nxtNewStart, 1);
-            var nxtNewDU = CALENDARIO.contarDU(nxtNewStart, new Date(nxtD.end));
+            var nxtNewDU = CALENDARIO.contarDU(nxtNewStart, G.parseD(nxtD.end));
             if (nxtNewDU < 1) {
               alert('Esta alteração deixaria a etapa seguinte com duração zero ou negativa.');
               return;
@@ -2575,7 +2575,8 @@ function tecFornEncadear(fornId, fromTecId) {
   if (!curEnd) return;
 
   // Calcular próximo dia útil após o fim da etapa atual
-  var nxtStart = G.addD(new Date(curEnd), 1);
+  var _curEndParsed = (typeof curEnd === "string") ? G.parseD(curEnd) : new Date(curEnd);
+  var nxtStart = G.addD(_curEndParsed, 1);
   while (CALENDARIO.isNaoUtil(nxtStart)) nxtStart = G.addD(nxtStart, 1);
   var nxtStartISO = G.fmtISO(nxtStart);
 
