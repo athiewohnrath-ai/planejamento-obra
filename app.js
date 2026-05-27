@@ -2411,7 +2411,9 @@ function tecFornAbrirModal(fornId) {
       var isKO = tecId === 'koTec';
 
       var row = document.createElement('div');
-      row.style.cssText = 'display:grid;grid-template-columns:100px 110px 110px 120px 30px;gap:6px;align-items:center;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--border);';
+      row.style.cssText = isKO
+        ? 'display:grid;grid-template-columns:100px 160px 90px 120px 30px;gap:6px;align-items:start;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--border);'
+        : 'display:grid;grid-template-columns:100px 110px 110px 120px 30px;gap:6px;align-items:center;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--border);';
 
       // Label
       var lbl = document.createElement('div');
@@ -2436,18 +2438,98 @@ function tecFornAbrirModal(fornId) {
       var iniV = document.createElement('div');
       iniV.style.cssText = 'border:1px solid var(--border);border-radius:4px;padding:5px 7px;font-size:11px;background:var(--bg-surface2);color:var(--txt);';
       if (isKO) {
+        // Kickoff integrado: flag koIntegrado no fornecedor
+        var isInteg = f.koIntegrado !== false; // padrão: integrado
+        // Obter data global do KO (da fase 0 do cronograma, ou de ESTADO.cfg.koTecData)
+        var koDataGlobal = (function() {
+          // Primeiro tenta rowOverride de qualquer fornecedor integrado
+          var fns = ESTADO.cfg.tecFornecedores || [];
+          for (var fi=0; fi<fns.length; fi++) {
+            var fn2 = fns[fi];
+            if (fn2.koIntegrado !== false && fn2.rowOverrides && fn2.rowOverrides.koTec && fn2.rowOverrides.koTec.start) {
+              return fn2.rowOverrides.koTec.start;
+            }
+          }
+          // Fallback: data do cronograma geral
+          var proj0 = gSt.projFases && gSt.projFases[0];
+          if (proj0 && proj0.rows && proj0.rows.tec && proj0.rows.tec.subs && proj0.rows.tec.subs.koTec) {
+            return G.fmtISO(proj0.rows.tec.subs.koTec.start);
+          }
+          return '';
+        })();
+
+        // Botão toggle de integração
+        var koToggleBtn = document.createElement('button');
+        var _koInt = isInteg;
+        var _koDataLocal = d.start || koDataGlobal;
+        koToggleBtn.style.cssText = 'width:100%;margin-bottom:5px;display:flex;align-items:center;justify-content:center;gap:5px;padding:5px 8px;border-radius:5px;cursor:pointer;font-size:10px;font-weight:700;font-family:var(--font);transition:all .15s;border:1px solid '+(_koInt?'#009EA8':'#C8D4D8')+';background:'+(_koInt?'rgba(0,158,168,.10)':'rgba(200,210,220,.08)')+';color:'+(_koInt?'#007A88':'#8A95A3')+';';
+        koToggleBtn.innerHTML = (_koInt ? '🔗 Kickoff integrado' : '⛓️ Kickoff separado');
+
+        // Input de data — visível sempre, editável conforme estado
         var iniI = document.createElement('input');
-        iniI.type='date'; iniI.value=d.start||'';
-        iniI.style.cssText = 'width:100%;border:none;background:transparent;font-size:11px;color:var(--txt);outline:none;padding:0;';
-        iniI.addEventListener('change',(function(tid){ return function(){
-          if (!f.rowOverrides) f.rowOverrides={};
-          // KO: sempre 1 dia, fim = início
-          if (!f.rowOverrides[tid]) f.rowOverrides[tid]={start:'',end:''};
-          f.rowOverrides[tid].start=this.value;
-          f.rowOverrides[tid].end=this.value; // KO dura 1 dia
-          tecFornEncadear(f.id,tid); // só atualiza início do EP
+        iniI.type='date';
+        iniI.value = _koInt ? (koDataGlobal || _koDataLocal) : (_koDataLocal);
+        iniI.style.cssText = 'width:100%;border:none;background:transparent;font-size:11px;color:var(--txt);outline:none;padding:0;'+(isInteg?'opacity:.6;':'');
+
+        var _applyKoChange = function(novaData, integrado) {
+          if (!f.rowOverrides) f.rowOverrides = {};
+          if (!f.rowOverrides.koTec) f.rowOverrides.koTec = {};
+          if (integrado) {
+            // Propagar para todos os fornecedores integrados
+            var fns = ESTADO.cfg.tecFornecedores || [];
+            fns.forEach(function(fn2) {
+              if (fn2.koIntegrado !== false) {
+                if (!fn2.rowOverrides) fn2.rowOverrides = {};
+                if (!fn2.rowOverrides.koTec) fn2.rowOverrides.koTec = {};
+                fn2.rowOverrides.koTec.start = novaData;
+                fn2.rowOverrides.koTec.end = novaData;
+              }
+            });
+          } else {
+            f.rowOverrides.koTec.start = novaData;
+            f.rowOverrides.koTec.end = novaData;
+          }
+          tecFornEncadear(f.id, 'koTec');
           onCfgChange(); salvarDados(); gRender(); renderEtapas();
-        };})(tecId));
+        };
+
+        iniI.addEventListener('change', function() {
+          _applyKoChange(this.value, _koInt);
+        });
+
+        koToggleBtn.addEventListener('click', function() {
+          _koInt = !_koInt;
+          f.koIntegrado = _koInt;
+          koToggleBtn.style.borderColor = _koInt ? '#009EA8' : '#C8D4D8';
+          koToggleBtn.style.background = _koInt ? 'rgba(0,158,168,.10)' : 'rgba(200,210,220,.08)';
+          koToggleBtn.style.color = _koInt ? '#007A88' : '#8A95A3';
+          koToggleBtn.innerHTML = _koInt ? '🔗 Kickoff integrado' : '⛓️ Kickoff separado';
+          iniI.style.opacity = _koInt ? '.6' : '1';
+          if (_koInt) {
+            // Ao integrar: adotar a data global
+            var koGlob = (function() {
+              var fns = ESTADO.cfg.tecFornecedores || [];
+              for (var fi=0; fi<fns.length; fi++) {
+                var fn2 = fns[fi];
+                if (fn2.id !== f.id && fn2.koIntegrado !== false && fn2.rowOverrides && fn2.rowOverrides.koTec && fn2.rowOverrides.koTec.start) {
+                  return fn2.rowOverrides.koTec.start;
+                }
+              }
+              var proj0 = gSt.projFases && gSt.projFases[0];
+              if (proj0 && proj0.rows && proj0.rows.tec && proj0.rows.tec.subs && proj0.rows.tec.subs.koTec) {
+                return G.fmtISO(proj0.rows.tec.subs.koTec.start);
+              }
+              return iniI.value;
+            })();
+            iniI.value = koGlob;
+            _applyKoChange(koGlob, true);
+          } else {
+            onCfgChange(); salvarDados(); gRender(); renderEtapas();
+          }
+        });
+
+        iniV.style.cssText = 'border:1px solid var(--border);border-radius:4px;padding:3px 7px;font-size:11px;background:var(--bg-surface2);color:var(--txt);display:flex;flex-direction:column;gap:2px;';
+        iniV.appendChild(koToggleBtn);
         iniV.appendChild(iniI);
       } else {
         iniV.textContent = d.start ? G.fmtBR(G.parseD(d.start)) : '—';
