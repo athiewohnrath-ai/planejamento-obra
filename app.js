@@ -2469,27 +2469,43 @@ function tecFornAbrirModal(fornId) {
         var iniI = document.createElement('input');
         iniI.type='date';
         iniI.value = _koInt ? (koDataGlobal || _koDataLocal) : (_koDataLocal);
-        iniI.style.cssText = 'width:100%;border:none;background:transparent;font-size:11px;color:var(--txt);outline:none;padding:0;'+(isInteg?'opacity:.6;':'');
+        iniI.style.cssText = 'width:100%;border:none;background:transparent;font-size:11px;color:var(--txt);outline:none;padding:0;cursor:pointer;'+(isInteg?'opacity:.6;':'');
+        iniI.addEventListener('click', function(){ try{ this.showPicker(); }catch(e){} });
 
         var _applyKoChange = function(novaData, integrado) {
           if (!f.rowOverrides) f.rowOverrides = {};
           if (!f.rowOverrides.koTec) f.rowOverrides.koTec = {};
+          var fns = ESTADO.cfg.tecFornecedores || [];
+          // Calcular próximo DU após KO para o EP
+          var koDate = G.parseD(novaData);
+          var epStart = G.addD(koDate, 1);
+          while (CALENDARIO.isNaoUtil(epStart)) epStart = G.addD(epStart, 1);
+          var epStartISO = G.fmtISO(epStart);
           if (integrado) {
-            // Propagar para todos os fornecedores integrados
-            var fns = ESTADO.cfg.tecFornecedores || [];
+            // Propagar KO + EP para todos os fornecedores integrados
             fns.forEach(function(fn2) {
               if (fn2.koIntegrado !== false) {
                 if (!fn2.rowOverrides) fn2.rowOverrides = {};
-                if (!fn2.rowOverrides.koTec) fn2.rowOverrides.koTec = {};
-                fn2.rowOverrides.koTec.start = novaData;
-                fn2.rowOverrides.koTec.end = novaData;
+                // KO: início e fim = mesma data
+                fn2.rowOverrides.koTec = { start: novaData, end: novaData };
+                // EP: início = dia seguinte útil ao KO, fim mantém a duração atual
+                var curEp = fn2.rowOverrides.epTec;
+                var allSubs = {};
+                gSt.projFases.forEach(function(pf){ var s=pf.rows&&pf.rows.tec&&pf.rows.tec.subs; if(s) Object.assign(allSubs,s); });
+                var epSubEnd = allSubs.epTec && allSubs.epTec.end;
+                var curEnd = (curEp && curEp.end) || (epSubEnd ? G.fmtISO(new Date(epSubEnd)) : null);
+                fn2.rowOverrides.epTec = { start: epStartISO, end: curEnd || epStartISO };
               }
             });
           } else {
-            f.rowOverrides.koTec.start = novaData;
-            f.rowOverrides.koTec.end = novaData;
+            f.rowOverrides.koTec = { start: novaData, end: novaData };
+            // EP deste fornecedor acompanha
+            var curEp2 = f.rowOverrides.epTec;
+            var allSubs2 = {};
+            gSt.projFases.forEach(function(pf){ var s=pf.rows&&pf.rows.tec&&pf.rows.tec.subs; if(s) Object.assign(allSubs2,s); });
+            var curEnd2 = (curEp2 && curEp2.end) || (allSubs2.epTec ? G.fmtISO(new Date(allSubs2.epTec.end)) : null);
+            f.rowOverrides.epTec = { start: epStartISO, end: curEnd2 || epStartISO };
           }
-          tecFornEncadear(f.id, 'koTec');
           onCfgChange(); salvarDados(); gRender(); renderEtapas();
         };
 
@@ -2528,9 +2544,9 @@ function tecFornAbrirModal(fornId) {
           }
         });
 
-        iniV.style.cssText = 'border:1px solid var(--border);border-radius:4px;padding:3px 7px;font-size:11px;background:var(--bg-surface2);color:var(--txt);display:flex;flex-direction:column;gap:2px;';
-        iniV.appendChild(koToggleBtn);
+        iniV.style.cssText = 'border:1px solid var(--border);border-radius:4px;padding:3px 7px;font-size:11px;background:var(--bg-surface2);color:var(--txt);display:flex;flex-direction:column;gap:4px;';
         iniV.appendChild(iniI);
+        iniV.appendChild(koToggleBtn);
       } else {
         iniV.textContent = d.start ? G.fmtBR(G.parseD(d.start)) : '—';
         iniV.style.opacity = '.7';
