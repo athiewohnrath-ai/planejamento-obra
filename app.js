@@ -2183,6 +2183,12 @@ function tecFornApplyDrag(fornId, tecId, mode, deltaDays) {
   if (mode === 'move' || mode === 'right') { newEnd   = G.addD(curEnd,   deltaDays); while(CALENDARIO.isNaoUtil(newEnd))   newEnd   = G.addD(newEnd,   deltaDays>0?1:-1); }
   if (G.ms(newEnd) < G.ms(newStart)) { if(mode==='left') newStart=G.addD(newEnd,-1); else newEnd=G.addD(newStart,1); }
   f.rowOverrides[tecId] = {start: G.fmtISO(newStart), end: G.fmtISO(newEnd)};
+  // Vínculo interno
+  if (tecFornVincInt(f, tecId)) tecFornEncadear(f.id, tecId);
+  // Vínculo externo: propagar start para todos vinculados
+  if (tecFornVincExt(f, tecId)) {
+    tecFornPropagaExt(f.id, tecId, G.fmtISO(newStart), G.fmtISO(newEnd));
+  }
   onCfgChange(); salvarDados(); gRender();
 }
 window.tecFornApplyDrag = tecFornApplyDrag;
@@ -2331,6 +2337,50 @@ function tecFornApplyJoint(fornId, tecId, nextTecId, deltaDays) {
 window.tecFornApplyJoint = tecFornApplyJoint;
 
 // ── Modal único de fornecedor (versão separada e unificada) ─────────────────
+// ── Helpers de vínculo interno e externo de etapas TEC ──────────────────────
+function tecFornVincInt(f, tecId) {
+  // vínculo interno: essa etapa encadeia com a próxima deste fornecedor?
+  if (!f.vincInterno) f.vincInterno = {};
+  return f.vincInterno[tecId] !== false; // padrão true
+}
+function tecFornSetVincInt(f, tecId, val) {
+  if (!f.vincInterno) f.vincInterno = {};
+  f.vincInterno[tecId] = val;
+}
+function tecFornVincExt(f, tecId) {
+  // vínculo externo: essa etapa anda junto com os outros fornecedores?
+  if (!f.vincExterno) f.vincExterno = {};
+  return f.vincExterno[tecId] !== false; // padrão true
+}
+function tecFornSetVincExt(f, tecId, val) {
+  if (!f.vincExterno) f.vincExterno = {};
+  f.vincExterno[tecId] = val;
+}
+// Propaga mudança de uma etapa para outros fornecedores vinculados externamente
+function tecFornPropagaExt(fornId, tecId, newStart, newEnd) {
+  if (tecId === 'koTec') return; // KO tem lógica própria
+  var fns = ESTADO.cfg.tecFornecedores || [];
+  fns.forEach(function(fn2) {
+    if (fn2.id === fornId) return; // pula o próprio
+    if (!tecFornVincExt(fn2, tecId)) return; // não vinculado externamente
+    if (!fn2.rowOverrides) fn2.rowOverrides = {};
+    var cur = fn2.rowOverrides[tecId] || {};
+    // Propaga apenas o start (mantém a duração original do fornecedor)
+    var allSubs = {};
+    gSt.projFases.forEach(function(pf){ var s=pf.rows&&pf.rows.tec&&pf.rows.tec.subs; if(s) Object.assign(allSubs,s); });
+    var curEnd = cur.end || (allSubs[tecId] ? G.fmtISO(allSubs[tecId].end) : newEnd);
+    fn2.rowOverrides[tecId] = { start: newStart, end: curEnd };
+    // Propaga internamente (cascata) se vínculo interno ativo
+    if (tecFornVincInt(fn2, tecId)) {
+      tecFornEncadear(fn2.id, tecId);
+    }
+  });
+}
+window.tecFornVincInt = tecFornVincInt;
+window.tecFornVincExt = tecFornVincExt;
+window.tecFornPropagaExt = tecFornPropagaExt;
+
+
 function tecFornAbrirModal(fornId) {
   var f = (ESTADO.cfg.tecFornecedores||[]).find(function(f){return f.id===fornId;});
   if (!f) return;
@@ -2425,7 +2475,7 @@ function tecFornAbrirModal(fornId) {
       var row = document.createElement('div');
       row.style.cssText = isKO
         ? 'display:grid;grid-template-columns:100px 160px 90px 120px 30px;gap:6px;align-items:start;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--border);'
-        : 'display:grid;grid-template-columns:100px 110px 110px 120px 30px;gap:6px;align-items:center;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--border);';
+        : 'display:grid;grid-template-columns:100px 110px 110px 120px 30px;gap:6px;align-items:start;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--border);';
 
       // Label
       var lbl = document.createElement('div');
@@ -2440,6 +2490,48 @@ function tecFornAbrirModal(fornId) {
       ltxt.style.cssText = 'font-size:11px;font-weight:700;color:var(--txt);';
       ltxt.textContent = tecNames[tecId]||tecId;
       lbl.appendChild(dot); lbl.appendChild(ltxt);
+
+      // Ícones de vínculo (não aparecem no KO)
+      if (!isKO) {
+        // Vínculo interno (encadeamento com próxima etapa)
+        var hasNext = tecIds.indexOf(tecId) < tecIds.length - 1;
+        if (hasNext) {
+          var viBtn = document.createElement('button');
+          var _vi = tecFornVincInt(f, tecId);
+          viBtn.title = _vi ? 'Vínculo interno ativo: esta etapa encadeia com a próxima' : 'Vínculo interno desativado: próxima etapa livre';
+          viBtn.style.cssText = 'margin-top:2px;display:block;width:100%;padding:2px 4px;border-radius:4px;cursor:pointer;font-size:9px;font-weight:700;font-family:var(--font);border:1px solid '+(_vi?'#009EA8':'#C8D4D8')+';background:'+(_vi?'rgba(0,158,168,.08)':'transparent')+';color:'+(_vi?'#007A88':'#9AABB8')+';text-align:center;white-space:nowrap;';
+          viBtn.innerHTML = (_vi ? '🔗 Int' : '⛓️ Int');
+          viBtn.addEventListener('click', (function(tid, btn){return function(){
+            var nv = !tecFornVincInt(f, tid);
+            tecFornSetVincInt(f, tid, nv);
+            btn.style.borderColor = nv?'#009EA8':'#C8D4D8';
+            btn.style.background  = nv?'rgba(0,158,168,.08)':'transparent';
+            btn.style.color       = nv?'#007A88':'#9AABB8';
+            btn.innerHTML         = nv?'🔗 Int':'⛓️ Int';
+            btn.title             = nv?'Vínculo interno ativo: esta etapa encadeia com a próxima':'Vínculo interno desativado: próxima etapa livre';
+            onCfgChange(); salvarDados();
+          };})(tecId, viBtn));
+          lbl.appendChild(viBtn);
+        }
+        // Vínculo externo (entre fornecedores)
+        var veBtn = document.createElement('button');
+        var _ve = tecFornVincExt(f, tecId);
+        veBtn.title = _ve ? 'Vínculo externo ativo: anda junto com outros fornecedores' : 'Vínculo externo desativado: datas independentes';
+        veBtn.style.cssText = 'margin-top:2px;display:block;width:100%;padding:2px 4px;border-radius:4px;cursor:pointer;font-size:9px;font-weight:700;font-family:var(--font);border:1px solid '+(_ve?'#E07000':'#C8D4D8')+';background:'+(_ve?'rgba(224,112,0,.08)':'transparent')+';color:'+(_ve?'#B05800':'#9AABB8')+';text-align:center;white-space:nowrap;';
+        veBtn.innerHTML = (_ve ? '🔗 Ext' : '⛓️ Ext');
+        veBtn.addEventListener('click', (function(tid, btn){return function(){
+          var nv = !tecFornVincExt(f, tid);
+          tecFornSetVincExt(f, tid, nv);
+          btn.style.borderColor = nv?'#E07000':'#C8D4D8';
+          btn.style.background  = nv?'rgba(224,112,0,.08)':'transparent';
+          btn.style.color       = nv?'#B05800':'#9AABB8';
+          btn.innerHTML         = nv?'🔗 Ext':'⛓️ Ext';
+          btn.title             = nv?'Vínculo externo ativo: anda junto com outros fornecedores':'Vínculo externo desativado: datas independentes';
+          onCfgChange(); salvarDados();
+        };})(tecId, veBtn));
+        lbl.appendChild(veBtn);
+      }
+
       row.appendChild(lbl);
 
       // Início
@@ -2637,8 +2729,15 @@ function tecFornAbrirModal(fornId) {
         if (!f.rowOverrides[tid]) f.rowOverrides[tid] = {start: dt2.start, end: G.fmtISO(newEnd)};
         else f.rowOverrides[tid].end = G.fmtISO(newEnd);
 
-        // Atualizar APENAS o início da próxima etapa
-        tecFornEncadear(f.id, tid);
+        // Vínculo interno: encadear próxima etapa deste fornecedor
+        if (tecFornVincInt(f, tid)) tecFornEncadear(f.id, tid);
+
+        // Vínculo externo: propagar fim para outros fornecedores vinculados
+        if (tecFornVincExt(f, tid)) {
+          tecFornPropagaExt(f.id, tid,
+            f.rowOverrides[tid].start || dt2.start,
+            G.fmtISO(newEnd));
+        }
         onCfgChange(); salvarDados(); gRender(); renderEtapas();
       }
       btnM.addEventListener('click',(function(tid){ return function(){ ajustarDU(tid,-1); };})(tecId));
