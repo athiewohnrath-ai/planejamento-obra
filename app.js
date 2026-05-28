@@ -2377,13 +2377,18 @@ function tecFornPropagaExt(fornId, tecId, newStart, newEnd) {
   });
 }
 window.tecFornVincInt = tecFornVincInt;
+window.tecFornSetVincInt = tecFornSetVincInt;
 window.tecFornVincExt = tecFornVincExt;
+window.tecFornSetVincExt = tecFornSetVincExt;
 window.tecFornPropagaExt = tecFornPropagaExt;
 
 
 function tecFornAbrirModal(fornId) {
   var f = (ESTADO.cfg.tecFornecedores||[]).find(function(f){return f.id===fornId;});
   if (!f) return;
+  // Garantir estruturas de vínculo inicializadas
+  if (!f.vincInterno) f.vincInterno = {};
+  if (!f.vincExterno) f.vincExterno = {};
   var subs = (gSt.projFases[0]?.rows?.tec?.subs) || {};
   var tecIds   = G.TEC_IDS   || ['koTec','epTec','apTec','exTec'];
   var tecNames = G.TEC_NAMES || {koTec:'Kickoff',epTec:'EP',apTec:'AP',exTec:'EX'};
@@ -2653,9 +2658,13 @@ function tecFornAbrirModal(fornId) {
         iniV.appendChild(koToggleBtn);
       } else {
         // Não-KO: editável se vínculo interno desativado (ou se for epTec, que depende do KO)
+        // Início editável: seq da etapa ANTERIOR está OFF (exceto epTec que depende do KO)
+        var _tidIdx = tecIds.indexOf(tecId);
+        var _prevId = _tidIdx > 0 ? tecIds[_tidIdx - 1] : null;
+        var _prevSeqOff = _prevId && _prevId !== 'koTec' && !tecFornVincInt(f, _prevId);
+        var _iniEditavel = _prevSeqOff && tecId !== 'epTec';
+        // Fim editável: seq desta etapa está OFF
         var _seqLivre = !tecFornVincInt(f, tecId);
-        // epTec: o início é controlado pelo KO, não pelo seq — então sempre somente leitura no início
-        var _iniEditavel = _seqLivre && tecId !== 'epTec';
         if (_iniEditavel) {
           var iniI2 = document.createElement('input');
           iniI2.type = 'date';
@@ -2684,7 +2693,7 @@ function tecFornAbrirModal(fornId) {
       fimL.textContent = 'Fim';
       var fimV = document.createElement('div');
       // Fim editável quando vínculo interno desativado (seq livre) — qualquer etapa exceto EX (última)
-      var _fimEditavel = !isKO && !tecFornVincInt(f, tecId);
+      var _fimEditavel = !isKO && _seqLivre;
       if (_fimEditavel) {
         var fimI = document.createElement('input');
         fimI.type = 'date';
