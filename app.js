@@ -4330,6 +4330,8 @@ function gBuildAprovaHtml(t){
   var el=document.createElement("div");
   el.setAttribute("data-aprova-sid",sid);
   el.style.cssText="margin-top:12px;border-top:1px solid #EEF0F4;padding-top:12px;";
+  var _sc = ESTADO.cfg && ESTADO.cfg.aprovaStarColor ? ESTADO.cfg.aprovaStarColor : "#FFD600";
+  var _bc = ESTADO.cfg && ESTADO.cfg.aprovaBgColor ? ESTADO.cfg.aprovaBgColor : "#e60a20";
   el.innerHTML=[
     "<div style=\"font-size:9px;font-weight:700;text-transform:uppercase;color:#D4A017;margin-bottom:6px;\">★ Aprovação do Cliente</div>",
     "<label style=\"display:flex;align-items:center;gap:7px;margin-bottom:7px;\">",
@@ -4338,7 +4340,18 @@ function gBuildAprovaHtml(t){
     "<label style=\"display:flex;align-items:center;gap:7px;\">",
     "<span style=\"font-size:11px;font-weight:700;color:#8A95A8;width:36px;\">Dias</span>",
     "<input type=\"number\" id=\"pop-aprova-dias\" value=\""+ac.dias+"\" min=\"1\" max=\"10\" onchange=\"gPopAprovaChange(this.parentElement.parentElement.dataset.aprovaSid)\" style=\"width:50px;padding:4px 6px;border:1px solid #C8CDD8;border-radius:4px;font-size:13px;text-align:center;\" "+dis+">",
-    "</label>"
+    "</label>",
+    "<div style=\"margin-top:10px;display:flex;gap:8px;align-items:center;\">",
+    "<span style=\"font-size:10px;font-weight:700;color:#8A95A8;flex:1;\">Aparência</span>",
+    "<label style=\"display:flex;align-items:center;gap:4px;font-size:10px;color:#6A7A8A;\">Fundo",
+    "<input type=\"color\" id=\"pop-aprova-bg\" value=\""+_bc+"\" oninput=\"if(!ESTADO.cfg)ESTADO.cfg={};ESTADO.cfg.aprovaBgColor=this.value;salvarDados();gRender()\" style=\"width:28px;height:22px;border:1px solid #C8CDD8;border-radius:4px;padding:1px;cursor:pointer;\">",
+    "</label>",
+    "<label style=\"display:flex;align-items:center;gap:4px;font-size:10px;color:#6A7A8A;\">★",
+    "<input type=\"color\" id=\"pop-aprova-star\" value=\""+_sc+"\" oninput=\"if(!ESTADO.cfg)ESTADO.cfg={};ESTADO.cfg.aprovaStarColor=this.value;salvarDados();gRender()\" style=\"width:28px;height:22px;border:1px solid #C8CDD8;border-radius:4px;padding:1px;cursor:pointer;\">",
+    "</label>",
+    "<div style=\"width:28px;height:22px;border-radius:4px;border:1px solid #C8CDD8;display:flex;align-items:center;justify-content:center;background:"+_bc+"\" id=\"pop-aprova-preview\">",
+    "<span style=\"font-size:11px;color:"+_sc+"\">★</span></div>",
+    "</div>"
   ].join("");
   var tmp=document.createElement("div");
   tmp.appendChild(el);
