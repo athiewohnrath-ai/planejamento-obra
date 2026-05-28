@@ -2512,11 +2512,7 @@ function tecFornAbrirModal(fornId) {
           viBtn.addEventListener('click', (function(tid, btn){return function(){
             var nv = !tecFornVincInt(f, tid);
             tecFornSetVincInt(f, tid, nv);
-            btn.style.borderColor = nv?'#009EA8':'#C8D4D8';
-            btn.style.background  = nv?'rgba(0,158,168,.10)':'transparent';
-            btn.style.color       = nv?'#007A88':'#9AABB8';
-            btn.innerHTML         = nv?'🔗 seq':'⛓ seq';
-            onCfgChange(); salvarDados();
+            onCfgChange(); salvarDados(); renderEtapas();
           };})(tecId, viBtn));
           vincCell.appendChild(viBtn);
         }
@@ -2656,8 +2652,28 @@ function tecFornAbrirModal(fornId) {
         iniV.appendChild(iniI);
         iniV.appendChild(koToggleBtn);
       } else {
-        iniV.textContent = d.start ? G.fmtBR(G.parseD(d.start)) : '—';
-        iniV.style.opacity = '.7';
+        // Não-KO: editável se vínculo interno desativado (ou se for epTec, que depende do KO)
+        var _seqLivre = !tecFornVincInt(f, tecId);
+        // epTec: o início é controlado pelo KO, não pelo seq — então sempre somente leitura no início
+        var _iniEditavel = _seqLivre && tecId !== 'epTec';
+        if (_iniEditavel) {
+          var iniI2 = document.createElement('input');
+          iniI2.type = 'date';
+          iniI2.value = d.start ? G.fmtISO(G.parseD(d.start)) : '';
+          iniI2.style.cssText = 'width:100%;border:none;background:transparent;font-size:11px;color:var(--txt);outline:none;padding:0;cursor:pointer;';
+          iniI2.addEventListener('click', function(){ try{ this.showPicker(); }catch(e){} });
+          iniI2.addEventListener('change', (function(tid){ return function(){
+            if (!f.rowOverrides) f.rowOverrides = {};
+            if (!f.rowOverrides[tid]) f.rowOverrides[tid] = {start:'',end:''};
+            f.rowOverrides[tid].start = this.value;
+            onCfgChange(); salvarDados(); gRender(); renderEtapas();
+          };})(tecId));
+          iniV.style.cssText = 'border:1px solid var(--border);border-radius:4px;padding:4px 7px;font-size:11px;background:var(--bg-surface2);color:var(--txt);';
+          iniV.appendChild(iniI2);
+        } else {
+          iniV.textContent = d.start ? G.fmtBR(G.parseD(d.start)) : '—';
+          iniV.style.cssText = 'border:1px solid var(--border);border-radius:4px;padding:5px 7px;font-size:11px;background:var(--bg-surface2);color:var(--txt);opacity:.7;';
+        }
       }
       iniW.appendChild(iniL); iniW.appendChild(iniV); row.appendChild(iniW);
 
@@ -2667,8 +2683,27 @@ function tecFornAbrirModal(fornId) {
       fimL.style.cssText = 'font-size:8px;color:var(--txt-muted);margin-bottom:2px;font-weight:600;text-transform:uppercase;';
       fimL.textContent = 'Fim';
       var fimV = document.createElement('div');
-      fimV.style.cssText = 'border:1px solid var(--border);border-radius:4px;padding:5px 7px;font-size:11px;background:var(--bg-surface2);color:var(--txt);opacity:.7;';
-      fimV.textContent = d.end ? G.fmtBR(G.parseD(d.end)) : '—';
+      // Fim editável quando vínculo interno desativado (seq livre) — qualquer etapa exceto EX (última)
+      var _fimEditavel = !isKO && !tecFornVincInt(f, tecId);
+      if (_fimEditavel) {
+        var fimI = document.createElement('input');
+        fimI.type = 'date';
+        fimI.value = d.end ? G.fmtISO(G.parseD(d.end)) : '';
+        fimI.style.cssText = 'width:100%;border:none;background:transparent;font-size:11px;color:var(--txt);outline:none;padding:0;cursor:pointer;';
+        fimI.addEventListener('click', function(){ try{ this.showPicker(); }catch(e){} });
+        fimI.addEventListener('change', (function(tid){ return function(){
+          if (!f.rowOverrides) f.rowOverrides = {};
+          if (!f.rowOverrides[tid]) f.rowOverrides[tid] = {start: (getDates()[tid]||{}).start||'', end:''};
+          f.rowOverrides[tid].end = this.value;
+          // Recalcular DU
+          onCfgChange(); salvarDados(); gRender(); renderEtapas();
+        };})(tecId));
+        fimV.style.cssText = 'border:1px solid var(--border);border-radius:4px;padding:4px 7px;font-size:11px;background:var(--bg-surface2);color:var(--txt);';
+        fimV.appendChild(fimI);
+      } else {
+        fimV.style.cssText = 'border:1px solid var(--border);border-radius:4px;padding:5px 7px;font-size:11px;background:var(--bg-surface2);color:var(--txt);opacity:.7;';
+        fimV.textContent = d.end ? G.fmtBR(G.parseD(d.end)) : '—';
+      }
       fimW.appendChild(fimL); fimW.appendChild(fimV); row.appendChild(fimW);
 
       // DU com botões +/-
