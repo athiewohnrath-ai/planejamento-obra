@@ -237,9 +237,10 @@ function renderObraFases(){
   if(t&&t.subId){
     var _aprDias=getDiasAprovacao(t.subId);
     _aprDias.forEach(function(_dk){
-      if(void 0===_alocOverride[_dk]){
+      // Seta 0 se: sem override, ou override igual ao padrão (não foi ajuste manual)
+      var _cur=_alocOverride[_dk];
+      if(void 0===_cur||_cur===_alocDefault){
         _alocOverride[_dk]=0;
-        // Persistir automaticamente para que o zero seja salvo
         ESTADO.alocacaoARQ||(ESTADO.alocacaoARQ={});
         ESTADO.alocacaoARQ[a]||(ESTADO.alocacaoARQ[a]={default:_alocDefault,override:{}});
         ESTADO.alocacaoARQ[a].override[_dk]=0;
