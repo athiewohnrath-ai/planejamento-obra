@@ -2474,8 +2474,8 @@ function tecFornAbrirModal(fornId) {
 
       var row = document.createElement('div');
       row.style.cssText = isKO
-        ? 'display:grid;grid-template-columns:100px 160px 90px 120px 30px;gap:6px;align-items:start;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--border);'
-        : 'display:grid;grid-template-columns:100px 110px 110px 120px 30px;gap:6px;align-items:start;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--border);';
+        ? 'display:grid;grid-template-columns:85px 52px 150px 90px 110px 28px;gap:5px;align-items:start;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--border);'
+        : 'display:grid;grid-template-columns:85px 52px 95px 95px 110px 28px;gap:5px;align-items:center;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--border);';
 
       // Label
       var lbl = document.createElement('div');
@@ -2491,48 +2491,52 @@ function tecFornAbrirModal(fornId) {
       ltxt.textContent = tecNames[tecId]||tecId;
       lbl.appendChild(dot); lbl.appendChild(ltxt);
 
-      // Ícones de vínculo (não aparecem no KO)
+      row.appendChild(lbl);
+
+      // Coluna de vínculos (célula própria na grid, só para não-KO)
+      var vincCell = document.createElement('div');
+      vincCell.style.cssText = 'display:flex;flex-direction:column;gap:3px;align-items:stretch;';
       if (!isKO) {
-        // Vínculo interno (encadeamento com próxima etapa)
         var hasNext = tecIds.indexOf(tecId) < tecIds.length - 1;
+        var _btnStyle = function(active, cor) {
+          var c = active ? cor : '#C8D4D8';
+          var bg = active ? 'rgba('+cor+',0.08)' : 'transparent';
+          return 'padding:2px 3px;border-radius:3px;cursor:pointer;font-size:8px;font-weight:700;font-family:var(--font);border:1px solid '+c+';background:'+(active?'rgba(0,0,0,0.04)':'transparent')+';color:'+(active?cor:'#9AABB8')+';text-align:center;white-space:nowrap;width:100%;display:block;line-height:14px;';
+        };
         if (hasNext) {
           var viBtn = document.createElement('button');
           var _vi = tecFornVincInt(f, tecId);
-          viBtn.title = _vi ? 'Vínculo interno ativo: esta etapa encadeia com a próxima' : 'Vínculo interno desativado: próxima etapa livre';
-          viBtn.style.cssText = 'margin-top:2px;display:block;width:100%;padding:2px 4px;border-radius:4px;cursor:pointer;font-size:9px;font-weight:700;font-family:var(--font);border:1px solid '+(_vi?'#009EA8':'#C8D4D8')+';background:'+(_vi?'rgba(0,158,168,.08)':'transparent')+';color:'+(_vi?'#007A88':'#9AABB8')+';text-align:center;white-space:nowrap;';
-          viBtn.innerHTML = (_vi ? '🔗 Int' : '⛓️ Int');
+          viBtn.title = _vi ? 'Encadeia com próxima' : 'Próxima etapa livre';
+          viBtn.style.cssText = 'padding:2px 3px;border-radius:3px;cursor:pointer;font-size:8px;font-weight:700;font-family:var(--font);border:1px solid '+(_vi?'#009EA8':'#C8D4D8')+';background:'+(_vi?'rgba(0,158,168,.10)':'transparent')+';color:'+(_vi?'#007A88':'#9AABB8')+';text-align:center;white-space:nowrap;width:100%;display:block;line-height:14px;';
+          viBtn.innerHTML = (_vi ? '🔗 seq' : '⛓ seq');
           viBtn.addEventListener('click', (function(tid, btn){return function(){
             var nv = !tecFornVincInt(f, tid);
             tecFornSetVincInt(f, tid, nv);
             btn.style.borderColor = nv?'#009EA8':'#C8D4D8';
-            btn.style.background  = nv?'rgba(0,158,168,.08)':'transparent';
+            btn.style.background  = nv?'rgba(0,158,168,.10)':'transparent';
             btn.style.color       = nv?'#007A88':'#9AABB8';
-            btn.innerHTML         = nv?'🔗 Int':'⛓️ Int';
-            btn.title             = nv?'Vínculo interno ativo: esta etapa encadeia com a próxima':'Vínculo interno desativado: próxima etapa livre';
+            btn.innerHTML         = nv?'🔗 seq':'⛓ seq';
             onCfgChange(); salvarDados();
           };})(tecId, viBtn));
-          lbl.appendChild(viBtn);
+          vincCell.appendChild(viBtn);
         }
-        // Vínculo externo (entre fornecedores)
         var veBtn = document.createElement('button');
         var _ve = tecFornVincExt(f, tecId);
-        veBtn.title = _ve ? 'Vínculo externo ativo: anda junto com outros fornecedores' : 'Vínculo externo desativado: datas independentes';
-        veBtn.style.cssText = 'margin-top:2px;display:block;width:100%;padding:2px 4px;border-radius:4px;cursor:pointer;font-size:9px;font-weight:700;font-family:var(--font);border:1px solid '+(_ve?'#E07000':'#C8D4D8')+';background:'+(_ve?'rgba(224,112,0,.08)':'transparent')+';color:'+(_ve?'#B05800':'#9AABB8')+';text-align:center;white-space:nowrap;';
-        veBtn.innerHTML = (_ve ? '🔗 Ext' : '⛓️ Ext');
+        veBtn.title = _ve ? 'Anda junto com outros' : 'Data independente';
+        veBtn.style.cssText = 'padding:2px 3px;border-radius:3px;cursor:pointer;font-size:8px;font-weight:700;font-family:var(--font);border:1px solid '+(_ve?'#E07000':'#C8D4D8')+';background:'+(_ve?'rgba(224,112,0,.10)':'transparent')+';color:'+(_ve?'#B05800':'#9AABB8')+';text-align:center;white-space:nowrap;width:100%;display:block;line-height:14px;';
+        veBtn.innerHTML = (_ve ? '🔗 sin' : '⛓ sin');
         veBtn.addEventListener('click', (function(tid, btn){return function(){
           var nv = !tecFornVincExt(f, tid);
           tecFornSetVincExt(f, tid, nv);
           btn.style.borderColor = nv?'#E07000':'#C8D4D8';
-          btn.style.background  = nv?'rgba(224,112,0,.08)':'transparent';
+          btn.style.background  = nv?'rgba(224,112,0,.10)':'transparent';
           btn.style.color       = nv?'#B05800':'#9AABB8';
-          btn.innerHTML         = nv?'🔗 Ext':'⛓️ Ext';
-          btn.title             = nv?'Vínculo externo ativo: anda junto com outros fornecedores':'Vínculo externo desativado: datas independentes';
+          btn.innerHTML         = nv?'🔗 sin':'⛓ sin';
           onCfgChange(); salvarDados();
         };})(tecId, veBtn));
-        lbl.appendChild(veBtn);
+        vincCell.appendChild(veBtn);
       }
-
-      row.appendChild(lbl);
+      row.appendChild(vincCell);
 
       // Início
       var iniW = document.createElement('div');
