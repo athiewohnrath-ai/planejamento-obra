@@ -5016,11 +5016,6 @@ window.cfgCarregar = function() {
   }, 50);
 };
 
-window.abrirPlanoFino=function(){
-  try{const p={ts:Date.now(),estado:ESTADO};sessionStorage.setItem('aw_estado_atual',JSON.stringify(p));}catch(e){}
-  window.location.href='gestao-arq.html';
-};
-
 // ── Modal Gestão ARQ ─────────────────────────────────────────────────────────
 window.abrirPlanoFino = function() {
   // Serializar datas das etapas ARQ para o gestao-arq.html
