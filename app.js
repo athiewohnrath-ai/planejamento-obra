@@ -5022,9 +5022,9 @@ window.abrirPlanoFino = function() {
   var iframe = document.getElementById('iframe-gestao-arq');
   if (!modal || !iframe) return;
 
-  // Montar dados para injetar no iframe (mesma origem — acesso direto via contentWindow)
-  var etapas = [];
+  // Serializar ctx das etapas
   try {
+    var etapas = [];
     (gSt.projFases || []).forEach(function(fase) {
       var subs = fase.rows && fase.rows.arq && fase.rows.arq.subs || {};
       G.SUB_IDS.forEach(function(id) {
@@ -5037,35 +5037,23 @@ window.abrirPlanoFino = function() {
         });
       });
     });
-  } catch(e) {}
-
-  var andares = (typeof CFG_ANDARES !== 'undefined' && CFG_ANDARES) ||
-                (ESTADO.cfg && ESTADO.cfg.andares) || [];
-  var etapasAtivas = {};
-  try {
+    var andares = (typeof CFG_ANDARES !== 'undefined' && CFG_ANDARES) ||
+                  (ESTADO.cfg && ESTADO.cfg.andares) || [];
+    var etapasAtivas = {};
     (ESTADO.cfg.projFases || []).forEach(function(f) {
       Object.keys(f.etapas || {}).forEach(function(k) { if(f.etapas[k]) etapasAtivas[k] = true; });
     });
+    sessionStorage.setItem('aw_gestao_ctx', JSON.stringify({andares: andares, etapas: etapas, etapasAtivas: etapasAtivas}));
   } catch(e) {}
 
-  var slimEstado = {
-    meta: ESTADO.meta || {},
-    cfg: {
-      equipeARQ: (ESTADO.cfg && ESTADO.cfg.equipeARQ) || {},
-      andares: andares
-    }
-  };
-  var ctx = {andares: andares, etapas: etapas, etapasAtivas: etapasAtivas};
+  // Salvar estado no sessionStorage (compartilhado com iframe mesma origem)
+  try {
+    sessionStorage.setItem('aw_estado_atual', JSON.stringify({ts: Date.now(), estado: ESTADO}));
+  } catch(e) {}
 
-  // Abrir modal e injetar dados via contentWindow após carregamento (mesma origem)
   modal.style.display = 'flex';
   document.body.style.overflow = 'hidden';
   iframe.src = 'gestao-arq.html?_=' + Date.now();
-  iframe.onload = function() {
-    try {
-      iframe.contentWindow.initWithData(slimEstado, ctx);
-    } catch(e) { console.error('[gestao-arq] initWithData:', e); }
-  };
 };
 
 window.fecharGestaoArq = function(salvar) {
@@ -5078,18 +5066,14 @@ window.fecharGestaoArq = function(salvar) {
   // Se o iframe sinalizou que salvou, recarregar estado
   if (salvar) {
     try {
-      var raw = localStorage.getItem('aw_gestao_arq_state');
+      var raw = sessionStorage.getItem('aw_estado_atual');
       if (raw) {
         var parsed = JSON.parse(raw);
-        if (parsed.estado) {
-          // Restaurar só equipeARQ no ESTADO principal (não substituir tudo)
-          if (parsed.estado.cfg && parsed.estado.cfg.equipeARQ) {
-            ESTADO.cfg.equipeARQ = parsed.estado.cfg.equipeARQ;
-          }
+        if (parsed.estado && parsed.estado.cfg && parsed.estado.cfg.equipeARQ) {
+          ESTADO.cfg.equipeARQ = parsed.estado.cfg.equipeARQ;
           window.__AW_ESTADO = ESTADO;
-          localStorage.removeItem('aw_gestao_arq_state'); // limpar após usar
           showToast('Equipe de arquitetura confirmada ✓');
-          salvarDados(); // persistir no Supabase
+          salvarDados();
         }
       }
     } catch(e) {}
