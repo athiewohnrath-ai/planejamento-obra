@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Gestão de Arquitetura · Athié Wohnrath</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --tiffany:#3FBFB0; --tiffany-dark:#2A9D8F; --tiffany-soft:#E6F6F4;
+  --black:#111213; --ink:#1F2326; --gray:#6B7280; --gray-light:#9CA3AF;
+  --border:#E5E7EB; --bg:#F7F8F8; --white:#FFFFFF;
+  --amber:#D97706; --amber-soft:#FEF3E2;
+  --red:#DC4C2E; --red-soft:#FCEAE6;
+  --green:#2A9D8F;
+  --font:'Barlow Condensed',sans-serif;
+  --body:'Barlow',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{font-family:var(--body);background:var(--bg);color:var(--ink);display:flex;height:100vh}
+
+/* ── Sidebar ── */
+aside{
+  width:268px;background:var(--black);color:var(--white);
+  display:flex;flex-direction:column;padding:20px 16px;flex-shrink:0;
+}
+.logo-row{display:flex;align-items:center;gap:11px;margin-bottom:20px}
+.logo{width:38px;height:38px;border-radius:9px;background:var(--tiffany);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo svg{width:20px;height:20px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round}
+.logo-title{font-family:var(--font);font-weight:800;font-size:14px;line-height:1.1;color:#fff}
+.logo-sub{font-size:11px;color:var(--gray-light);margin-top:1px}
+
+.ctx{padding:11px 12px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);margin-bottom:8px}
+.ctx-label{font-size:9px;font-weight:700;letter-spacing:.7px;color:var(--gray-light);text-transform:uppercase;margin-bottom:3px;font-family:var(--font)}
+.ctx-val{font-size:15px;font-weight:800;color:#fff;line-height:1.2;font-family:var(--font)}
+.ctx-code{font-size:12px;color:var(--tiffany);font-weight:700;margin-bottom:3px;font-family:var(--font)}
+.ctx-sub{font-size:11px;color:var(--gray-light);margin-top:2px}
+
+.side-divider{height:1px;background:rgba(255,255,255,.08);margin:14px 4px}
+.nav-label{font-size:9px;font-weight:700;letter-spacing:.7px;color:#4b5468;text-transform:uppercase;margin:2px 0 8px 4px;font-family:var(--font)}
+
+.steps{display:flex;flex-direction:column;gap:4px}
+.step-btn{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:10px;border:none;background:transparent;cursor:pointer;text-align:left;width:100%;transition:background .15s}
+.step-btn.active{background:rgba(63,191,176,.16)}
+.step-btn.locked{opacity:.45;cursor:not-allowed}
+.step-dot{width:26px;height:26px;border-radius:50%;flex-shrink:0;border:2px solid #4b5468;color:var(--gray-light);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;font-family:var(--font)}
+.step-btn.active .step-dot,.step-btn.done .step-dot{background:var(--tiffany);border-color:var(--tiffany);color:#111}
+.step-btn.done .step-dot::after{content:'✓'}
+.step-label{font-size:13px;font-weight:500;color:var(--gray-light);font-family:var(--font)}
+.step-btn.active .step-label{font-weight:700;color:#fff}
+.step-btn.done .step-label{color:#d1d5db}
+.step-sub{font-size:10px;color:#4b5468;margin-top:1px;font-family:var(--body)}
+.step-btn.active .step-sub{color:rgba(63,191,176,.7)}
+
+.spacer{flex:1}
+.status-row{display:flex;align-items:center;gap:7px;font-size:11.5px;font-weight:600;padding:0 4px;font-family:var(--font)}
+.status-dot{width:8px;height:8px;border-radius:50%;background:var(--tiffany);box-shadow:0 0 8px var(--tiffany)}
+.back-btn{display:flex;align-items:center;gap:6px;width:100%;padding:9px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.12);background:transparent;color:var(--gray-light);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);transition:all .15s;margin-top:8px}
+.back-btn:hover{background:rgba(255,255,255,.06);color:#fff}
+
+/* ── Main ── */
+main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.main-header{padding:20px 32px 0;flex-shrink:0}
+.main-header h1{font-family:var(--font);font-size:22px;font-weight:800;color:var(--ink);letter-spacing:.02em}
+.main-header .subtitle{font-size:13px;color:var(--gray);margin-top:3px}
+.main-scroll{flex:1;overflow-y:auto;padding:20px 32px 32px}
+
+/* ── Cards ── */
+.card{background:var(--white);border:1px solid var(--border);border-radius:12px;margin-bottom:18px;overflow:hidden}
+.card.accent{border-left:3px solid var(--tiffany)}
+.card-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.card-icon{width:32px;height:32px;border-radius:8px;background:var(--tiffany-soft);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.card-icon svg{width:16px;height:16px;stroke:var(--tiffany-dark);fill:none;stroke-width:2;stroke-linecap:round}
+.card-title{font-family:var(--font);font-size:14px;font-weight:700;color:var(--ink)}
+.card-sub{font-size:11.5px;color:var(--gray-light);margin-top:1px}
+.card-body{padding:18px}
+
+/* ── Diretor banner ── */
+.dir-banner{display:flex;align-items:center;gap:14px;padding:14px 18px;background:linear-gradient(135deg,#0e2340,#1a3a5e);border-radius:10px;margin-bottom:20px}
+.dir-avatar{width:44px;height:44px;border-radius:10px;background:var(--tiffany);display:flex;align-items:center;justify-content:center;font-family:var(--font);font-size:16px;font-weight:800;color:#111;flex-shrink:0}
+.dir-info{flex:1}
+.dir-name{font-family:var(--font);font-size:16px;font-weight:800;color:#fff}
+.dir-role{font-size:11px;color:var(--tiffany);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-top:1px;font-family:var(--font)}
+.dir-badge{padding:4px 10px;border-radius:20px;background:rgba(63,191,176,.2);border:1px solid rgba(63,191,176,.4);font-size:10px;font-weight:700;color:var(--tiffany);font-family:var(--font);letter-spacing:.04em}
+
+/* ── Chips ── */
+.chip-grid{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:flex;align-items:center;gap:6px;padding:7px 13px;border-radius:20px;border:1.5px solid var(--border);background:var(--white);cursor:pointer;transition:all .15s;font-family:var(--font);font-size:12px;font-weight:600;color:var(--gray)}
+.chip:hover{border-color:var(--tiffany);color:var(--tiffany-dark)}
+.chip.selected{background:var(--tiffany);border-color:var(--tiffany);color:#111}
+.chip .chip-role{font-size:10px;font-weight:400;opacity:.75}
+.chip .chip-check{width:14px;height:14px;border-radius:50%;background:rgba(0,0,0,.15);display:flex;align-items:center;justify-content:center;font-size:9px}
+.chip.selected .chip-check{background:rgba(0,0,0,.2)}
+
+/* ── Seção GA ── */
+.ga-section{margin-bottom:16px}
+.ga-header{display:flex;align-items:center;gap:8px;padding:8px 12px;background:#F8F9FA;border-radius:8px;margin-bottom:8px}
+.ga-dot{width:8px;height:8px;border-radius:50%;background:var(--tiffany-dark);flex-shrink:0}
+.ga-name{font-family:var(--font);font-size:13px;font-weight:700;color:var(--ink)}
+.ga-role-tag{font-size:10px;padding:2px 7px;border-radius:10px;background:var(--tiffany-soft);color:var(--tiffany-dark);font-weight:700;font-family:var(--font)}
+.ga-sel-btn{margin-left:auto;font-size:11px;font-weight:700;font-family:var(--font);padding:4px 10px;border-radius:15px;border:1.5px solid var(--border);background:transparent;cursor:pointer;transition:all .15s}
+.ga-sel-btn.active{background:var(--tiffany);border-color:var(--tiffany);color:#111}
+.ga-sel-btn:not(.active){color:var(--gray)}
+
+/* ── Resumo equipe ── */
+.equipe-resumo{background:linear-gradient(135deg,#f0faf9,#e6f6f4);border:1px solid rgba(63,191,176,.3);border-radius:10px;padding:16px 18px;margin-top:4px}
+.eq-resumo-title{font-family:var(--font);font-size:10px;font-weight:700;color:var(--tiffany-dark);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px}
+.eq-ga-block{margin-bottom:10px}
+.eq-ga-name{font-family:var(--font);font-size:13px;font-weight:700;color:var(--ink);margin-bottom:4px}
+.eq-arq-list{display:flex;flex-wrap:wrap;gap:5px}
+.eq-arq-chip{font-size:11px;font-family:var(--font);padding:3px 9px;border-radius:12px;background:rgba(63,191,176,.15);color:var(--tiffany-dark);font-weight:600}
+.eq-count{font-family:var(--font);font-size:12px;font-weight:700;color:var(--tiffany-dark);margin-top:8px;padding-top:8px;border-top:1px solid rgba(63,191,176,.25)}
+
+/* ── CTA footer ── */
+.cta-bar{padding:16px 32px;border-top:1px solid var(--border);background:var(--white);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.cta-info{font-size:12px;color:var(--gray);font-family:var(--body)}
+.cta-info strong{color:var(--ink)}
+.btn-primary{height:38px;padding:0 22px;background:var(--tiffany);border:none;border-radius:9px;font-family:var(--font);font-size:13px;font-weight:700;color:#111;cursor:pointer;display:flex;align-items:center;gap:7px;transition:all .15s}
+.btn-primary:hover{background:var(--tiffany-dark);color:#fff}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed}
+.btn-secondary{height:38px;padding:0 18px;background:transparent;border:1.5px solid var(--border);border-radius:9px;font-family:var(--font);font-size:12px;font-weight:700;color:var(--gray);cursor:pointer;transition:all .15s}
+.btn-secondary:hover{border-color:var(--tiffany);color:var(--tiffany-dark)}
+
+/* ── Empty state ── */
+.empty{text-align:center;padding:40px 20px;color:var(--gray-light)}
+.empty-icon{font-size:32px;margin-bottom:10px;opacity:.5}
+.empty-txt{font-size:13px}
+
+/* ── Section label ── */
+.sec-label{font-family:var(--font);font-size:10px;font-weight:700;color:var(--gray-light);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.sec-label::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* ── Toast ── */
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(12px);background:#111;color:#fff;padding:9px 18px;border-radius:20px;font-family:var(--font);font-size:13px;font-weight:600;opacity:0;transition:all .25s;z-index:9999;pointer-events:none}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.fade-in{animation:fadeIn .22s ease both}
+</style>
+</head>
+<body>
+
+<!-- ── SIDEBAR ── -->
+<aside>
+  <div class="logo-row">
+    <div class="logo">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    </div>
+    <div>
+      <div class="logo-title">Gestão de Arquitetura</div>
+      <div class="logo-sub">Athié Wohnrath</div>
+    </div>
+  </div>
+
+  <!-- Contexto do projeto -->
+  <div class="ctx" id="ctx-projeto">
+    <div class="ctx-label">Projeto</div>
+    <div class="ctx-code" id="ctx-codigo">—</div>
+    <div class="ctx-val" id="ctx-nome">Carregando…</div>
+    <div class="ctx-sub" id="ctx-cliente"></div>
+  </div>
+  <div class="ctx" id="ctx-dir">
+    <div class="ctx-label">Diretoria</div>
+    <div class="ctx-val" id="ctx-diretor" style="font-size:13px;">—</div>
+  </div>
+
+  <div class="side-divider"></div>
+  <div class="nav-label">Etapas</div>
+
+  <div class="steps">
+    <button class="step-btn active" onclick="goStep(1)">
+      <div class="step-dot">1</div>
+      <div>
+        <div class="step-label">Equipe</div>
+        <div class="step-sub">Gerentes e arquitetos</div>
+      </div>
+    </button>
+    <button class="step-btn locked" id="step2-btn">
+      <div class="step-dot">2</div>
+      <div>
+        <div class="step-label">Alocação</div>
+        <div class="step-sub">Calendário dia a dia</div>
+      </div>
+    </button>
+    <button class="step-btn locked" id="step3-btn">
+      <div class="step-dot">3</div>
+      <div>
+        <div class="step-label">Relatório</div>
+        <div class="step-sub">Visão geral + impressão</div>
+      </div>
+    </button>
+  </div>
+
+  <div class="spacer"></div>
+
+  <div class="status-row">
+    <div class="status-dot"></div>
+    <span style="color:var(--tiffany);">Plano em elaboração</span>
+  </div>
+  <button class="back-btn" onclick="voltarApp()">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+    Voltar ao planejamento
+  </button>
+</aside>
+
+<!-- ── MAIN ── -->
+<main>
+  <div class="main-header">
+    <h1>Equipe de Arquitetura</h1>
+    <p class="subtitle">Selecione os gerentes e arquitetos que trabalharão neste projeto</p>
+  </div>
+
+  <div class="main-scroll" id="main-content">
+    <!-- Preenchido pelo JS -->
+    <div class="empty fade-in">
+      <div class="empty-icon">⏳</div>
+      <div class="empty-txt">Carregando dados do projeto…</div>
+    </div>
+  </div>
+
+  <!-- CTA Footer -->
+  <div class="cta-bar">
+    <div class="cta-info" id="cta-info">Selecione pelo menos um gerente para continuar</div>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <button class="btn-secondary" onclick="voltarApp()">Cancelar</button>
+      <button class="btn-primary" id="btn-confirmar" disabled onclick="confirmarEquipe()">
+        Confirmar equipe
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+  </div>
+</main>
+
+<div id="toast"></div>
+
+<script>
+// ── Banco de equipe ──────────────────────────────────────────────────────────
+var EQUIPE_DB = {
+  "Pedro Coivo": {
+    gerentes: [
+      { nome: "Paula Torres", cargo: "Gerente de Arquitetura",
+        arquitetos: [
+          { nome: "Andre Milhomens",    cargo: "Arquiteto" },
+          { nome: "Caroline Rodrigues", cargo: "Arquiteto" },
+          { nome: "Gabriela Pugliese",  cargo: "Arquiteto" },
+          { nome: "Ana Rodrigues",      cargo: "Arquiteto" },
+          { nome: "Alice Souza",        cargo: "Arquiteto" }
+        ]
+      },
+      { nome: "Ana Pollizello", cargo: "Gerente de Arquitetura",
+        arquitetos: [
+          { nome: "Rafaela Justo",      cargo: "Arquiteto" },
+          { nome: "Thiago Oliveira",    cargo: "Arquiteto" },
+          { nome: "Emilio Bertolini",   cargo: "Arquiteto" },
+          { nome: "Franciela Gehrke",   cargo: "Arquiteto" },
+          { nome: "Carolina Plascak",   cargo: "Arquiteto" },
+          { nome: "Caroline Guerrero",  cargo: "Arquiteto" }
+        ]
+      }
+    ]
+  },
+  "Daniel Ingarano": {
+    gerentes: [
+      { nome: "Nathalia Gomes", cargo: "Gerente de Arquitetura",
+        arquitetos: [
+          { nome: "Sergio Sampaio", cargo: "Arquiteto" },
+          { nome: "Aline Leal",     cargo: "Arquiteto" }
+        ]
+      },
+      { nome: "Tais Neiva", cargo: "Gerente de Arquitetura",
+        arquitetos: [
+          { nome: "Rafaella Silva",   cargo: "Arquiteto" },
+          { nome: "Vinicius Bressan", cargo: "Arquiteto" }
+        ]
+      }
+    ]
+  },
+  "Virginia Nehmi": {
+    gerentes: [
+      { nome: "Giulia Previato", cargo: "Gerente de Arquitetura",
+        arquitetos: [
+          { nome: "Itamara Lima", cargo: "Arquiteto" },
+          { nome: "Leo Teruo",    cargo: "Arquiteto" }
+        ]
+      },
+      { nome: "Priscila Pary", cargo: "Gerente de Arquitetura",
+        arquitetos: [
+          { nome: "Sabryna Ribeiro",  cargo: "Arquiteto" },
+          { nome: "Guilherme Fazano", cargo: "Arquiteto" },
+          { nome: "Kazuo Daido",      cargo: "Arquiteto" }
+        ]
+      }
+    ]
+  }
+};
+
+// ── Estado local ─────────────────────────────────────────────────────────────
+var ESTADO = null;
+var equipeLocal = { diretor: '', gerentes: [], arquitetos: [] };
+
+// ── Carregar estado do app principal ─────────────────────────────────────────
+function carregarEstado() {
+  try {
+    var raw = sessionStorage.getItem('aw_estado_atual');
+    if (raw) {
+      var parsed = JSON.parse(raw);
+      ESTADO = parsed.estado || parsed;
+    }
+  } catch(e) { ESTADO = null; }
+
+  if (!ESTADO) {
+    document.getElementById('main-content').innerHTML =
+      '<div class="empty fade-in"><div class="empty-icon">⚠️</div>' +
+      '<div class="empty-txt" style="color:#DC4C2E;">Não foi possível carregar os dados do projeto.<br>' +
+      '<small style="color:var(--gray-light);margin-top:6px;display:block;">Abra esta página a partir do planejamento de obra.</small></div></div>';
+    return;
+  }
+
+  // Preencher sidebar
+  var meta = ESTADO.meta || {};
+  document.getElementById('ctx-codigo').textContent = meta.codigo || '';
+  document.getElementById('ctx-nome').textContent   = meta.nome   || 'Sem título';
+  document.getElementById('ctx-cliente').textContent= meta.gi ? 'GI: '+meta.gi : '';
+
+  var ea = ESTADO.cfg && ESTADO.cfg.equipeARQ || {};
+  var dir = ea.diretor || '';
+  document.getElementById('ctx-diretor').textContent = dir || 'Não definido';
+
+  // Restaurar seleção salva
+  if (ea.diretor) equipeLocal.diretor = ea.diretor;
+  if (ea.gerentes && ea.gerentes.length) equipeLocal.gerentes = ea.gerentes.slice();
+  if (ea.arquitetos && ea.arquitetos.length) equipeLocal.arquitetos = ea.arquitetos.slice();
+
+  renderConteudo();
+}
+
+// ── Render principal ──────────────────────────────────────────────────────────
+function renderConteudo() {
+  var dir = equipeLocal.diretor;
+  var dbDir = EQUIPE_DB[dir];
+  var el = document.getElementById('main-content');
+
+  if (!dir || !dbDir) {
+    el.innerHTML =
+      '<div class="empty fade-in">' +
+      '<div class="empty-icon">📋</div>' +
+      '<div class="empty-txt">Nenhum diretor selecionado.<br>' +
+      '<small style="margin-top:6px;display:block;">Configure o diretor de arquitetura em<br>' +
+      '<strong>Configurações do Projeto → Identificação</strong></small></div></div>';
+    atualizarCTA();
+    return;
+  }
+
+  var html = '<div class="fade-in">';
+
+  // Banner do diretor
+  var initials = dir.split(' ').map(function(w){return w[0];}).slice(0,2).join('');
+  html += '<div class="dir-banner">';
+  html += '<div class="dir-avatar">'+initials+'</div>';
+  html += '<div class="dir-info">';
+  html += '<div class="dir-name">'+dir+'</div>';
+  html += '<div class="dir-role">Diretor de Arquitetura</div>';
+  html += '</div>';
+  html += '<div class="dir-badge">'+dbDir.gerentes.length+' gerentes disponíveis</div>';
+  html += '</div>';
+
+  // Gerentes
+  html += '<div class="card accent">';
+  html += '<div class="card-header">';
+  html += '<div class="card-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></div>';
+  html += '<div><div class="card-title">Gerentes responsáveis</div>';
+  html += '<div class="card-sub">Selecione um ou mais gerentes que coordenarão este projeto</div></div>';
+  html += '</div>';
+  html += '<div class="card-body">';
+  html += '<div class="chip-grid">';
+
+  dbDir.gerentes.forEach(function(g) {
+    var sel = equipeLocal.gerentes.indexOf(g.nome) >= 0;
+    html += '<button class="chip'+(sel?' selected':'')+'" onclick="toggleGerente(\''+g.nome+'\',this)">';
+    html += '<div class="chip-check">'+(sel?'✓':'')+'</div>';
+    html += g.nome;
+    html += '<span class="chip-role">GA</span>';
+    html += '</button>';
+  });
+
+  html += '</div></div></div>';
+
+  // Arquitetos (agrupados por GA selecionado)
+  var gerSel = equipeLocal.gerentes;
+  if (gerSel.length > 0) {
+    html += '<div class="card">';
+    html += '<div class="card-header">';
+    html += '<div class="card-icon" style="background:#EEF2FA;"><svg viewBox="0 0 24 24" style="stroke:#1A5294;"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>';
+    html += '<div><div class="card-title">Arquitetos</div>';
+    html += '<div class="card-sub">Profissionais dos gerentes selecionados. Todos são adicionados por padrão — clique para remover</div></div>';
+    html += '</div>';
+    html += '<div class="card-body">';
+
+    dbDir.gerentes.forEach(function(g) {
+      if (gerSel.indexOf(g.nome) < 0) return;
+      html += '<div class="ga-section">';
+      html += '<div class="ga-header">';
+      html += '<div class="ga-dot"></div>';
+      html += '<span class="ga-name">'+g.nome+'</span>';
+      html += '<span class="ga-role-tag">GA</span>';
+      // Botão selecionar/desselecionar todos do GA
+      var todosSelGA = g.arquitetos.every(function(a){return equipeLocal.arquitetos.indexOf(a.nome)>=0;});
+      html += '<button class="ga-sel-btn'+(todosSelGA?' active':'')+'" onclick="toggleTodosGA(\''+g.nome+'\',this)">'+(todosSelGA?'Todos ✓':'Selecionar todos')+'</button>';
+      html += '</div>';
+      html += '<div class="chip-grid">';
+      g.arquitetos.forEach(function(a) {
+        var sel = equipeLocal.arquitetos.indexOf(a.nome) >= 0;
+        html += '<button class="chip'+(sel?' selected':'')+'" onclick="toggleArq(\''+a.nome+'\',this)">';
+        html += '<div class="chip-check">'+(sel?'✓':'')+'</div>';
+        html += a.nome;
+        html += '<span class="chip-role">'+a.cargo+'</span>';
+        html += '</button>';
+      });
+      html += '</div></div>';
+    });
+
+    html += '</div></div>';
+  }
+
+  // Resumo equipe (quando há seleção)
+  if (equipeLocal.gerentes.length > 0 && equipeLocal.arquitetos.length > 0) {
+    html += '<div class="equipe-resumo">';
+    html += '<div class="eq-resumo-title">Resumo da equipe selecionada</div>';
+
+    equipeLocal.gerentes.forEach(function(gNome) {
+      var gDef = dbDir.gerentes.find(function(g){return g.nome===gNome;});
+      if (!gDef) return;
+      var arqsDoGA = gDef.arquitetos.filter(function(a){return equipeLocal.arquitetos.indexOf(a.nome)>=0;});
+      if (!arqsDoGA.length) return;
+      html += '<div class="eq-ga-block">';
+      html += '<div class="eq-ga-name">'+gNome+' <span style="font-size:10px;color:var(--tiffany-dark);font-family:var(--font);font-weight:700;">GA</span></div>';
+      html += '<div class="eq-arq-list">';
+      arqsDoGA.forEach(function(a){
+        html += '<span class="eq-arq-chip">'+a.nome+'</span>';
+      });
+      html += '</div></div>';
+    });
+
+    html += '<div class="eq-count">'+equipeLocal.arquitetos.length+' arquiteto(s) · '+equipeLocal.gerentes.length+' gerente(s)</div>';
+    html += '</div>';
+  }
+
+  html += '</div>';
+  el.innerHTML = html;
+  atualizarCTA();
+}
+
+// ── Toggles ───────────────────────────────────────────────────────────────────
+function toggleGerente(nome, btn) {
+  var idx = equipeLocal.gerentes.indexOf(nome);
+  if (idx >= 0) {
+    equipeLocal.gerentes.splice(idx, 1);
+    // Remover arquitetos desse GA
+    var dir = EQUIPE_DB[equipeLocal.diretor];
+    if (dir) {
+      var gDef = dir.gerentes.find(function(g){return g.nome===nome;});
+      if (gDef) {
+        gDef.arquitetos.forEach(function(a){
+          var ai = equipeLocal.arquitetos.indexOf(a.nome);
+          if (ai >= 0) equipeLocal.arquitetos.splice(ai, 1);
+        });
+      }
+    }
+  } else {
+    equipeLocal.gerentes.push(nome);
+    // Auto-selecionar todos os arquitetos do GA
+    var dir2 = EQUIPE_DB[equipeLocal.diretor];
+    if (dir2) {
+      var gDef2 = dir2.gerentes.find(function(g){return g.nome===nome;});
+      if (gDef2) {
+        gDef2.arquitetos.forEach(function(a){
+          if (equipeLocal.arquitetos.indexOf(a.nome) < 0)
+            equipeLocal.arquitetos.push(a.nome);
+        });
+      }
+    }
+  }
+  renderConteudo();
+}
+
+function toggleArq(nome, btn) {
+  var idx = equipeLocal.arquitetos.indexOf(nome);
+  if (idx >= 0) equipeLocal.arquitetos.splice(idx, 1);
+  else equipeLocal.arquitetos.push(nome);
+  renderConteudo();
+}
+
+function toggleTodosGA(gNome) {
+  var dir = EQUIPE_DB[equipeLocal.diretor];
+  if (!dir) return;
+  var gDef = dir.gerentes.find(function(g){return g.nome===gNome;});
+  if (!gDef) return;
+  var todosSelGA = gDef.arquitetos.every(function(a){return equipeLocal.arquitetos.indexOf(a.nome)>=0;});
+  if (todosSelGA) {
+    // Desselecionar todos
+    gDef.arquitetos.forEach(function(a){
+      var i = equipeLocal.arquitetos.indexOf(a.nome);
+      if (i >= 0) equipeLocal.arquitetos.splice(i, 1);
+    });
+  } else {
+    // Selecionar todos
+    gDef.arquitetos.forEach(function(a){
+      if (equipeLocal.arquitetos.indexOf(a.nome) < 0)
+        equipeLocal.arquitetos.push(a.nome);
+    });
+  }
+  renderConteudo();
+}
+
+// ── CTA ───────────────────────────────────────────────────────────────────────
+function atualizarCTA() {
+  var btn = document.getElementById('btn-confirmar');
+  var info = document.getElementById('cta-info');
+  var nGer = equipeLocal.gerentes.length;
+  var nArq = equipeLocal.arquitetos.length;
+
+  if (nGer === 0) {
+    btn.disabled = true;
+    info.innerHTML = 'Selecione pelo menos um <strong>gerente</strong> para continuar';
+  } else if (nArq === 0) {
+    btn.disabled = true;
+    info.innerHTML = 'Selecione pelo menos um <strong>arquiteto</strong> para continuar';
+  } else {
+    btn.disabled = false;
+    info.innerHTML = '<strong>'+nArq+'</strong> arquiteto(s) · <strong>'+nGer+'</strong> gerente(s) selecionado(s)';
+  }
+}
+
+// ── Confirmar e salvar ────────────────────────────────────────────────────────
+function confirmarEquipe() {
+  if (!ESTADO) return;
+  if (!ESTADO.cfg) ESTADO.cfg = {};
+  if (!ESTADO.cfg.equipeARQ) ESTADO.cfg.equipeARQ = {};
+  ESTADO.cfg.equipeARQ.gerentes   = equipeLocal.gerentes.slice();
+  ESTADO.cfg.equipeARQ.arquitetos = equipeLocal.arquitetos.slice();
+
+  // Salvar de volta no sessionStorage
+  try {
+    var payload = {ts: Date.now(), estado: ESTADO};
+    sessionStorage.setItem('aw_estado_atual', JSON.stringify(payload));
+  } catch(e) {}
+
+  showToast('Equipe confirmada — '+equipeLocal.arquitetos.length+' arquiteto(s)');
+  setTimeout(function(){ voltarApp(); }, 900);
+}
+
+// ── Navegação ─────────────────────────────────────────────────────────────────
+function voltarApp() {
+  window.location.href = 'app.html';
+}
+
+function goStep(n) {
+  // Por enquanto só step 1 está disponível
+}
+
+// ── Toast ─────────────────────────────────────────────────────────────────────
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 2600);
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+carregarEstado();
+</script>
+</body>
+</html>

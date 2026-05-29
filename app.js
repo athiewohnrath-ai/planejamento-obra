@@ -5015,3 +5015,8 @@ window.cfgCarregar = function() {
     if (sel && ea.diretor) { sel.value = ea.diretor; equipeRenderGerentes(); }
   }, 50);
 };
+
+window.abrirPlanoFino=function(){
+  try{const p={ts:Date.now(),estado:ESTADO};sessionStorage.setItem('aw_estado_atual',JSON.stringify(p));}catch(e){}
+  window.location.href='gestao-arq.html';
+};
