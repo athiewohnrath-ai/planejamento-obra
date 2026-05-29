@@ -10,7 +10,6 @@
   --tf:#3FBFB0;--tf-dk:#2A9D8F;--tf-s:#E6F6F4;
   --black:#111213;--ink:#1F2326;--gray:#6B7280;--gl:#9CA3AF;
   --border:#E5E7EB;--bg:#F7F8F8;--white:#fff;
-  --amber:#D97706;--red:#DC4C2E;
   --font:'Barlow Condensed',sans-serif;--body:'Barlow',sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0}
@@ -20,33 +19,32 @@ button{font-family:inherit;cursor:pointer}
 input,select{font-family:inherit}
 
 /* ── Sidebar ── */
-aside{width:248px;background:var(--black);color:#fff;display:flex;flex-direction:column;padding:18px 14px;flex-shrink:0}
-.logo-row{display:flex;align-items:center;gap:10px;margin-bottom:18px}
-.logo{width:36px;height:36px;border-radius:9px;background:var(--tf);display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.logo svg{width:18px;height:18px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round}
-.logo-title{font-family:var(--font);font-weight:800;font-size:13px;line-height:1.1;color:#fff}
-.logo-sub{font-size:10.5px;color:var(--gl)}
-.ctx{padding:10px 11px;border-radius:9px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);margin-bottom:7px}
-.ctx-label{font-size:9px;font-weight:700;letter-spacing:.7px;color:var(--gl);text-transform:uppercase;margin-bottom:2px;font-family:var(--font)}
-.ctx-val{font-size:14px;font-weight:800;color:#fff;line-height:1.2;font-family:var(--font)}
-.ctx-code{font-size:11.5px;color:var(--tf);font-weight:700;margin-bottom:2px;font-family:var(--font)}
-.divider{height:1px;background:rgba(255,255,255,.08);margin:12px 3px}
-.nav-label{font-size:9px;font-weight:700;letter-spacing:.7px;color:#444c5a;text-transform:uppercase;margin:2px 0 7px 3px;font-family:var(--font)}
-.steps{display:flex;flex-direction:column;gap:4px}
-.step-btn{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:9px;border:none;background:transparent;text-align:left;width:100%;transition:background .15s;position:relative}
+aside{width:240px;background:var(--black);color:#fff;display:flex;flex-direction:column;padding:16px 13px;flex-shrink:0}
+.logo-row{display:flex;align-items:center;gap:9px;margin-bottom:16px}
+.logo{width:34px;height:34px;border-radius:8px;background:var(--tf);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo svg{width:17px;height:17px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round}
+.logo-title{font-family:var(--font);font-weight:800;font-size:13px;line-height:1.1}
+.logo-sub{font-size:10px;color:var(--gl)}
+.ctx{padding:9px 10px;border-radius:8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);margin-bottom:6px}
+.ctx-label{font-size:8.5px;font-weight:700;letter-spacing:.7px;color:var(--gl);text-transform:uppercase;margin-bottom:2px;font-family:var(--font)}
+.ctx-val{font-size:13px;font-weight:800;color:#fff;line-height:1.2;font-family:var(--font)}
+.ctx-code{font-size:11px;color:var(--tf);font-weight:700;margin-bottom:2px;font-family:var(--font)}
+.divider{height:1px;background:rgba(255,255,255,.08);margin:11px 3px}
+.nav-label{font-size:8.5px;font-weight:700;letter-spacing:.7px;color:#444c5a;text-transform:uppercase;margin:2px 0 6px 3px;font-family:var(--font)}
+.steps{display:flex;flex-direction:column;gap:3px}
+.step-btn{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;border:none;background:transparent;text-align:left;width:100%;transition:background .15s}
 .step-btn.active{background:rgba(63,191,176,.16);cursor:pointer}
 .step-btn.clickable{cursor:pointer}
 .step-btn.clickable:hover{background:rgba(255,255,255,.06)}
 .step-btn.locked{opacity:.4;cursor:not-allowed}
-.step-dot{width:24px;height:24px;border-radius:50%;flex-shrink:0;border:2px solid #444c5a;color:var(--gl);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;font-family:var(--font)}
+.step-dot{width:22px;height:22px;border-radius:50%;flex-shrink:0;border:2px solid #444c5a;color:var(--gl);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:10px;font-family:var(--font)}
 .step-btn.active .step-dot,.step-btn.done .step-dot{background:var(--tf);border-color:var(--tf);color:#111}
-.step-label{font-size:12.5px;font-weight:500;color:var(--gl);font-family:var(--font)}
+.step-label{font-size:12px;font-weight:500;color:var(--gl);font-family:var(--font)}
 .step-btn.active .step-label{font-weight:700;color:#fff}
 .step-btn.done .step-label{color:#d1d5db}
-.step-sub{font-size:10px;color:#444c5a}
-.step-btn.active .step-sub{color:rgba(63,191,176,.7)}
+.step-sub{font-size:9.5px;color:#444c5a}
 .spacer{flex:1}
-.back-btn{display:flex;align-items:center;gap:6px;width:100%;padding:8px 11px;border-radius:7px;border:1px solid rgba(255,255,255,.12);background:transparent;color:var(--gl);font-size:11.5px;font-weight:600;font-family:var(--font);transition:all .15s;margin-top:7px}
+.back-btn{display:flex;align-items:center;gap:5px;width:100%;padding:7px 10px;border-radius:6px;border:1px solid rgba(255,255,255,.12);background:transparent;color:var(--gl);font-size:11px;font-weight:600;font-family:var(--font);transition:all .15s;margin-top:6px}
 .back-btn:hover{background:rgba(255,255,255,.06);color:#fff}
 
 /* ── Main ── */
@@ -55,717 +53,594 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .scr.active{display:flex}
 
 /* ── Screen 1: Equipe ── */
-.s1-header{padding:18px 28px 0;flex-shrink:0}
-.s1-header h1{font-family:var(--font);font-size:21px;font-weight:800;color:var(--ink)}
-.s1-sub{font-size:13px;color:var(--gray);margin-top:3px}
-.s1-scroll{flex:1;overflow-y:auto;padding:18px 28px 28px}
-.card{background:#fff;border:1px solid var(--border);border-radius:11px;margin-bottom:16px;overflow:hidden}
+.s1-header{padding:16px 26px 0;flex-shrink:0}
+.s1-header h1{font-family:var(--font);font-size:20px;font-weight:800;color:var(--ink)}
+.s1-sub{font-size:12.5px;color:var(--gray);margin-top:2px}
+.s1-scroll{flex:1;overflow-y:auto;padding:16px 26px 24px}
+.card{background:#fff;border:1px solid var(--border);border-radius:10px;margin-bottom:14px;overflow:hidden}
 .card.accent{border-left:3px solid var(--tf)}
-.card-hdr{padding:13px 17px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:9px}
-.card-ico{width:30px;height:30px;border-radius:7px;background:var(--tf-s);display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.card-ico svg{width:15px;height:15px;stroke:var(--tf-dk);fill:none;stroke-width:2;stroke-linecap:round}
-.card-title{font-family:var(--font);font-size:13.5px;font-weight:700;color:var(--ink)}
-.card-sub{font-size:11px;color:var(--gl);margin-top:1px}
-.card-body{padding:16px}
-.dir-banner{display:flex;align-items:center;gap:13px;padding:13px 16px;background:linear-gradient(135deg,#0e2340,#1a3a5e);border-radius:9px;margin-bottom:18px}
-.dir-av{width:42px;height:42px;border-radius:9px;background:var(--tf);display:flex;align-items:center;justify-content:center;font-family:var(--font);font-size:15px;font-weight:800;color:#111;flex-shrink:0}
-.dir-name{font-family:var(--font);font-size:15px;font-weight:800;color:#fff}
-.dir-role{font-size:10.5px;color:var(--tf);font-weight:600;text-transform:uppercase;letter-spacing:.06em;font-family:var(--font)}
-.dir-badge{padding:3px 9px;border-radius:16px;background:rgba(63,191,176,.2);border:1px solid rgba(63,191,176,.4);font-size:10px;font-weight:700;color:var(--tf);font-family:var(--font)}
-.chip-grid{display:flex;flex-wrap:wrap;gap:7px}
-.chip{display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:18px;border:1.5px solid var(--border);background:#fff;transition:all .14s;font-family:var(--font);font-size:12px;font-weight:600;color:var(--gray)}
+.card-hdr{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.card-ico{width:28px;height:28px;border-radius:6px;background:var(--tf-s);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.card-ico svg{width:14px;height:14px;stroke:var(--tf-dk);fill:none;stroke-width:2;stroke-linecap:round}
+.card-title{font-family:var(--font);font-size:13px;font-weight:700;color:var(--ink)}
+.card-sub{font-size:10.5px;color:var(--gl);margin-top:1px}
+.card-body{padding:14px}
+.dir-banner{display:flex;align-items:center;gap:12px;padding:12px 15px;background:linear-gradient(135deg,#0e2340,#1a3a5e);border-radius:8px;margin-bottom:16px}
+.dir-av{width:40px;height:40px;border-radius:8px;background:var(--tf);display:flex;align-items:center;justify-content:center;font-family:var(--font);font-size:14px;font-weight:800;color:#111;flex-shrink:0}
+.dir-name{font-family:var(--font);font-size:14px;font-weight:800;color:#fff}
+.dir-role{font-size:10px;color:var(--tf);font-weight:600;text-transform:uppercase;letter-spacing:.06em;font-family:var(--font)}
+.dir-badge{padding:3px 8px;border-radius:14px;background:rgba(63,191,176,.2);border:1px solid rgba(63,191,176,.4);font-size:10px;font-weight:700;color:var(--tf);font-family:var(--font)}
+.chip-grid{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:flex;align-items:center;gap:5px;padding:5px 11px;border-radius:16px;border:1.5px solid var(--border);background:#fff;transition:all .14s;font-family:var(--font);font-size:11.5px;font-weight:600;color:var(--gray)}
 .chip:hover{border-color:var(--tf);color:var(--tf-dk)}
 .chip.sel{background:var(--tf);border-color:var(--tf);color:#111}
-.chip-ck{width:13px;height:13px;border-radius:50%;background:rgba(0,0,0,.15);display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0}
-.chip .role{font-size:10px;font-weight:400;opacity:.7}
-.ga-sec{margin-bottom:14px}
-.ga-hdr{display:flex;align-items:center;gap:7px;padding:7px 11px;background:#F8F9FA;border-radius:7px;margin-bottom:7px}
-.ga-dot{width:7px;height:7px;border-radius:50%;background:var(--tf-dk);flex-shrink:0}
-.ga-name{font-family:var(--font);font-size:12.5px;font-weight:700;color:var(--ink)}
-.ga-tag{font-size:10px;padding:2px 7px;border-radius:9px;background:var(--tf-s);color:var(--tf-dk);font-weight:700;font-family:var(--font)}
-.ga-all-btn{margin-left:auto;font-size:11px;font-weight:700;font-family:var(--font);padding:3px 9px;border-radius:14px;border:1.5px solid var(--border);background:transparent;transition:all .14s}
+.chip-ck{width:12px;height:12px;border-radius:50%;background:rgba(0,0,0,.15);display:flex;align-items:center;justify-content:center;font-size:8px;flex-shrink:0}
+.chip .role{font-size:9.5px;font-weight:400;opacity:.7}
+.ga-sec{margin-bottom:12px}
+.ga-hdr{display:flex;align-items:center;gap:6px;padding:6px 10px;background:#F8F9FA;border-radius:6px;margin-bottom:6px}
+.ga-dot{width:6px;height:6px;border-radius:50%;background:var(--tf-dk);flex-shrink:0}
+.ga-name{font-family:var(--font);font-size:12px;font-weight:700;color:var(--ink)}
+.ga-tag{font-size:9.5px;padding:1px 6px;border-radius:8px;background:var(--tf-s);color:var(--tf-dk);font-weight:700;font-family:var(--font)}
+.ga-all-btn{margin-left:auto;font-size:10.5px;font-weight:700;font-family:var(--font);padding:3px 8px;border-radius:12px;border:1.5px solid var(--border);background:transparent;transition:all .14s}
 .ga-all-btn.sel{background:var(--tf);border-color:var(--tf);color:#111}
 .ga-all-btn:not(.sel){color:var(--gray)}
-.eq-resumo{background:linear-gradient(135deg,#f0faf9,#e6f6f4);border:1px solid rgba(63,191,176,.3);border-radius:9px;padding:14px 16px;margin-top:2px}
-.eq-rt{font-family:var(--font);font-size:10px;font-weight:700;color:var(--tf-dk);text-transform:uppercase;letter-spacing:.08em;margin-bottom:9px}
-.eq-chip{font-size:11px;font-family:var(--font);padding:3px 8px;border-radius:11px;background:rgba(63,191,176,.15);color:var(--tf-dk);font-weight:600}
+.eq-resumo{background:linear-gradient(135deg,#f0faf9,#e6f6f4);border:1px solid rgba(63,191,176,.3);border-radius:8px;padding:13px 15px;margin-top:2px}
+.eq-rt{font-family:var(--font);font-size:9.5px;font-weight:700;color:var(--tf-dk);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+.eq-chip{font-size:11px;font-family:var(--font);padding:2px 7px;border-radius:10px;background:rgba(63,191,176,.15);color:var(--tf-dk);font-weight:600}
 
 /* ── Screen 2: Alocação ── */
-.s2-topbar{flex-shrink:0;display:flex;align-items:center;gap:0;padding:0 18px;background:#fff;border-bottom:1px solid var(--border);height:46px}
-.etapa-tab{height:46px;padding:0 16px;border:none;background:transparent;font-family:var(--font);font-size:12px;font-weight:700;color:var(--gl);cursor:pointer;border-bottom:2px solid transparent;transition:all .14s;white-space:nowrap}
+.s2-topbar{flex-shrink:0;display:flex;align-items:stretch;background:#fff;border-bottom:1px solid var(--border);height:44px;padding:0 14px}
+.etapa-tab{height:44px;padding:0 14px;border:none;background:transparent;font-family:var(--font);font-size:12px;font-weight:700;color:var(--gl);border-bottom:2px solid transparent;transition:all .14s;white-space:nowrap}
 .etapa-tab:hover{color:var(--tf-dk)}
 .etapa-tab.active{color:var(--tf-dk);border-bottom-color:var(--tf)}
 .s2-main{flex:1;display:flex;overflow:hidden;min-height:0}
 
-/* ── Sidebar entregas ── */
-.entregas-panel{width:200px;flex-shrink:0;border-right:1px solid var(--border);background:#FAFBFC;display:flex;flex-direction:column;overflow:hidden}
-.ep-hdr{padding:11px 13px;border-bottom:1px solid var(--border);flex-shrink:0}
-.ep-hdr-title{font-family:var(--font);font-size:11px;font-weight:700;color:var(--ink);letter-spacing:.04em}
-.ep-hdr-sub{font-size:10px;color:var(--gl);margin-top:1px}
-.ep-body{flex:1;overflow-y:auto;padding:8px}
-.entrega-item{display:flex;align-items:center;gap:6px;padding:6px 9px;border-radius:7px;margin-bottom:4px;cursor:pointer;border:1.5px solid var(--border);background:#fff;transition:all .14s;font-size:11px;font-family:var(--font);font-weight:600;color:var(--ink)}
-.entrega-item:hover{border-color:var(--tf);background:var(--tf-s)}
-.entrega-item.selected{border-color:var(--tf);background:var(--tf);color:#111}
-.entrega-item.assigned{opacity:.45;cursor:default;background:#f0f0f0;text-decoration:line-through}
-.entrega-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
-.entrega-andar{font-size:9px;font-weight:700;color:var(--tf-dk);background:var(--tf-s);padding:1px 5px;border-radius:8px;white-space:nowrap}
+/* ── Painel entregas ── */
+.ep{width:210px;flex-shrink:0;border-right:1px solid var(--border);background:#FAFBFC;display:flex;flex-direction:column;overflow:hidden}
+.ep-hdr{padding:10px 12px 8px;border-bottom:1px solid var(--border);flex-shrink:0}
+.ep-hdr-title{font-family:var(--font);font-size:11px;font-weight:700;color:var(--ink)}
+.ep-hdr-count{font-size:10px;color:var(--gl);margin-top:1px}
+.ep-filters{padding:7px 10px 6px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:5px;flex-shrink:0}
+.ep-filters select{width:100%;padding:4px 7px;border:1px solid var(--border);border-radius:5px;font-size:11px;color:var(--ink);background:#fff;outline:none;height:26px}
+.ep-filters select:focus{border-color:var(--tf)}
+.ep-body{flex:1;overflow-y:auto;padding:7px}
+.ent-item{display:flex;align-items:flex-start;gap:5px;padding:6px 8px;border-radius:6px;margin-bottom:3px;cursor:pointer;border:1.5px solid var(--border);background:#fff;transition:all .14s;font-size:11px;font-family:var(--font);font-weight:600;color:var(--ink);line-height:1.3}
+.ent-item:hover{border-color:var(--tf);background:var(--tf-s)}
+.ent-item.sel{border-color:var(--tf);background:var(--tf);color:#111}
+.ent-item.done{opacity:.38;cursor:default;text-decoration:line-through;background:#f3f4f6}
+.ent-dot{width:7px;height:7px;border-radius:2px;flex-shrink:0;margin-top:2px}
+.ent-andar{font-size:9px;font-weight:700;color:var(--tf-dk);background:var(--tf-s);padding:1px 5px;border-radius:7px;white-space:nowrap;margin-left:auto;align-self:flex-start}
+.ent-item.sel .ent-andar{background:rgba(0,0,0,.15);color:#111}
 
-/* ── Calendário grid ── */
+/* ── Calendário ── */
 .cal-wrap{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
-.cal-header{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);flex-shrink:0;background:#fff}
-.cal-nav-btn{width:28px;height:28px;border-radius:7px;border:1.5px solid var(--border);background:#fff;color:var(--gray);display:flex;align-items:center;justify-content:center;font-size:16px;line-height:1;transition:all .14s;flex-shrink:0}
-.cal-nav-btn:hover{border-color:var(--tf);color:var(--tf-dk)}
-.cal-week-label{font-family:var(--font);font-size:13px;font-weight:700;color:var(--ink);min-width:160px;text-align:center}
-.cal-etapa-badge{font-size:10px;padding:2px 8px;border-radius:8px;background:var(--tf-s);color:var(--tf-dk);font-weight:700;font-family:var(--font)}
-.cal-progress{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:11px;color:var(--gl);font-family:var(--font)}
+.cal-hdr{display:flex;align-items:center;gap:8px;padding:9px 14px;border-bottom:1px solid var(--border);flex-shrink:0;background:#fff}
+.cal-badge{font-size:10px;padding:2px 8px;border-radius:7px;background:var(--tf-s);color:var(--tf-dk);font-weight:700;font-family:var(--font)}
+.cal-progress{margin-left:auto;font-size:11px;color:var(--gl);font-family:var(--font)}
 .cal-body{flex:1;overflow:auto}
 
-/* ── Grade dias ── */
-.alloc-table{border-collapse:separate;border-spacing:0;min-width:max-content}
-.alloc-table thead th{position:sticky;top:0;z-index:10;background:#fff;border-bottom:2px solid var(--border)}
-.alloc-table thead th.lbl-col{position:sticky;left:0;z-index:20;background:#fff;width:150px;min-width:150px;padding:8px 12px;text-align:left;font-family:var(--font);font-size:10px;font-weight:700;color:var(--gl);text-transform:uppercase;letter-spacing:.06em;border-right:2px solid var(--border)}
-.alloc-table thead th.day-col{text-align:center;min-width:90px;width:90px;padding:6px 2px;border-left:1px solid #F0F1F2}
-.day-col.weekend{background:#EDEEEF}
-.day-col.outside{background:#F8F9FA}
-.day-col.today-col{background:rgba(63,191,176,.08)}
-.dh-dow{display:block;font-size:8.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--gl);font-weight:700;font-family:var(--font)}
-.dh-date{display:block;font-size:13px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums;font-family:var(--font)}
-.day-col.weekend .dh-date{color:var(--gl)}
-.day-col.today-col .dh-date{color:var(--tf-dk)}
-.alloc-table tbody tr{border-bottom:1px solid var(--border)}
-.alloc-table tbody td.arq-lbl{position:sticky;left:0;z-index:9;background:#fff;width:150px;min-width:150px;padding:8px 12px;border-right:2px solid var(--border);border-bottom:1px solid var(--border)}
-.arq-lbl-name{font-family:var(--font);font-size:12.5px;font-weight:700;color:var(--ink);display:block}
-.arq-lbl-role{font-size:10px;color:var(--gl);font-weight:500}
-.alloc-cell{min-width:90px;width:90px;height:56px;border-left:1px solid #F0F1F2;border-bottom:1px solid var(--border);vertical-align:top;padding:4px 4px;position:relative}
-.alloc-cell.weekend{background:repeating-linear-gradient(45deg,#F3F4F5,#F3F4F5 5px,#EDEEEF 5px,#EDEEEF 10px)}
-.alloc-cell.outside{background:#F8F9FA;opacity:.6}
-.alloc-cell.drop-target{background:rgba(63,191,176,.1);border-color:var(--tf)!important;outline:2px dashed var(--tf)}
-.alloc-cell.has-item{background:#fff}
-.add-btn{width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--gl);font-size:18px;border-radius:5px;transition:all .14s}
-.add-btn:hover{background:var(--tf-s);color:var(--tf-dk)}
-.alloc-chip{display:flex;align-items:flex-start;gap:4px;padding:4px 6px;border-radius:5px;font-size:10px;font-weight:700;color:#fff;line-height:1.25;font-family:var(--font);cursor:pointer;position:relative;width:100%;box-sizing:border-box}
-.alloc-chip:hover .chip-del{opacity:1}
-.chip-del{position:absolute;top:2px;right:2px;width:14px;height:14px;border-radius:50%;background:rgba(0,0,0,.25);color:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;opacity:0;transition:opacity .12s;line-height:1}
+/* ── Tabela alocação ── */
+.at{border-collapse:separate;border-spacing:0;min-width:max-content}
+.at thead th{position:sticky;top:0;z-index:10;background:#fff;border-bottom:2px solid var(--border)}
+.at thead th.lbl{position:sticky;left:0;z-index:20;background:#fff;width:144px;min-width:144px;padding:7px 11px;text-align:left;font-family:var(--font);font-size:9.5px;font-weight:700;color:var(--gl);text-transform:uppercase;letter-spacing:.06em;border-right:2px solid var(--border)}
+.at thead th.dcol{text-align:center;width:88px;min-width:88px;padding:5px 2px;border-left:1px solid #eee}
+.dcol.out{background:#F2F3F5}
+.dcol.today-col{background:rgba(63,191,176,.08)}
+.dh-dow{display:block;font-size:8px;text-transform:uppercase;color:var(--gl);font-weight:700;font-family:var(--font)}
+.dh-date{display:block;font-size:12.5px;font-weight:800;color:var(--ink);font-family:var(--font)}
+.dcol.out .dh-date{color:#9ca3af}
+.dcol.today-col .dh-date{color:var(--tf-dk)}
+.at tbody td.arq-lbl{position:sticky;left:0;z-index:9;background:#fff;width:144px;min-width:144px;padding:7px 11px;border-right:2px solid var(--border);border-bottom:1px solid var(--border);vertical-align:middle}
+.arq-name{font-family:var(--font);font-size:12px;font-weight:700;color:var(--ink)}
+.arq-role{font-size:9.5px;color:var(--gl)}
+.acell{width:88px;min-width:88px;border-left:1px solid #eee;border-bottom:1px solid var(--border);vertical-align:top;padding:3px;position:relative;min-height:52px}
+.acell.out{background:#F2F3F5}
+.acell.today-col{background:rgba(63,191,176,.05)}
+.acell.drop-target{background:rgba(63,191,176,.1);outline:2px dashed var(--tf);outline-offset:-2px}
+.acell-chips{display:flex;flex-direction:column;gap:2px}
+.achip{display:flex;align-items:flex-start;gap:3px;padding:3px 5px 3px 5px;border-radius:4px;font-size:10px;font-weight:700;color:#fff;line-height:1.2;font-family:var(--font);cursor:pointer;position:relative;width:100%;transition:filter .12s}
+.achip:hover{filter:brightness(1.1)}
+.achip:hover .chip-del{opacity:1}
+.chip-del{position:absolute;top:2px;right:2px;width:13px;height:13px;border-radius:50%;background:rgba(0,0,0,.28);color:#fff;display:flex;align-items:center;justify-content:center;font-size:8px;opacity:0;transition:opacity .12s;line-height:1;flex-shrink:0}
+.add-cell-btn{width:100%;height:46px;display:flex;align-items:center;justify-content:center;color:#d1d5db;font-size:16px;border-radius:4px;transition:all .14s}
+.add-cell-btn:hover{background:var(--tf-s);color:var(--tf-dk)}
+.has-chips .add-cell-btn{height:20px;font-size:13px;margin-top:1px}
 
-/* ── Popup de seleção ── */
-.sel-popup{position:fixed;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 32px rgba(0,0,0,.18);z-index:500;min-width:200px;max-width:260px;max-height:320px;display:flex;flex-direction:column;overflow:hidden}
-.sel-pop-hdr{padding:9px 12px;border-bottom:1px solid var(--border);font-family:var(--font);font-size:11px;font-weight:700;color:var(--ink)}
-.sel-pop-body{overflow-y:auto;padding:7px}
-.sel-pop-item{padding:7px 10px;border-radius:6px;font-size:12px;font-family:var(--font);font-weight:600;cursor:pointer;display:flex;align-items:center;gap:7px;transition:background .1s}
-.sel-pop-item:hover{background:var(--tf-s);color:var(--tf-dk)}
-.sel-pop-empty{padding:12px;text-align:center;color:var(--gl);font-size:12px}
+/* ── Popup seleção ── */
+.sel-pop{position:fixed;background:#fff;border:1px solid var(--border);border-radius:9px;box-shadow:0 10px 30px rgba(0,0,0,.18);z-index:600;width:230px;max-height:300px;display:flex;flex-direction:column;overflow:hidden}
+.sel-pop-hdr{padding:8px 11px;border-bottom:1px solid var(--border);font-family:var(--font);font-size:11px;font-weight:700;color:var(--ink);flex-shrink:0}
+.sel-pop-body{overflow-y:auto;padding:6px}
+.spi{padding:6px 9px;border-radius:5px;font-size:11.5px;font-family:var(--font);font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:background .1s}
+.spi:hover{background:var(--tf-s);color:var(--tf-dk)}
+.spi-empty{padding:11px;text-align:center;color:var(--gl);font-size:11.5px}
 
-/* ── CTA footer ── */
-.cta-bar{padding:13px 28px;border-top:1px solid var(--border);background:#fff;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+/* ── CTA ── */
+.cta-bar{padding:12px 26px;border-top:1px solid var(--border);background:#fff;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
 .cta-info{font-size:12px;color:var(--gray)}
 .cta-info strong{color:var(--ink)}
-.btn-p{height:36px;padding:0 20px;background:var(--tf);border:none;border-radius:8px;font-family:var(--font);font-size:12.5px;font-weight:700;color:#111;display:flex;align-items:center;gap:6px;transition:all .15s}
+.btn-p{height:34px;padding:0 18px;background:var(--tf);border:none;border-radius:7px;font-family:var(--font);font-size:12px;font-weight:700;color:#111;display:flex;align-items:center;gap:5px;transition:all .15s}
 .btn-p:hover{background:var(--tf-dk);color:#fff}
 .btn-p:disabled{opacity:.4;cursor:not-allowed}
-.btn-s{height:36px;padding:0 16px;background:transparent;border:1.5px solid var(--border);border-radius:8px;font-family:var(--font);font-size:12px;font-weight:700;color:var(--gray);transition:all .15s}
+.btn-s{height:34px;padding:0 14px;background:transparent;border:1.5px solid var(--border);border-radius:7px;font-family:var(--font);font-size:11.5px;font-weight:700;color:var(--gray);transition:all .15s}
 .btn-s:hover{border-color:var(--tf);color:var(--tf-dk)}
-
-/* ── Empty ── */
-.empty{text-align:center;padding:48px 20px;color:var(--gl)}
-.empty-icon{font-size:36px;margin-bottom:10px;opacity:.5}
-.empty-txt{font-size:13px;line-height:1.6}
-
-#toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(10px);background:#111;color:#fff;padding:8px 18px;border-radius:18px;font-family:var(--font);font-size:13px;font-weight:600;opacity:0;transition:all .24s;z-index:9999;pointer-events:none}
+.empty{text-align:center;padding:40px 16px;color:var(--gl)}
+.empty-icon{font-size:32px;margin-bottom:8px;opacity:.5}
+.empty-txt{font-size:12.5px;line-height:1.6}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(10px);background:#111;color:#fff;padding:7px 16px;border-radius:16px;font-family:var(--font);font-size:12.5px;font-weight:600;opacity:0;transition:all .24s;z-index:9999;pointer-events:none}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-@keyframes fi{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
-.fi{animation:fi .22s ease both}
+@keyframes fi{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.fi{animation:fi .2s ease both}
 </style>
 </head>
 <body>
-
-<!-- ── SIDEBAR ── -->
 <aside>
   <div class="logo-row">
     <div class="logo"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
     <div><div class="logo-title">Gestão de Arquitetura</div><div class="logo-sub">Athié Wohnrath</div></div>
   </div>
-  <div class="ctx">
-    <div class="ctx-label">Projeto</div>
-    <div class="ctx-code" id="ctx-codigo">—</div>
-    <div class="ctx-val" id="ctx-nome" style="font-size:13px;">Carregando…</div>
-  </div>
-  <div class="ctx">
-    <div class="ctx-label">Diretoria</div>
-    <div class="ctx-val" id="ctx-dir" style="font-size:12px;">—</div>
-  </div>
+  <div class="ctx"><div class="ctx-label">Projeto</div><div class="ctx-code" id="ctx-cod">—</div><div class="ctx-val" id="ctx-nome" style="font-size:12.5px">Carregando…</div></div>
+  <div class="ctx"><div class="ctx-label">Diretoria</div><div class="ctx-val" id="ctx-dir" style="font-size:12px">—</div></div>
   <div class="divider"></div>
   <div class="nav-label">Etapas</div>
   <div class="steps">
-    <button class="step-btn clickable" id="sb1" onclick="goScreen(1)">
-      <div class="step-dot" id="sd1">1</div>
-      <div><div class="step-label">Equipe</div><div class="step-sub">Gerentes e arquitetos</div></div>
-    </button>
-    <button class="step-btn clickable" id="sb2" onclick="goScreen(2)">
-      <div class="step-dot" id="sd2">2</div>
-      <div><div class="step-label">Alocação</div><div class="step-sub">Calendário dia a dia</div></div>
-    </button>
-    <button class="step-btn locked" id="sb3">
-      <div class="step-dot">3</div>
-      <div><div class="step-label">Relatório</div><div class="step-sub">Visão geral + impressão</div></div>
-    </button>
+    <button class="step-btn clickable" id="sb1" onclick="goScr(1)"><div class="step-dot" id="sd1">1</div><div><div class="step-label">Equipe</div><div class="step-sub">Gerentes e arquitetos</div></div></button>
+    <button class="step-btn clickable" id="sb2" onclick="goScr(2)"><div class="step-dot" id="sd2">2</div><div><div class="step-label">Alocação</div><div class="step-sub">Calendário dia a dia</div></div></button>
+    <button class="step-btn locked"><div class="step-dot">3</div><div><div class="step-label">Relatório</div><div class="step-sub">Visão geral + impressão</div></div></button>
   </div>
   <div class="spacer"></div>
-  <button class="back-btn" onclick="voltarApp()">
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
-    Voltar ao planejamento
-  </button>
+  <button class="back-btn" onclick="sair()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>Voltar ao planejamento</button>
 </aside>
 
-<!-- ── MAIN ── -->
 <main>
-
-  <!-- Screen 1: Equipe -->
+  <!-- Screen 1 -->
   <div class="scr active" id="scr1">
-    <div class="s1-header">
-      <h1>Equipe de Arquitetura</h1>
-      <p class="s1-sub">Selecione os gerentes e arquitetos responsáveis por este projeto</p>
-    </div>
-    <div class="s1-scroll" id="s1-content"><div class="empty fi"><div class="empty-icon">⏳</div><div class="empty-txt">Carregando…</div></div></div>
+    <div class="s1-header"><h1>Equipe de Arquitetura</h1><p class="s1-sub">Selecione os gerentes e arquitetos responsáveis por este projeto</p></div>
+    <div class="s1-scroll" id="s1-body"><div class="empty fi"><div class="empty-icon">⏳</div><div class="empty-txt">Carregando…</div></div></div>
     <div class="cta-bar">
       <div class="cta-info" id="cta1-info">Selecione pelo menos um gerente</div>
-      <div style="display:flex;gap:9px;align-items:center">
-        <button class="btn-s" onclick="voltarApp()">Cancelar</button>
-        <button class="btn-p" id="btn-prox1" disabled onclick="goScreen(2)">
-          Próximo: Alocação
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
-        </button>
+      <div style="display:flex;gap:8px">
+        <button class="btn-s" onclick="sair()">Cancelar</button>
+        <button class="btn-p" id="btn-prox" disabled onclick="goScr(2)">Próximo: Alocação <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></button>
       </div>
     </div>
   </div>
 
-  <!-- Screen 2: Alocação -->
+  <!-- Screen 2 -->
   <div class="scr" id="scr2">
-    <div class="s2-topbar">
-      <div id="etapa-tabs" style="display:flex;align-items:center;gap:0;flex:1;overflow-x:auto"></div>
-    </div>
+    <div class="s2-topbar" id="etapa-tabs"></div>
     <div class="s2-main">
-      <!-- Painel de entregas -->
-      <div class="entregas-panel">
-        <div class="ep-hdr">
-          <div class="ep-hdr-title">A alocar</div>
-          <div class="ep-hdr-sub" id="ep-count">—</div>
+      <div class="ep">
+        <div class="ep-hdr"><div class="ep-hdr-title">Entregas a alocar</div><div class="ep-hdr-count" id="ep-count">—</div></div>
+        <div class="ep-filters">
+          <select id="filt-andar" onchange="renderEntregas()"><option value="">Todos os andares</option></select>
+          <select id="filt-tipo" onchange="renderEntregas()"><option value="">Todos os tipos</option></select>
         </div>
         <div class="ep-body" id="ep-body"></div>
       </div>
-      <!-- Calendário -->
       <div class="cal-wrap">
-        <div class="cal-header">
-          <button class="cal-nav-btn" onclick="navWeek(-1)">‹</button>
-          <div class="cal-week-label" id="cal-week-label">—</div>
-          <button class="cal-nav-btn" onclick="navWeek(1)">›</button>
-          <span class="cal-etapa-badge" id="cal-etapa-badge">—</span>
-          <div class="cal-progress" id="cal-progress"></div>
+        <div class="cal-hdr">
+          <span class="cal-badge" id="cal-badge">—</span>
+          <div class="cal-progress" id="cal-prog"></div>
         </div>
-        <div class="cal-body">
-          <table class="alloc-table" id="alloc-table"></table>
-        </div>
+        <div class="cal-body"><table class="at" id="at"></table></div>
       </div>
     </div>
     <div class="cta-bar">
       <div class="cta-info" id="cta2-info">Aloque as entregas no calendário</div>
-      <div style="display:flex;gap:9px;align-items:center">
-        <button class="btn-s" onclick="goScreen(1)">‹ Equipe</button>
-        <button class="btn-p" id="btn-confirmar" onclick="confirmarEquipe()">
-          Confirmar equipe
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
-        </button>
+      <div style="display:flex;gap:8px">
+        <button class="btn-s" onclick="goScr(1)">‹ Equipe</button>
+        <button class="btn-p" onclick="confirmar()">Confirmar equipe <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></button>
       </div>
     </div>
   </div>
-
 </main>
-
 <div id="toast"></div>
 
 <script>
-// ─── Banco de dados ──────────────────────────────────────────────────────────
-var EQUIPE_DB = {
-  "Pedro Coivo": { gerentes: [
-    { nome:"Paula Torres", cargo:"GA", arquitetos:[
-      {nome:"Andre Milhomens",cargo:"Arquiteto"},{nome:"Caroline Rodrigues",cargo:"Arquiteto"},
-      {nome:"Gabriela Pugliese",cargo:"Arquiteto"},{nome:"Ana Rodrigues",cargo:"Arquiteto"},
-      {nome:"Alice Souza",cargo:"Arquiteto"}
-    ]},
-    { nome:"Ana Pollizello", cargo:"GA", arquitetos:[
-      {nome:"Rafaela Justo",cargo:"Arquiteto"},{nome:"Thiago Oliveira",cargo:"Arquiteto"},
-      {nome:"Emilio Bertolini",cargo:"Arquiteto"},{nome:"Franciela Gehrke",cargo:"Arquiteto"},
-      {nome:"Carolina Plascak",cargo:"Arquiteto"},{nome:"Caroline Guerrero",cargo:"Arquiteto"}
-    ]}
+// ── Banco ────────────────────────────────────────────────────────────────────
+var EDB = {
+  "Pedro Coivo":{ gerentes:[
+    {nome:"Paula Torres",cargo:"GA",arquitetos:[{nome:"Andre Milhomens",cargo:"Arquiteto"},{nome:"Caroline Rodrigues",cargo:"Arquiteto"},{nome:"Gabriela Pugliese",cargo:"Arquiteto"},{nome:"Ana Rodrigues",cargo:"Arquiteto"},{nome:"Alice Souza",cargo:"Arquiteto"}]},
+    {nome:"Ana Pollizello",cargo:"GA",arquitetos:[{nome:"Rafaela Justo",cargo:"Arquiteto"},{nome:"Thiago Oliveira",cargo:"Arquiteto"},{nome:"Emilio Bertolini",cargo:"Arquiteto"},{nome:"Franciela Gehrke",cargo:"Arquiteto"},{nome:"Carolina Plascak",cargo:"Arquiteto"},{nome:"Caroline Guerrero",cargo:"Arquiteto"}]}
   ]},
-  "Daniel Ingarano": { gerentes: [
-    { nome:"Nathalia Gomes", cargo:"GA", arquitetos:[{nome:"Sergio Sampaio",cargo:"Arquiteto"},{nome:"Aline Leal",cargo:"Arquiteto"}] },
-    { nome:"Tais Neiva",     cargo:"GA", arquitetos:[{nome:"Rafaella Silva",cargo:"Arquiteto"},{nome:"Vinicius Bressan",cargo:"Arquiteto"}] }
+  "Daniel Ingarano":{ gerentes:[
+    {nome:"Nathalia Gomes",cargo:"GA",arquitetos:[{nome:"Sergio Sampaio",cargo:"Arquiteto"},{nome:"Aline Leal",cargo:"Arquiteto"}]},
+    {nome:"Tais Neiva",cargo:"GA",arquitetos:[{nome:"Rafaella Silva",cargo:"Arquiteto"},{nome:"Vinicius Bressan",cargo:"Arquiteto"}]}
   ]},
-  "Virginia Nehmi": { gerentes: [
-    { nome:"Giulia Previato", cargo:"GA", arquitetos:[{nome:"Itamara Lima",cargo:"Arquiteto"},{nome:"Leo Teruo",cargo:"Arquiteto"}] },
-    { nome:"Priscila Pary",   cargo:"GA", arquitetos:[{nome:"Sabryna Ribeiro",cargo:"Arquiteto"},{nome:"Guilherme Fazano",cargo:"Arquiteto"},{nome:"Kazuo Daido",cargo:"Arquiteto"}] }
+  "Virginia Nehmi":{ gerentes:[
+    {nome:"Giulia Previato",cargo:"GA",arquitetos:[{nome:"Itamara Lima",cargo:"Arquiteto"},{nome:"Leo Teruo",cargo:"Arquiteto"}]},
+    {nome:"Priscila Pary",cargo:"GA",arquitetos:[{nome:"Sabryna Ribeiro",cargo:"Arquiteto"},{nome:"Guilherme Fazano",cargo:"Arquiteto"},{nome:"Kazuo Daido",cargo:"Arquiteto"}]}
   ]}
 };
 
-var ENTREGAS_DEF = {
-  lev:  ["Levantamento físico"],
-  ep1:  ["Layout","Kit de mobiliário","Ampliação áreas técnicas"],
-  ep2:  ["Layout","Forro","Indicação de pontos","Def. de acabamentos","Especificações","Maquetes"],
-  ap:   ["Layout","Mobiliário","Arquitetura","Forro","Piso","Indicação de pontos","Marcenaria","Detalhamento"],
-  ex:   ["Layout","Mobiliário","Arquitetura","Forro","Piso","Indicação de pontos","Marcenaria","Detalhamento"],
-  baseAP:["Base AP"], baseEX:["Base EX"], compatAP:["Compatibilização AP"],
-  compatEX:["Compatibilização EX"], aprovCond:["Aprovação Condômino"]
+var EDEF = {
+  lev:["Levantamento físico"],
+  ep1:["Layout","Kit de mobiliário","Ampliação áreas técnicas"],
+  ep2:["Layout","Forro","Indicação de pontos","Def. acabamentos","Especificações","Maquetes"],
+  ap:["Layout","Mobiliário","Arquitetura","Forro","Piso","Indicação de pontos","Marcenaria","Detalhamento"],
+  ex:["Layout","Mobiliário","Arquitetura","Forro","Piso","Indicação de pontos","Marcenaria","Detalhamento"],
+  baseAP:["Base AP"],baseEX:["Base EX"],compatAP:["Compat. AP"],compatEX:["Compat. EX"],aprovCond:["Aprov. Condômino"]
 };
 
-var CHIP_COLORS = ["#3FBFB0","#2563EB","#7C3AED","#D97706","#059669","#DC4C2E","#0891B2","#65A30D","#9333EA","#CA8A04"];
+var COLORS=["#3FBFB0","#2563EB","#7C3AED","#D97706","#059669","#DC4C2E","#0891B2","#65A30D","#9333EA","#CA8A04","#1D4ED8","#B45309","#0F766E","#9F1239"];
 
-// ─── Estado ──────────────────────────────────────────────────────────────────
-var ESTADO = null, CTX = null;
-var equipeLocal = {diretor:'', gerentes:[], arquitetos:[]};
-var planoAloc = {}; // {etapaId: [{id,entregavel,andar,arquiteto,data}]}
-var selEntrega = null; // entrega selecionada para alocar
-var curEtapaId = null;
-var curWeekStart = null; // Date
+// ── Estado ───────────────────────────────────────────────────────────────────
+var ESTADO=null, CTX=null;
+var eq={diretor:'',gerentes:[],arquitetos:[]};
+var plano={}; // {etapaId: {iso: [{entId,tipo,andar,arquiteto}]}} - múltiplos por célula
+var selEnt=null;
+var curEt=null;
 
-// ─── Utilitários de data ─────────────────────────────────────────────────────
-function parseD(iso){ var p=iso.split('-'); return new Date(+p[0],+p[1]-1,+p[2],12); }
-function fmtISO(d){ return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
-function fmtBR(d){ return pad(d.getDate())+'/'+pad(d.getMonth()+1); }
-function pad(n){ return String(n).padStart(2,'0'); }
-function addD(d,n){ var r=new Date(d); r.setDate(r.getDate()+n); return r; }
-var DOW_LABELS = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+// ── Utils data ───────────────────────────────────────────────────────────────
+function pD(iso){var p=iso.split('-');return new Date(+p[0],+p[1]-1,+p[2],12);}
+function fISO(d){return d.getFullYear()+'-'+pd(d.getMonth()+1)+'-'+pd(d.getDate());}
+function fBR(d){return pd(d.getDate())+'/'+pd(d.getMonth()+1);}
+function pd(n){return String(n).padStart(2,'0');}
+function addD(d,n){var r=new Date(d);r.setDate(r.getDate()+n);return r;}
+var DOWS=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
 
-function getMondayOf(d){
-  var r=new Date(d); var day=r.getDay(); var diff=(day+6)%7;
-  r.setDate(r.getDate()-diff); r.setHours(12,0,0,0); return r;
+function isWorkDay(d){var dow=d.getDay();return dow!==0&&dow!==6;}
+
+function prevWorkDay(d){
+  var r=addD(d,-1);
+  while(!isWorkDay(r)) r=addD(r,-1);
+  return r;
+}
+function nextWorkDay(d){
+  var r=addD(d,1);
+  while(!isWorkDay(r)) r=addD(r,1);
+  return r;
 }
 
-function getWeekDays(mon){
-  var days=[];
-  for(var i=0;i<7;i++) days.push(addD(mon,i));
-  return days;
-}
-
-// ─── Init ────────────────────────────────────────────────────────────────────
-function init(){
-  try{
-    var raw=sessionStorage.getItem('aw_estado_atual');
-    if(raw){ var p=JSON.parse(raw); ESTADO=p.estado||p; }
-    var ctxRaw=sessionStorage.getItem('aw_gestao_ctx');
-    if(ctxRaw) CTX=JSON.parse(ctxRaw);
-  }catch(e){}
-
-  if(!ESTADO){ showEmpty('Abra esta página a partir do planejamento de obra.'); return; }
-
-  // Sidebar contexto
+// ── Init ─────────────────────────────────────────────────────────────────────
+(function init(){
+  try{var r=sessionStorage.getItem('aw_estado_atual');if(r){var p=JSON.parse(r);ESTADO=p.estado||p;}}catch(e){}
+  try{var c=sessionStorage.getItem('aw_gestao_ctx');if(c)CTX=JSON.parse(c);}catch(e){}
+  if(!ESTADO){document.getElementById('s1-body').innerHTML='<div class="empty fi"><div class="empty-icon">⚠️</div><div class="empty-txt" style="color:#DC4C2E">Abra a partir do planejamento de obra.</div></div>';return;}
   var meta=ESTADO.meta||{};
-  document.getElementById('ctx-codigo').textContent=meta.codigo||'';
+  document.getElementById('ctx-cod').textContent=meta.codigo||'';
   document.getElementById('ctx-nome').textContent=meta.nome||'Sem título';
   var ea=(ESTADO.cfg&&ESTADO.cfg.equipeARQ)||{};
   document.getElementById('ctx-dir').textContent=ea.diretor||'—';
+  eq.diretor=ea.diretor||'';
+  eq.gerentes=(ea.gerentes||[]).slice();
+  eq.arquitetos=(ea.arquitetos||[]).slice();
+  if(ea.planoAloc) plano=ea.planoAloc;
+  renderS1(); updSidebar();
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')sair();});
+  document.addEventListener('click',function(e){if(!e.target.closest('.sel-pop'))closePop();});
+})();
 
-  // Restaurar equipe
-  equipeLocal.diretor=ea.diretor||'';
-  equipeLocal.gerentes=(ea.gerentes||[]).slice();
-  equipeLocal.arquitetos=(ea.arquitetos||[]).slice();
-
-  // Restaurar alocação
-  if(ea.planoAloc) planoAloc=ea.planoAloc;
-
-  renderS1();
-  updateSidebar();
-  document.addEventListener('keydown',function(e){ if(e.key==='Escape') voltarApp(); });
-  document.addEventListener('click',function(e){ if(!e.target.closest('.sel-popup')&&!e.target.closest('.add-btn')) closeSel(); });
+function updSidebar(){
+  [1,2].forEach(function(i){
+    var btn=document.getElementById('sb'+i),dot=document.getElementById('sd'+i);
+    var done=(i===1&&eq.gerentes.length>0)||(i===2&&Object.keys(plano).length>0);
+    btn.className='step-btn clickable'+(curScr===i?' active':'')+(done&&curScr!==i?' done':'');
+    if(done&&curScr!==i)dot.textContent='✓'; else dot.textContent=String(i);
+  });
 }
 
-function showEmpty(msg){
-  document.getElementById('s1-content').innerHTML='<div class="empty fi"><div class="empty-icon">⚠️</div><div class="empty-txt" style="color:#DC4C2E;">'+msg+'</div></div>';
-}
-
-// ─── Sidebar states ───────────────────────────────────────────────────────────
-var currentScr = 1;
-function goScreen(n){
-  if(n===2 && equipeLocal.gerentes.length===0){ showToast('Selecione gerentes na etapa 1 primeiro'); return; }
-  currentScr=n;
-  document.querySelectorAll('.scr').forEach(function(s,i){ s.classList.toggle('active',i+1===n); });
-  updateSidebar();
+var curScr=1;
+function goScr(n){
+  if(n===2&&!eq.gerentes.length){toast('Selecione gerentes primeiro');return;}
+  curScr=n;
+  document.querySelectorAll('.scr').forEach(function(s,i){s.classList.toggle('active',i+1===n);});
+  updSidebar();
   if(n===2) initS2();
 }
 
-function updateSidebar(){
-  [1,2].forEach(function(i){
-    var btn=document.getElementById('sb'+i);
-    var dot=document.getElementById('sd'+i);
-    var done = (i===1 && equipeLocal.gerentes.length>0) || (i===2 && Object.keys(planoAloc).length>0);
-    btn.className='step-btn clickable'+(currentScr===i?' active':'')+(done&&currentScr!==i?' done':'');
-    if(done&&currentScr!==i) dot.textContent='✓';
-    else dot.textContent=String(i);
-  });
-}
-
-// ─── Screen 1: Equipe ────────────────────────────────────────────────────────
+// ── Screen 1 ─────────────────────────────────────────────────────────────────
 function renderS1(){
-  var dir=equipeLocal.diretor, dbDir=EQUIPE_DB[dir], el=document.getElementById('s1-content');
-  if(!dir||!dbDir){
-    el.innerHTML='<div class="empty fi"><div class="empty-icon">📋</div><div class="empty-txt">Nenhum diretor selecionado.<br><small style="margin-top:6px;display:block;">Configure em <strong>Config → Identificação</strong></small></div></div>';
-    updCTA1(); return;
-  }
+  var dir=eq.diretor, db=EDB[dir], el=document.getElementById('s1-body');
+  if(!dir||!db){el.innerHTML='<div class="empty fi"><div class="empty-icon">📋</div><div class="empty-txt">Configure o diretor em <strong>Config → Identificação</strong></div></div>';updCTA1();return;}
   var init=dir.split(' ').map(function(w){return w[0];}).slice(0,2).join('');
-  var html='<div class="fi">';
-  html+='<div class="dir-banner"><div class="dir-av">'+init+'</div>';
-  html+='<div style="flex:1"><div class="dir-name">'+dir+'</div><div class="dir-role">Diretor de Arquitetura</div></div>';
-  html+='<span class="dir-badge">'+dbDir.gerentes.length+' gerentes</span></div>';
-
+  var h='<div class="fi"><div class="dir-banner"><div class="dir-av">'+init+'</div><div style="flex:1"><div class="dir-name">'+dir+'</div><div class="dir-role">Diretor de Arquitetura</div></div><span class="dir-badge">'+db.gerentes.length+' GAs</span></div>';
   // Gerentes
-  html+='<div class="card accent"><div class="card-hdr"><div class="card-ico"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></div>';
-  html+='<div><div class="card-title">Gerentes responsáveis</div><div class="card-sub">Selecione um ou mais GAs para este projeto</div></div></div><div class="card-body"><div class="chip-grid">';
-  dbDir.gerentes.forEach(function(g){
-    var s=equipeLocal.gerentes.indexOf(g.nome)>=0;
-    html+='<button class="chip'+(s?' sel':'')+'" onclick="togG(\''+g.nome+'\',this)">';
-    html+='<div class="chip-ck">'+(s?'✓':'')+'</div>'+g.nome+'<span class="role">GA</span></button>';
-  });
-  html+='</div></div></div>';
-
+  h+='<div class="card accent"><div class="card-hdr"><div class="card-ico"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></div><div><div class="card-title">Gerentes responsáveis</div><div class="card-sub">Clique para selecionar</div></div></div><div class="card-body"><div class="chip-grid">';
+  db.gerentes.forEach(function(g){var s=eq.gerentes.indexOf(g.nome)>=0;h+='<button class="chip'+(s?' sel':'')+'" onclick="togG(\''+g.nome+'\')">'+'<div class="chip-ck">'+(s?'✓':'')+'</div>'+g.nome+'<span class="role">GA</span></button>';});
+  h+='</div></div></div>';
   // Arquitetos
-  if(equipeLocal.gerentes.length>0){
-    html+='<div class="card"><div class="card-hdr"><div class="card-ico" style="background:#EEF2FA"><svg viewBox="0 0 24 24" style="stroke:#1A5294"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>';
-    html+='<div><div class="card-title">Arquitetos</div><div class="card-sub">Clique para incluir ou remover da equipe</div></div></div><div class="card-body">';
-    dbDir.gerentes.forEach(function(g){
-      if(equipeLocal.gerentes.indexOf(g.nome)<0) return;
-      var allSel=g.arquitetos.every(function(a){return equipeLocal.arquitetos.indexOf(a.nome)>=0;});
-      html+='<div class="ga-sec"><div class="ga-hdr"><div class="ga-dot"></div><span class="ga-name">'+g.nome+'</span>';
-      html+='<span class="ga-tag">GA</span><button class="ga-all-btn'+(allSel?' sel':'')+'" onclick="togTodosGA(\''+g.nome+'\',this)">'+(allSel?'Todos ✓':'Sel. todos')+'</button></div>';
-      html+='<div class="chip-grid">';
-      g.arquitetos.forEach(function(a){
-        var s=equipeLocal.arquitetos.indexOf(a.nome)>=0;
-        html+='<button class="chip'+(s?' sel':'')+'" onclick="togA(\''+a.nome+'\',this)">';
-        html+='<div class="chip-ck">'+(s?'✓':'')+'</div>'+a.nome+'<span class="role">'+a.cargo+'</span></button>';
-      });
-      html+='</div></div>';
+  if(eq.gerentes.length){
+    h+='<div class="card"><div class="card-hdr"><div class="card-ico" style="background:#EEF2FA"><svg viewBox="0 0 24 24" style="stroke:#1A5294"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div><div class="card-title">Arquitetos</div><div class="card-sub">Clique para incluir/remover</div></div></div><div class="card-body">';
+    db.gerentes.forEach(function(g){
+      if(eq.gerentes.indexOf(g.nome)<0)return;
+      var allS=g.arquitetos.every(function(a){return eq.arquitetos.indexOf(a.nome)>=0;});
+      h+='<div class="ga-sec"><div class="ga-hdr"><div class="ga-dot"></div><span class="ga-name">'+g.nome+'</span><span class="ga-tag">GA</span><button class="ga-all-btn'+(allS?' sel':'')+'" onclick="togAll(\''+g.nome+'\')">'+(allS?'Todos ✓':'Sel. todos')+'</button></div><div class="chip-grid">';
+      g.arquitetos.forEach(function(a){var s=eq.arquitetos.indexOf(a.nome)>=0;h+='<button class="chip'+(s?' sel':'')+'" onclick="togA(\''+a.nome+'\')">'+'<div class="chip-ck">'+(s?'✓':'')+'</div>'+a.nome+'<span class="role">'+a.cargo+'</span></button>';});
+      h+='</div></div>';
     });
-    html+='</div></div>';
+    h+='</div></div>';
   }
-
-  // Resumo
-  if(equipeLocal.gerentes.length>0&&equipeLocal.arquitetos.length>0){
-    html+='<div class="eq-resumo"><div class="eq-rt">Resumo da equipe</div>';
-    equipeLocal.gerentes.forEach(function(gNome){
-      var gDef=dbDir.gerentes.find(function(g){return g.nome===gNome;});
-      if(!gDef) return;
-      var arqs=gDef.arquitetos.filter(function(a){return equipeLocal.arquitetos.indexOf(a.nome)>=0;});
-      if(!arqs.length) return;
-      html+='<div style="margin-bottom:10px"><div style="font-family:var(--font);font-size:12px;font-weight:700;color:var(--ink);margin-bottom:5px">'+gNome+' <span style="font-size:10px;color:var(--tf-dk)">GA</span></div>';
-      html+='<div style="display:flex;flex-wrap:wrap;gap:5px">';
-      arqs.forEach(function(a){ html+='<span class="eq-chip">'+a.nome+'</span>'; });
-      html+='</div></div>';
+  if(eq.gerentes.length&&eq.arquitetos.length){
+    h+='<div class="eq-resumo"><div class="eq-rt">Resumo</div>';
+    db.gerentes.forEach(function(g){
+      if(eq.gerentes.indexOf(g.nome)<0)return;
+      var arqs=g.arquitetos.filter(function(a){return eq.arquitetos.indexOf(a.nome)>=0;});
+      if(!arqs.length)return;
+      h+='<div style="margin-bottom:8px"><div style="font-family:var(--font);font-size:11.5px;font-weight:700;color:var(--ink);margin-bottom:4px">'+g.nome+' <span style="font-size:9.5px;color:var(--tf-dk)">GA</span></div><div style="display:flex;flex-wrap:wrap;gap:4px">';
+      arqs.forEach(function(a){h+='<span class="eq-chip">'+a.nome+'</span>';});
+      h+='</div></div>';
     });
-    html+='<div style="font-family:var(--font);font-size:12px;font-weight:700;color:var(--tf-dk);padding-top:8px;border-top:1px solid rgba(63,191,176,.25)">'+equipeLocal.arquitetos.length+' arquiteto(s) · '+equipeLocal.gerentes.length+' gerente(s)</div>';
-    html+='</div>';
+    h+='<div style="font-family:var(--font);font-size:11.5px;font-weight:700;color:var(--tf-dk);padding-top:7px;border-top:1px solid rgba(63,191,176,.25)">'+eq.arquitetos.length+' arquiteto(s) · '+eq.gerentes.length+' gerente(s)</div>';
+    h+='</div>';
   }
-  html+='</div>';
-  el.innerHTML=html; updCTA1();
+  el.innerHTML=h+'</div>'; updCTA1();
 }
 
 function togG(nome){
-  var idx=equipeLocal.gerentes.indexOf(nome);
-  var dir=EQUIPE_DB[equipeLocal.diretor];
-  if(idx>=0){
-    equipeLocal.gerentes.splice(idx,1);
-    if(dir){ var gd=dir.gerentes.find(function(g){return g.nome===nome;});
-      if(gd) gd.arquitetos.forEach(function(a){ var ai=equipeLocal.arquitetos.indexOf(a.nome); if(ai>=0) equipeLocal.arquitetos.splice(ai,1); }); }
-  } else {
-    equipeLocal.gerentes.push(nome);
-    if(dir){ var gd2=dir.gerentes.find(function(g){return g.nome===nome;});
-      if(gd2) gd2.arquitetos.forEach(function(a){ if(equipeLocal.arquitetos.indexOf(a.nome)<0) equipeLocal.arquitetos.push(a.nome); }); }
-  }
+  var idx=eq.gerentes.indexOf(nome),db=EDB[eq.diretor];
+  if(idx>=0){eq.gerentes.splice(idx,1);if(db){var gd=db.gerentes.find(function(g){return g.nome===nome;});if(gd)gd.arquitetos.forEach(function(a){var i=eq.arquitetos.indexOf(a.nome);if(i>=0)eq.arquitetos.splice(i,1);});}}
+  else{eq.gerentes.push(nome);if(db){var gd2=db.gerentes.find(function(g){return g.nome===nome;});if(gd2)gd2.arquitetos.forEach(function(a){if(eq.arquitetos.indexOf(a.nome)<0)eq.arquitetos.push(a.nome);});}}
   renderS1();
 }
-function togA(nome){
-  var idx=equipeLocal.arquitetos.indexOf(nome);
-  if(idx>=0) equipeLocal.arquitetos.splice(idx,1); else equipeLocal.arquitetos.push(nome);
+function togA(nome){var i=eq.arquitetos.indexOf(nome);if(i>=0)eq.arquitetos.splice(i,1);else eq.arquitetos.push(nome);renderS1();}
+function togAll(gNome){
+  var db=EDB[eq.diretor];if(!db)return;
+  var gd=db.gerentes.find(function(g){return g.nome===gNome;});if(!gd)return;
+  var all=gd.arquitetos.every(function(a){return eq.arquitetos.indexOf(a.nome)>=0;});
+  if(all)gd.arquitetos.forEach(function(a){var i=eq.arquitetos.indexOf(a.nome);if(i>=0)eq.arquitetos.splice(i,1);}); 
+  else gd.arquitetos.forEach(function(a){if(eq.arquitetos.indexOf(a.nome)<0)eq.arquitetos.push(a.nome);});
   renderS1();
 }
-function togTodosGA(gNome){
-  var dir=EQUIPE_DB[equipeLocal.diretor]; if(!dir) return;
-  var gd=dir.gerentes.find(function(g){return g.nome===gNome;}); if(!gd) return;
-  var all=gd.arquitetos.every(function(a){return equipeLocal.arquitetos.indexOf(a.nome)>=0;});
-  if(all) gd.arquitetos.forEach(function(a){ var i=equipeLocal.arquitetos.indexOf(a.nome); if(i>=0) equipeLocal.arquitetos.splice(i,1); });
-  else gd.arquitetos.forEach(function(a){ if(equipeLocal.arquitetos.indexOf(a.nome)<0) equipeLocal.arquitetos.push(a.nome); });
-  renderS1();
-}
-
 function updCTA1(){
-  var btn=document.getElementById('btn-prox1'), info=document.getElementById('cta1-info');
-  var ng=equipeLocal.gerentes.length, na=equipeLocal.arquitetos.length;
-  if(!ng){ btn.disabled=true; info.innerHTML='Selecione pelo menos um <strong>gerente</strong>'; }
-  else if(!na){ btn.disabled=true; info.innerHTML='Selecione pelo menos um <strong>arquiteto</strong>'; }
-  else{ btn.disabled=false; info.innerHTML='<strong>'+na+'</strong> arquiteto(s) · <strong>'+ng+'</strong> gerente(s)'; }
-  updateSidebar();
+  var btn=document.getElementById('btn-prox'),info=document.getElementById('cta1-info');
+  if(!eq.gerentes.length){btn.disabled=true;info.innerHTML='Selecione pelo menos um <strong>gerente</strong>';}
+  else if(!eq.arquitetos.length){btn.disabled=true;info.innerHTML='Selecione pelo menos um <strong>arquiteto</strong>';}
+  else{btn.disabled=false;info.innerHTML='<strong>'+eq.arquitetos.length+'</strong> arq · <strong>'+eq.gerentes.length+'</strong> GA';}
+  updSidebar();
 }
 
-// ─── Screen 2: Alocação ──────────────────────────────────────────────────────
-function initS2(){
-  if(!CTX||!CTX.etapas||!CTX.etapas.length){
-    document.getElementById('etapa-tabs').innerHTML='<span style="padding:0 16px;font-size:12px;color:var(--gl)">Sem etapas configuradas</span>';
-    return;
-  }
-  // Montar abas
-  var tabs='', first=null;
-  var ativas=CTX.etapasAtivas||{};
-  CTX.etapas.forEach(function(e){
-    if(ativas[e.id]===false) return;
-    if(!first) first=e.id;
-    tabs+='<button class="etapa-tab" id="et-'+e.id+'" onclick="setEtapa(\''+e.id+'\')">'+(e.label||e.id)+'</button>';
-  });
-  document.getElementById('etapa-tabs').innerHTML=tabs;
-  if(first) setEtapa(first);
-}
-
-function setEtapa(id){
-  curEtapaId=id;
-  document.querySelectorAll('.etapa-tab').forEach(function(t){ t.classList.toggle('active',t.id==='et-'+id); });
-  var etapa=CTX&&CTX.etapas.find(function(e){return e.id===id;});
-  if(etapa){
-    document.getElementById('cal-etapa-badge').textContent=(etapa.label||id)+' · '+fmtBR(parseD(etapa.start))+'–'+fmtBR(parseD(etapa.end));
-    curWeekStart=getMondayOf(parseD(etapa.start));
-  }
-  selEntrega=null;
-  renderEntregas(); renderCal(); updCTA2();
-}
-
-function navWeek(delta){
-  curWeekStart=addD(curWeekStart,delta*7);
-  renderCal();
-}
-
-// ─── Entregas ────────────────────────────────────────────────────────────────
-function getEntregasDaEtapa(etapaId){
-  var tipos=ENTREGAS_DEF[etapaId]||[];
+// ── Screen 2 ─────────────────────────────────────────────────────────────────
+function getEntregas(etId){
+  var tipos=EDEF[etId]||[];
   var andares=(CTX&&CTX.andares)||['(andar)'];
-  var items=[];
+  var items=[],colorIdx=0;
   tipos.forEach(function(tipo,ti){
     andares.forEach(function(andar){
-      items.push({id:etapaId+'__'+ti+'__'+andar.replace(/\s/g,'_'),tipo:tipo,andar:andar});
+      items.push({id:etId+'__'+ti+'__'+andar.replace(/\s/g,'_'),tipo:tipo,andar:andar,colorIdx:colorIdx%COLORS.length});
+      colorIdx++;
     });
   });
   return items;
 }
 
-function isAssigned(entId){
-  var list=planoAloc[curEtapaId]||[];
-  return list.some(function(a){return a.entId===entId;});
+function isAllocated(etId,entId){
+  var ep=plano[etId];if(!ep)return false;
+  return Object.values(ep).some(function(cells){
+    return cells.some(function(c){return c.entId===entId;});
+  });
+}
+
+function initS2(){
+  if(!CTX||!CTX.etapas||!CTX.etapas.length){document.getElementById('etapa-tabs').innerHTML='<span style="padding:0 14px;font-size:12px;color:var(--gl)">Sem etapas</span>';return;}
+  var ativas=CTX.etapasAtivas||{},tabs='',first=null;
+  CTX.etapas.forEach(function(e){
+    if(ativas[e.id]===false)return;
+    if(!first)first=e.id;
+    tabs+='<button class="etapa-tab" id="et-'+e.id+'" onclick="setEt(\''+e.id+'\')">'+(e.label||e.id)+'</button>';
+  });
+  document.getElementById('etapa-tabs').innerHTML=tabs;
+  if(first)setEt(first);
+}
+
+function setEt(id){
+  curEt=id; selEnt=null;
+  document.querySelectorAll('.etapa-tab').forEach(function(t){t.classList.toggle('active',t.id==='et-'+id);});
+  var et=CTX&&CTX.etapas.find(function(e){return e.id===id;});
+  if(et) document.getElementById('cal-badge').textContent=(et.label||id)+' · '+fBR(pD(et.start))+'–'+fBR(pD(et.end));
+  populateFiltros();
+  renderEntregas(); renderCal(); updCTA2();
+}
+
+function populateFiltros(){
+  var items=getEntregas(curEt);
+  var andares=[],tipos=[];
+  items.forEach(function(it){
+    if(andares.indexOf(it.andar)<0)andares.push(it.andar);
+    if(tipos.indexOf(it.tipo)<0)tipos.push(it.tipo);
+  });
+  var sa=document.getElementById('filt-andar');
+  var curA=sa.value;
+  sa.innerHTML='<option value="">Todos os andares</option>';
+  andares.forEach(function(a){sa.innerHTML+='<option value="'+a+'"'+(a===curA?' selected':'')+'>'+a+'</option>';});
+  var st=document.getElementById('filt-tipo');
+  var curT=st.value;
+  st.innerHTML='<option value="">Todos os tipos</option>';
+  tipos.forEach(function(t){st.innerHTML+='<option value="'+t+'"'+(t===curT?' selected':'')+'>'+t+'</option>';});
 }
 
 function renderEntregas(){
-  var items=getEntregasDaEtapa(curEtapaId);
-  var total=items.length;
-  var done=items.filter(function(it){return isAssigned(it.id);}).length;
+  var items=getEntregas(curEt);
+  var fa=document.getElementById('filt-andar').value;
+  var ft=document.getElementById('filt-tipo').value;
+  var total=items.length, done=0;
+  items.forEach(function(it){if(isAllocated(curEt,it.id))done++;});
   document.getElementById('ep-count').textContent=done+'/'+total+' alocadas';
-  var html='';
-  items.forEach(function(it,i){
-    var assigned=isAssigned(it.id);
-    var sel=selEntrega&&selEntrega.id===it.id;
-    var color=CHIP_COLORS[i%CHIP_COLORS.length];
-    html+='<div class="entrega-item'+(assigned?' assigned':sel?' selected':'')+'" onclick="selectEntrega('+(assigned?'null':JSON.stringify(it))+')" style="'+(sel?'border-color:var(--tf);background:var(--tf);color:#111':assigned?'':'border-color:'+color+'22')+';">';
-    html+='<div class="entrega-dot" style="background:'+color+'"></div>';
-    html+=it.tipo;
-    html+='<span class="entrega-andar">'+it.andar+'</span>';
-    html+='</div>';
+  var filtered=items.filter(function(it){return(!fa||it.andar===fa)&&(!ft||it.tipo===ft);});
+  var h='';
+  filtered.forEach(function(it){
+    var alloc=isAllocated(curEt,it.id);
+    var sel=selEnt&&selEnt.id===it.id;
+    var c=COLORS[it.colorIdx];
+    h+='<div class="ent-item'+(alloc?' done':sel?' sel':'')+'" onclick="'+(alloc?'void 0':'selItem('+JSON.stringify(it)+')')+'" style="'+(sel?'border-color:var(--tf);background:var(--tf);color:#111':'border-left:3px solid '+c)+'">';
+    h+='<div class="ent-dot" style="background:'+c+'"></div>';
+    h+='<span style="flex:1">'+it.tipo+'</span>';
+    h+='<span class="ent-andar">'+it.andar+'</span>';
+    h+='</div>';
   });
-  document.getElementById('ep-body').innerHTML=html||'<div class="empty" style="padding:20px"><div class="empty-txt">Nenhuma entrega</div></div>';
+  document.getElementById('ep-body').innerHTML=h||'<div class="empty" style="padding:16px"><div class="empty-txt">Nenhuma entrega nos filtros</div></div>';
 }
 
-function selectEntrega(it){
-  selEntrega=it;
+function selItem(it){
+  selEnt=(selEnt&&selEnt.id===it.id)?null:it;
   renderEntregas(); renderCal();
-  if(it) showToast('Selecione um dia no calendário para alocar: '+it.tipo+' · '+it.andar);
+  if(selEnt) toast('Clique em um dia para alocar: '+it.tipo+' · '+it.andar);
 }
 
-// ─── Calendário ──────────────────────────────────────────────────────────────
+// ── Calendário: somente dias úteis da etapa + 1 antes + 1 depois ─────────────
+function buildCalDays(etId){
+  var et=CTX&&CTX.etapas.find(function(e){return e.id===etId;});
+  if(!et) return [];
+  var start=pD(et.start), end=pD(et.end);
+  // 1 dia útil antes
+  var before=prevWorkDay(start);
+  // Coletar dias úteis da etapa
+  var days=[], cur=new Date(start);
+  while(cur<=end){if(isWorkDay(cur))days.push({date:new Date(cur),out:false});cur=addD(cur,1);}
+  // 1 dia útil depois
+  var after=nextWorkDay(end);
+  return [{date:before,out:true}].concat(days).concat([{date:after,out:true}]);
+}
+
 function renderCal(){
-  var etapa=CTX&&CTX.etapas.find(function(e){return e.id===curEtapaId;});
-  if(!etapa){ document.getElementById('alloc-table').innerHTML=''; return; }
-  var etStart=parseD(etapa.start), etEnd=parseD(etapa.end);
-  var weekDays=getWeekDays(curWeekStart);
-
-  // Label semana
-  document.getElementById('cal-week-label').textContent=fmtBR(weekDays[0])+' – '+fmtBR(weekDays[6]);
-
-  // Arquitetos
-  var arqs=equipeLocal.arquitetos;
-
-  var today=new Date(); today.setHours(12,0,0,0);
-  var todayISO=fmtISO(today);
+  var et=CTX&&CTX.etapas.find(function(e){return e.id===curEt;});
+  if(!et){document.getElementById('at').innerHTML='';return;}
+  var days=buildCalDays(curEt);
+  var arqs=eq.arquitetos;
+  var today=new Date();today.setHours(12,0,0,0);var todayISO=fISO(today);
 
   // Cabeçalho
-  var thead='<thead><tr><th class="lbl-col">Arquiteto</th>';
-  weekDays.forEach(function(d){
-    var dow=d.getDay(), iso=fmtISO(d);
-    var outside=d<etStart||d>etEnd;
-    var wknd=dow===0||dow===6;
-    var cls=(wknd?'weekend':outside?'outside':'')+(iso===todayISO?' today-col':'');
-    thead+='<th class="day-col '+cls+'">';
-    thead+='<span class="dh-dow">'+DOW_LABELS[dow]+'</span>';
-    thead+='<span class="dh-date">'+pad(d.getDate())+'/'+pad(d.getMonth()+1)+'</span>';
-    thead+='</th>';
+  var thead='<thead><tr><th class="lbl">Arquiteto</th>';
+  days.forEach(function(d){
+    var iso=fISO(d.date),cls=d.out?'dcol out':(iso===todayISO?'dcol today-col':'dcol');
+    thead+='<th class="'+cls+'"><span class="dh-dow">'+DOWS[d.date.getDay()]+'</span><span class="dh-date">'+pd(d.date.getDate())+'/'+pd(d.date.getMonth()+1)+'</span></th>';
   });
   thead+='</tr></thead>';
 
   // Corpo
   var tbody='<tbody>';
-  arqs.forEach(function(arqNome,ai){
-    tbody+='<tr><td class="arq-lbl"><span class="arq-lbl-name">'+arqNome+'</span><span class="arq-lbl-role">Arquiteto</span></td>';
-    weekDays.forEach(function(d,di){
-      var dow=d.getDay(), iso=fmtISO(d);
-      var outside=d<etStart||d>etEnd;
-      var wknd=dow===0||dow===6;
-      var cls=(wknd?'weekend':outside?'outside':'')+(iso===todayISO?' today-col':'');
+  arqs.forEach(function(arqNome){
+    tbody+='<tr><td class="arq-lbl"><div class="arq-name">'+arqNome+'</div><div class="arq-role">Arquiteto</div></td>';
+    days.forEach(function(d){
+      var iso=fISO(d.date);
+      var cls='acell'+(d.out?' out':(iso===todayISO?' today-col':''));
+      if(selEnt&&!d.out) cls+=' drop-target';
+      // Chips alocados nesta célula para este arquiteto
+      var cellItems=(plano[curEt]&&plano[curEt][arqNome+'|'+iso])||[];
+      var allItems=getEntregas(curEt);
 
-      // Buscar alocação neste dia para este arquiteto
-      var list=planoAloc[curEtapaId]||[];
-      var item=list.find(function(a){return a.arquiteto===arqNome&&a.data===iso;});
-
-      if(item){
-        var entItems=getEntregasDaEtapa(curEtapaId);
-        var eIdx=entItems.findIndex(function(e){return e.id===item.entId;});
-        var color=CHIP_COLORS[eIdx>=0?eIdx%CHIP_COLORS.length:ai%CHIP_COLORS.length];
-        tbody+='<td class="alloc-cell has-item '+cls+'">';
-        tbody+='<div class="alloc-chip" style="background:'+color+'" onclick="removeAloc(\''+arqNome+'\',\''+iso+'\')" title="Clique para remover">';
-        tbody+=item.tipo+'<br><span style="font-size:8.5px;opacity:.8">'+item.andar+'</span>';
-        tbody+='<span class="chip-del">✕</span>';
-        tbody+='</div></td>';
-      } else if(!outside&&!wknd){
-        tbody+='<td class="alloc-cell '+cls+(selEntrega?' drop-target':'')+'" onclick="alocCell(\''+arqNome+'\',\''+iso+'\')" id="cell-'+ai+'-'+di+'">';
-        if(selEntrega) tbody+='<div class="add-btn">+</div>';
-        else tbody+='<div class="add-btn" onclick="openSel(event,\''+arqNome+'\',\''+iso+'\')">+</div>';
-        tbody+='</td>';
+      if(d.out){
+        tbody+='<td class="'+cls+'"></td>';
       } else {
-        tbody+='<td class="alloc-cell '+cls+'"></td>';
+        tbody+='<td class="'+cls+(cellItems.length?' has-chips':'')+'" id="c-'+arqNome.replace(/ /g,'_')+'-'+iso+'">';
+        if(cellItems.length){
+          tbody+='<div class="acell-chips">';
+          cellItems.forEach(function(ci,idx){
+            var eIdx=allItems.findIndex(function(e){return e.id===ci.entId;});
+            var col=eIdx>=0?COLORS[allItems[eIdx].colorIdx]:COLORS[idx%COLORS.length];
+            tbody+='<div class="achip" style="background:'+col+'" onclick="rmAloc(\''+arqNome+'\',\''+iso+'\',\''+ci.entId+'\',event)" title="'+ci.tipo+' · '+ci.andar+' (clique para remover)">';
+            tbody+=ci.tipo+'<br><span style="font-size:8px;opacity:.85">'+ci.andar+'</span>';
+            tbody+='<span class="chip-del">✕</span></div>';
+          });
+          tbody+='</div>';
+        }
+        // Botão add sempre visível (para adicionar mais)
+        tbody+='<div class="add-cell-btn" onclick="cellClick(\''+arqNome+'\',\''+iso+'\',event)">+</div>';
+        tbody+='</td>';
       }
     });
     tbody+='</tr>';
   });
   tbody+='</tbody>';
-
-  document.getElementById('alloc-table').innerHTML=thead+tbody;
+  document.getElementById('at').innerHTML=thead+tbody;
   updCTA2();
 }
 
-function alocCell(arqNome,iso){
-  if(!selEntrega){ openSelByArgs(arqNome,iso); return; }
-  var etapa=CTX&&CTX.etapas.find(function(e){return e.id===curEtapaId;}); if(!etapa) return;
-  if(!planoAloc[curEtapaId]) planoAloc[curEtapaId]=[];
-  // Verificar se essa entrega já está alocada
-  var already=planoAloc[curEtapaId].find(function(a){return a.entId===selEntrega.id;});
-  if(already){ showToast('Esta entrega já está alocada'); return; }
-  // Verificar se o arquiteto já tem algo neste dia
-  var conflict=planoAloc[curEtapaId].find(function(a){return a.arquiteto===arqNome&&a.data===iso;});
-  if(conflict){ showToast('Arquiteto já tem uma entrega neste dia'); return; }
-  planoAloc[curEtapaId].push({id:'aloc_'+Date.now(),entId:selEntrega.id,tipo:selEntrega.tipo,andar:selEntrega.andar,arquiteto:arqNome,data:iso});
-  selEntrega=null;
-  salvarAloc(); renderEntregas(); renderCal();
+function cellClick(arqNome,iso,ev){
+  ev.stopPropagation();
+  if(selEnt){
+    addAloc(arqNome,iso,selEnt);
+    selEnt=null;
+    renderEntregas(); renderCal();
+  } else {
+    openPop(ev,arqNome,iso);
+  }
 }
 
-function removeAloc(arqNome,iso){
-  if(!planoAloc[curEtapaId]) return;
-  planoAloc[curEtapaId]=planoAloc[curEtapaId].filter(function(a){return!(a.arquiteto===arqNome&&a.data===iso);});
-  salvarAloc(); renderEntregas(); renderCal();
+function addAloc(arqNome,iso,it){
+  if(!plano[curEt]) plano[curEt]={};
+  var key=arqNome+'|'+iso;
+  if(!plano[curEt][key]) plano[curEt][key]=[];
+  // Verificar se já existe essa entrega neste dia (mesmo arquiteto)
+  if(plano[curEt][key].some(function(c){return c.entId===it.id;})){toast('Esta entrega já está neste dia');return;}
+  // Verificar se esta entrega já está alocada em outro dia/arquiteto
+  if(isAllocated(curEt,it.id)){toast('Esta entrega já foi alocada');return;}
+  plano[curEt][key].push({entId:it.id,tipo:it.tipo,andar:it.andar,arquiteto:arqNome,data:iso});
+  salvAloc();
 }
 
-// Popup de seleção rápida (quando não tem entrega pré-selecionada)
-var _selPopEl=null, _selPopArq=null, _selPopIso=null;
-function openSel(ev,arqNome,iso){
-  ev.stopPropagation(); closeSel();
-  _selPopArq=arqNome; _selPopIso=iso;
-  var items=getEntregasDaEtapa(curEtapaId).filter(function(it){return!isAssigned(it.id);});
-  var pop=document.createElement('div');
-  pop.className='sel-popup';
-  var hdr='<div class="sel-pop-hdr">'+pad(parseInt(iso.split('-')[2]))+'/'+pad(parseInt(iso.split('-')[1]))+' · '+arqNome+'</div>';
-  var body='<div class="sel-pop-body">';
-  if(!items.length) body+='<div class="sel-pop-empty">Todas as entregas já alocadas</div>';
-  items.forEach(function(it,i){
-    var color=CHIP_COLORS[i%CHIP_COLORS.length];
-    body+='<div class="sel-pop-item" onclick="alocFromPop(\''+it.id+'\')"><div style="width:8px;height:8px;border-radius:2px;background:'+color+';flex-shrink:0"></div>'+it.tipo+'<span class="entrega-andar">'+it.andar+'</span></div>';
+function rmAloc(arqNome,iso,entId,ev){
+  ev.stopPropagation();
+  var key=arqNome+'|'+iso;
+  if(plano[curEt]&&plano[curEt][key]){
+    plano[curEt][key]=plano[curEt][key].filter(function(c){return c.entId!==entId;});
+    if(!plano[curEt][key].length) delete plano[curEt][key];
+  }
+  salvAloc(); renderEntregas(); renderCal();
+}
+
+// ── Popup rápido ─────────────────────────────────────────────────────────────
+var _pop=null,_pArq=null,_pIso=null;
+function openPop(ev,arqNome,iso){
+  closePop(); _pArq=arqNome; _pIso=iso;
+  var allItems=getEntregas(curEt);
+  var avail=allItems.filter(function(it){return!isAllocated(curEt,it.id);});
+  var p=document.createElement('div'); p.className='sel-pop';
+  var h='<div class="sel-pop-hdr">'+pd(parseInt(iso.split('-')[2]))+'/'+pd(parseInt(iso.split('-')[1]))+' · '+arqNome+'</div><div class="sel-pop-body">';
+  if(!avail.length) h+='<div class="spi-empty">Todas as entregas já alocadas</div>';
+  avail.forEach(function(it){
+    var c=COLORS[it.colorIdx];
+    h+='<div class="spi" onclick="alocFromPop(\''+it.id+'\')"><div style="width:7px;height:7px;border-radius:2px;background:'+c+';flex-shrink:0"></div>'+it.tipo+' <span style="font-size:9.5px;font-family:var(--font);padding:1px 5px;background:var(--tf-s);color:var(--tf-dk);border-radius:7px">'+it.andar+'</span></div>';
   });
-  body+='</div>';
-  pop.innerHTML=hdr+body;
-  document.body.appendChild(pop);
-  _selPopEl=pop;
-  // Posicionar
-  var rect=ev.currentTarget.getBoundingClientRect();
-  var x=Math.min(rect.left,window.innerWidth-270);
-  var y=rect.bottom+4;
-  if(y+320>window.innerHeight) y=rect.top-324;
-  pop.style.left=x+'px'; pop.style.top=y+'px';
+  h+='</div>'; p.innerHTML=h; document.body.appendChild(p); _pop=p;
+  var rect=ev.target.getBoundingClientRect();
+  var x=Math.min(rect.left,window.innerWidth-240),y=rect.bottom+4;
+  if(y+300>window.innerHeight) y=rect.top-304;
+  p.style.left=x+'px'; p.style.top=y+'px';
 }
-
-function openSelByArgs(arqNome,iso){
-  // Cria evento simulado a partir da célula
-  var cell=document.querySelector('.alloc-cell[onclick*="'+arqNome+'"]');
-  var fakeEv={stopPropagation:function(){},currentTarget:{getBoundingClientRect:function(){return{left:400,right:490,top:300,bottom:355}}}};
-  openSel(fakeEv,arqNome,iso);
-}
-
 function alocFromPop(entId){
-  var items=getEntregasDaEtapa(curEtapaId);
-  var it=items.find(function(x){return x.id===entId;}); if(!it) return;
-  closeSel();
-  if(!planoAloc[curEtapaId]) planoAloc[curEtapaId]=[];
-  var conflict=planoAloc[curEtapaId].find(function(a){return a.arquiteto===_selPopArq&&a.data===_selPopIso;});
-  if(conflict){ showToast('Arquiteto já tem entrega neste dia'); return; }
-  planoAloc[curEtapaId].push({id:'aloc_'+Date.now(),entId:it.id,tipo:it.tipo,andar:it.andar,arquiteto:_selPopArq,data:_selPopIso});
-  salvarAloc(); renderEntregas(); renderCal();
+  var allItems=getEntregas(curEt);
+  var it=allItems.find(function(x){return x.id===entId;}); if(!it)return;
+  closePop(); addAloc(_pArq,_pIso,it);
+  renderEntregas(); renderCal();
 }
+function closePop(){if(_pop){_pop.remove();_pop=null;}}
 
-function closeSel(){
-  if(_selPopEl){ _selPopEl.remove(); _selPopEl=null; }
-}
-
-function salvarAloc(){
-  if(!ESTADO||!ESTADO.cfg||!ESTADO.cfg.equipeARQ) return;
-  ESTADO.cfg.equipeARQ.planoAloc=planoAloc;
-  try{ sessionStorage.setItem('aw_estado_atual',JSON.stringify({ts:Date.now(),estado:ESTADO})); }catch(e){}
+function salvAloc(){
+  if(!ESTADO||!ESTADO.cfg||!ESTADO.cfg.equipeARQ)return;
+  ESTADO.cfg.equipeARQ.planoAloc=plano;
+  try{sessionStorage.setItem('aw_estado_atual',JSON.stringify({ts:Date.now(),estado:ESTADO}));}catch(e){}
 }
 
 function updCTA2(){
-  if(!CTX||!CTX.etapas) return;
-  var total=0,done=0;
+  if(!CTX||!CTX.etapas)return;
+  var tot=0,done=0;
   (CTX.etapas||[]).forEach(function(e){
-    var items=getEntregasDaEtapa(e.id);
-    total+=items.length;
-    items.forEach(function(it){ if((planoAloc[e.id]||[]).some(function(a){return a.entId===it.id;})) done++; });
+    var items=getEntregas(e.id); tot+=items.length;
+    items.forEach(function(it){if(isAllocated(e.id,it.id))done++;});
   });
-  document.getElementById('cta2-info').innerHTML='<strong>'+done+'</strong> / '+total+' entregas alocadas';
+  document.getElementById('cta2-info').innerHTML='<strong>'+done+'</strong> / '+tot+' entregas alocadas';
 }
 
-// ─── Confirmar e salvar ───────────────────────────────────────────────────────
-function confirmarEquipe(){
-  if(!ESTADO) return;
-  if(!ESTADO.cfg) ESTADO.cfg={};
-  if(!ESTADO.cfg.equipeARQ) ESTADO.cfg.equipeARQ={};
-  ESTADO.cfg.equipeARQ.gerentes=equipeLocal.gerentes.slice();
-  ESTADO.cfg.equipeARQ.arquitetos=equipeLocal.arquitetos.slice();
-  ESTADO.cfg.equipeARQ.planoAloc=planoAloc;
-  try{ sessionStorage.setItem('aw_estado_atual',JSON.stringify({ts:Date.now(),estado:ESTADO})); }catch(e){}
-  showToast('Equipe e alocação confirmadas ✓');
+function confirmar(){
+  if(!ESTADO)return;
+  if(!ESTADO.cfg)ESTADO.cfg={};
+  if(!ESTADO.cfg.equipeARQ)ESTADO.cfg.equipeARQ={};
+  ESTADO.cfg.equipeARQ.gerentes=eq.gerentes.slice();
+  ESTADO.cfg.equipeARQ.arquitetos=eq.arquitetos.slice();
+  ESTADO.cfg.equipeARQ.planoAloc=plano;
+  try{sessionStorage.setItem('aw_estado_atual',JSON.stringify({ts:Date.now(),estado:ESTADO}));}catch(e){}
+  toast('Equipe e alocação confirmadas ✓');
   setTimeout(function(){
-    if(window.parent&&window.parent.fecharGestaoArq) window.parent.fecharGestaoArq(true);
+    if(window.parent&&window.parent.fecharGestaoArq)window.parent.fecharGestaoArq(true);
     else window.location.href='app.html';
-  }, 700);
+  },700);
 }
-
-function voltarApp(){
-  if(window.parent&&window.parent.fecharGestaoArq) window.parent.fecharGestaoArq(false);
+function sair(){
+  if(window.parent&&window.parent.fecharGestaoArq)window.parent.fecharGestaoArq(false);
   else window.location.href='app.html';
 }
-
-function showToast(msg){
-  var t=document.getElementById('toast');
-  t.textContent=msg; t.classList.add('show');
-  setTimeout(function(){ t.classList.remove('show'); },2600);
-}
-
-init();
+function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2600);}
 </script>
 </body>
 </html>
