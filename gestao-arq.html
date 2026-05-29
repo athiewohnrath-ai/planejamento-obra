@@ -337,8 +337,8 @@ function computeDatas(isoStart,dias){
 
 // Init
 (function(){
-  try{var r=sessionStorage.getItem('aw_estado_atual');if(r){var p=JSON.parse(r);ESTADO=p.estado||p;}}catch(e){}
-  try{var c=sessionStorage.getItem('aw_gestao_ctx');if(c)CTX=JSON.parse(c);}catch(e){}
+  try{var r=localStorage.getItem('aw_gestao_arq_state');if(r){var p=JSON.parse(r);ESTADO=p.estado||p;}}catch(e){}
+  try{var c=localStorage.getItem('aw_gestao_ctx');if(c)CTX=JSON.parse(c);}catch(e){}
   if(!ESTADO){document.getElementById('s1-body').innerHTML='<div class="empty fi"><div class="empty-icon">⚠️</div><div class="empty-txt" style="color:#DC4C2E">Abra a partir do planejamento de obra.</div></div>';return;}
   var meta=ESTADO.meta||{};
   document.getElementById('ctx-cod').textContent=meta.codigo||'';
@@ -690,7 +690,7 @@ function updCTA2(){
 function salvAloc(){
   if(!ESTADO||!ESTADO.cfg||!ESTADO.cfg.equipeARQ)return;
   ESTADO.cfg.equipeARQ.planoAloc=plano;
-  try{sessionStorage.setItem('aw_estado_atual',JSON.stringify({ts:Date.now(),estado:ESTADO}));}catch(e){}
+  try{localStorage.setItem('aw_gestao_arq_state',JSON.stringify({ts:Date.now(),estado:ESTADO}));}catch(e){}
 }
 function confirmar(){
   if(!ESTADO)return;
@@ -698,7 +698,7 @@ function confirmar(){
   ESTADO.cfg.equipeARQ.gerentes=eq.gerentes.slice();
   ESTADO.cfg.equipeARQ.arquitetos=eq.arquitetos.slice();
   ESTADO.cfg.equipeARQ.planoAloc=plano;
-  try{sessionStorage.setItem('aw_estado_atual',JSON.stringify({ts:Date.now(),estado:ESTADO}));}catch(e){}
+  try{localStorage.setItem('aw_gestao_arq_state',JSON.stringify({ts:Date.now(),estado:ESTADO}));}catch(e){}
   toast('Equipe e alocação confirmadas ✓');
   setTimeout(function(){if(window.parent&&window.parent.fecharGestaoArq)window.parent.fecharGestaoArq(true);else window.location.href='app.html';},700);
 }

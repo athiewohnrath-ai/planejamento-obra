@@ -5049,12 +5049,12 @@ window.abrirPlanoFino = function() {
     (ESTADO.cfg.projFases || []).forEach(function(f) {
       Object.keys(f.etapas || {}).forEach(function(k) { if(f.etapas[k]) etapasAtivas[k] = true; });
     });
-    sessionStorage.setItem('aw_gestao_ctx', JSON.stringify({andares: andares, etapas: etapas, etapasAtivas: etapasAtivas}));
+    localStorage.setItem('aw_gestao_ctx', JSON.stringify({andares: andares, etapas: etapas, etapasAtivas: etapasAtivas}));
   } catch(e) {}
-  // Salvar estado atual no sessionStorage antes de abrir o iframe
+  // Salvar estado em localStorage (acessível pelo iframe mesmo em browsing context diferente)
   try {
     var p = {ts: Date.now(), estado: ESTADO};
-    sessionStorage.setItem('aw_estado_atual', JSON.stringify(p));
+    localStorage.setItem('aw_gestao_arq_state', JSON.stringify(p));
   } catch(e) {}
 
   var modal = document.getElementById('modal-gestao-arq');
@@ -5077,13 +5077,15 @@ window.fecharGestaoArq = function(salvar) {
   // Se o iframe sinalizou que salvou, recarregar estado
   if (salvar) {
     try {
-      var raw = sessionStorage.getItem('aw_estado_atual');
+      var raw = localStorage.getItem('aw_gestao_arq_state');
       if (raw) {
         var parsed = JSON.parse(raw);
         if (parsed.estado) {
           ESTADO = parsed.estado;
           window.__AW_ESTADO = ESTADO;
+          localStorage.removeItem('aw_gestao_arq_state'); // limpar após usar
           showToast('Equipe de arquitetura confirmada ✓');
+          salvarDados(); // persistir no Supabase
         }
       }
     } catch(e) {}
