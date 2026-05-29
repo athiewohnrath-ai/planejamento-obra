@@ -821,7 +821,7 @@ function getPreObraDiscsByDay(faseIdx) {
     if (!totalProf) return;
     var profByDay = {};
     days.forEach(function(d) {
-      if (!d.isSun && !CALENDARIO.isNaoUtil(d.date)) {
+      if (!_isNaoUtilPO(d.date)) {
         var iso = G.fmtISO(d.date);
         profByDay[iso] = {total: totalProf, hasService: true, hasPrep: false};
       }
