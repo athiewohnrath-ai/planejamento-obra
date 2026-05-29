@@ -594,7 +594,7 @@ function gGridLines(t,e,o,noWkLine){const a=[];return t.forEach((t,n)=>{const r=
   var payload=encodeURIComponent(JSON.stringify({type:'preObra',faseIdx:obraFaseIdx}));
   console.log('[PO3] xi='+xi+' xw='+xw+' ini='+G.fmtISO(ini)+' tpl='+!!tpl+' ds='+(tpl?tpl.disciplinas.length:0));
   // Sidebar header
-  r.push('<div class="gt2" style="height:'+(G.ROW_H+8)+'px;background:'+cb+';display:flex;align-items:center;padding:0 5px 0 8px;border-bottom:1px solid #EEE0C8;border-right:2px solid #C0C8D4;font-size:10px;font-weight:700;color:#6A3810;text-transform:uppercase;letter-spacing:.04em;gap:3px;"><span style="width:5px;height:5px;border-radius:1px;background:'+cm+';flex-shrink:0;"></span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Pré-Obra'+(gSt.obraFases.length>1?' F'+(obraFaseIdx+1):'')+' '+du+' DU</span><button onclick="abrirModalPreObra('+obraFaseIdx+')" title="Editar pré-obra" style="background:none;border:1px solid '+cm+';border-radius:3px;cursor:pointer;font-size:11px;padding:0 5px;color:'+cm+';flex-shrink:0;height:20px;">✎</button></div>');
+  r.push('<div class="gt2" style="height:'+(G.ROW_H+8)+'px;background:'+cb+';display:flex;align-items:center;padding:0 5px 0 8px;border-bottom:1px solid #EEE0C8;border-right:2px solid #C0C8D4;font-size:10px;font-weight:700;color:#6A3810;text-transform:uppercase;letter-spacing:.04em;gap:4px;"><span style="width:5px;height:5px;border-radius:1px;background:'+cm+';flex-shrink:0;"></span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Pré-Obra'+(gSt.obraFases.length>1?' F'+(obraFaseIdx+1):'')+' · '+du+' DU</span><button onclick="abrirModalPreObra('+obraFaseIdx+')" title="Editar disciplinas da pré-obra" data-po-open="'+obraFaseIdx+'" style="background:'+cm+';border:none;border-radius:3px;cursor:pointer;font-size:9px;font-weight:700;font-family:var(--font);padding:0 7px;color:#fff;flex-shrink:0;height:20px;letter-spacing:.04em;">✎ Disciplinas</button></div>');
   // Gantt: barra principal
   i.push('<div style="height:'+(G.ROW_H+8)+'px;background:'+cb+';position:relative;border-bottom:1px solid #EEE0C8;overflow:visible;">'+gGridLines(o,e,false)+gBar(xi,xw,G.ROW_H,cm,ini,fim,null,payload,true)+'</div>');
   // Disciplinas
@@ -630,7 +630,7 @@ gObraRow(t,o,e,r,i),t.expanded&&(t.disciplinas||[]).forEach((a,n)=>{a&&a.ativo&&
   var payload=encodeURIComponent(JSON.stringify({type:'preObra',faseIdx:obraFaseIdx}));
   console.log('[PO3] xi='+xi+' xw='+xw+' ini='+G.fmtISO(ini)+' tpl='+!!tpl+' ds='+(tpl?tpl.disciplinas.length:0));
   // Sidebar header
-  r.push('<div style="height:'+(G.ROW_H+8)+'px;background:'+cb+';display:flex;align-items:center;padding:0 5px 0 8px;border-bottom:1px solid #EEE0C8;border-right:2px solid #C0C8D4;font-size:10px;font-weight:700;color:#6A3810;text-transform:uppercase;letter-spacing:.04em;gap:3px;"><span style="width:5px;height:5px;border-radius:1px;background:'+cm+';flex-shrink:0;"></span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Pré-Obra'+(gSt.obraFases.length>1?' F'+(obraFaseIdx+1):'')+' '+du+' DU</span></div>');
+  r.push('<div style="height:'+(G.ROW_H+8)+'px;background:'+cb+';display:flex;align-items:center;padding:0 5px 0 8px;border-bottom:1px solid #EEE0C8;border-right:2px solid #C0C8D4;font-size:10px;font-weight:700;color:#6A3810;text-transform:uppercase;letter-spacing:.04em;gap:4px;"><span style="width:5px;height:5px;border-radius:1px;background:'+cm+';flex-shrink:0;"></span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Pré-Obra'+(gSt.obraFases.length>1?' F'+(obraFaseIdx+1):'')+' · '+du+' DU</span><button onclick="abrirModalPreObra('+obraFaseIdx+')" title="Editar disciplinas da pré-obra" data-po-open="'+obraFaseIdx+'" style="background:'+cm+';border:none;border-radius:3px;cursor:pointer;font-size:9px;font-weight:700;font-family:var(--font);padding:0 7px;color:#fff;flex-shrink:0;height:20px;letter-spacing:.04em;">✎ Disciplinas</button></div>');
   // Gantt: barra principal
   i.push('<div style="height:'+(G.ROW_H+8)+'px;background:'+cb+';position:relative;border-bottom:1px solid #EEE0C8;overflow:visible;">'+gGridLines(o,e,false)+gBar(xi,xw,G.ROW_H,cm,ini,fim,null,payload,true)+'</div>');
   // Disciplinas
@@ -1697,45 +1697,60 @@ function _poRenderModal(faseIdx) {
   if (!ov) return;
   var custom = ESTADO.preObraCustom[faseIdx];
   var discs = custom.disciplinas || [];
+  var DISC_COLORS = ['#C07820','#A86018','#E8A840','#B86C10','#CC8820','#F0B850','#986010','#D87828'];
 
   var discsHtml = discs.map(function(disc, di) {
-    var tasksHtml = (disc.tasks||[]).map(function(task, ti) {
-      return '<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;padding:5px 8px;background:var(--bg-surface);border-radius:4px;border:0.5px solid var(--border);">'
-        + '<span style="cursor:grab;opacity:.35;font-size:11px;flex-shrink:0;">⠿</span>'
+    var ativo = disc.ativo !== false;
+    var dc = DISC_COLORS[di % DISC_COLORS.length];
+
+    var tableHdr = '<div style="display:grid;grid-template-columns:1fr 90px 70px 28px;gap:4px;padding:4px 10px 4px 36px;background:rgba(0,0,0,.04);border-bottom:1px solid rgba(0,0,0,.06);">'
+      + '<span style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#8A7060;">Tarefa</span>'
+      + '<span style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#8A7060;text-align:center;">Tipo</span>'
+      + '<span style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#8A7060;text-align:center;">Efetivo</span>'
+      + '<span></span></div>';
+
+    var tasksHtml = tableHdr + (disc.tasks||[]).map(function(task, ti) {
+      var isPrep = task.prep === true;
+      return '<div style="display:grid;grid-template-columns:1fr 90px 70px 28px;gap:4px;padding:5px 10px 5px 36px;border-bottom:1px solid rgba(0,0,0,.04);align-items:center;">'
         + '<input type="text" value="'+task.n.replace(/"/g,'&quot;')+'" '
         + 'onchange="ESTADO.preObraCustom['+faseIdx+'].disciplinas['+di+'].tasks['+ti+'].n=this.value;onCfgChange();" '
-        + 'style="flex:1;height:26px;padding:0 6px;border:0.5px solid var(--border);border-radius:4px;background:var(--bg-surface2);color:var(--txt);font-size:11px;">'
-        + '<label style="font-size:10px;color:var(--txt-muted);white-space:nowrap;flex-shrink:0;">Efetivo</label>'
+        + 'style="height:26px;padding:0 7px;border:0.5px solid var(--border);border-radius:4px;background:var(--bg-surface2);color:var(--txt);font-size:11px;width:100%;">'
+        + '<select data-fi="'+faseIdx+'" data-di="'+di+'" data-ti="'+ti+'" onchange="_poSetPrep(this)" '
+        + 'style="height:26px;padding:0 4px;border:0.5px solid var(--border);border-radius:4px;background:var(--bg-surface2);color:var(--txt);font-size:10px;font-family:var(--font);font-weight:700;width:100%;">'
+        + '<option value="SERVIÇO" '+(isPrep?'':'selected')+'>SERVIÇO</option>'
+        + '<option value="PREP" '+(isPrep?'selected':'')+'>PREP</option>'
+        + '</select>'
         + '<input type="number" min="1" max="50" value="'+(task.prof||2)+'" '
         + 'onchange="ESTADO.preObraCustom['+faseIdx+'].disciplinas['+di+'].tasks['+ti+'].prof=parseInt(this.value)||1;onCfgChange();gRender();" '
-        + 'style="width:44px;height:26px;padding:0 4px;border:0.5px solid var(--border);border-radius:4px;background:var(--bg-surface2);color:var(--txt);font-size:11px;text-align:center;">'
+        + 'style="height:26px;padding:0 4px;border:0.5px solid var(--border);border-radius:4px;background:var(--bg-surface2);color:var(--txt);font-size:11px;text-align:center;width:100%;">'
         + '<button onclick="_poRemoverTarefa('+faseIdx+','+di+','+ti+')" '
-        + 'style="width:22px;height:22px;background:none;border:none;cursor:pointer;font-size:12px;color:var(--txt-dim);">✕</button>'
+        + 'style="width:24px;height:24px;background:none;border:none;cursor:pointer;font-size:13px;color:var(--txt-dim);">✕</button>'
         + '</div>';
     }).join('');
 
-    return '<div data-po-disc="'+di+'" draggable="true" style="border:1px solid var(--border);border-radius:8px;margin-bottom:10px;overflow:hidden;">'
-      + '<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--bg-surface2);border-bottom:1px solid var(--border);">'
-      + '<span style="cursor:grab;opacity:.35;font-size:13px;flex-shrink:0;">⠿</span>'
+    return '<div data-po-disc="'+di+'" draggable="true" style="border-radius:8px;margin-bottom:10px;overflow:hidden;border:1px solid rgba(0,0,0,.08);">'
+      + '<div style="display:flex;align-items:center;gap:8px;padding:0 10px;background:'+dc+';height:36px;" data-po-disc-hdr="'+di+'">'
+      + '<span style="opacity:.5;font-size:13px;flex-shrink:0;cursor:grab;">⠿</span>'
       + '<input type="text" value="'+disc.label.replace(/"/g,'&quot;')+'" '
+      + 'onclick="event.stopPropagation();" '
       + 'onchange="ESTADO.preObraCustom['+faseIdx+'].disciplinas['+di+'].label=this.value;onCfgChange();" '
-      + 'style="flex:1;height:28px;padding:0 8px;border:0.5px solid var(--border);border-radius:4px;background:var(--bg-surface);color:var(--txt);font-size:12px;font-weight:700;">'
-      + '<label style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--txt-muted);cursor:pointer;flex-shrink:0;">'
-      + '<input type="checkbox" '+(disc.ativo!==false?'checked':'')+' '
+      + 'style="flex:1;height:26px;padding:0 8px;border:none;border-radius:4px;background:rgba(255,255,255,.18);color:#fff;font-size:12px;font-weight:700;font-family:var(--font);">'
+      + '<label style="display:flex;align-items:center;gap:4px;font-size:10px;color:rgba(255,255,255,.85);cursor:pointer;flex-shrink:0;" onclick="event.stopPropagation();">'
+      + '<input type="checkbox" '+(ativo?'checked':'')+' '
       + 'onchange="ESTADO.preObraCustom['+faseIdx+'].disciplinas['+di+'].ativo=this.checked;onCfgChange();gRender();" '
-      + 'style="accent-color:var(--accent);"> Ativa</label>'
-      + '<button onclick="_poRemoverDisc('+faseIdx+','+di+')" '
-      + 'style="height:26px;padding:0 8px;background:rgba(180,20,20,.08);border:1px solid rgba(180,20,20,.2);border-radius:4px;font-size:10px;color:#B41414;cursor:pointer;flex-shrink:0;">✕ Disc.</button>'
+      + 'style="accent-color:#fff;"> Ativa</label>'
+      + '<button onclick="event.stopPropagation();_poRemoverDisc('+faseIdx+','+di+')" '
+      + 'style="height:24px;padding:0 8px;background:rgba(180,20,20,.22);border:1px solid rgba(255,255,255,.3);border-radius:4px;font-size:9px;font-weight:700;color:#fff;cursor:pointer;flex-shrink:0;font-family:var(--font);">✕ Disc.</button>'
       + '</div>'
-      + '<div style="padding:8px 10px;">' + tasksHtml
-      + '<button onclick="_poAdicionarTarefa('+faseIdx+','+di+')" '
-      + 'style="font-size:10px;color:var(--accent);background:none;border:none;cursor:pointer;font-family:var(--font);font-weight:700;">+ Tarefa</button>'
+      + '<div style="background:var(--bg-surface);">' + tasksHtml
+      + '<div style="padding:6px 10px 6px 36px;"><button onclick="_poAdicionarTarefa('+faseIdx+','+di+')" '
+      + 'style="font-size:10px;color:'+dc+';background:none;border:none;cursor:pointer;font-family:var(--font);font-weight:700;">+ Tarefa</button></div>'
       + '</div></div>';
   }).join('');
 
-  ov.innerHTML = '<div style="background:var(--bg-panel);border-radius:12px;box-shadow:0 24px 64px rgba(0,0,0,.45);width:100%;max-width:660px;max-height:88vh;display:flex;flex-direction:column;overflow:hidden;">'
+  ov.innerHTML = '<div style="background:var(--bg-panel);border-radius:12px;box-shadow:0 24px 64px rgba(0,0,0,.45);width:100%;max-width:820px;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;">'
     + '<div style="display:flex;align-items:center;gap:10px;padding:14px 20px;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--bg-surface2);">'
-    + '<div style="width:6px;height:6px;border-radius:2px;background:#C07820;flex-shrink:0;"></div>'
+    + '<div style="width:6px;height:22px;border-radius:2px;background:#C07820;flex-shrink:0;"></div>'
     + '<div style="flex:1;">'
     + '<div style="font-family:var(--font);font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--txt);">Pré-Obra · Fase '+(faseIdx+1)+'</div>'
     + '<div style="font-size:10px;color:var(--txt-muted);margin-top:1px;">Edição específica deste cronograma — não altera o template</div>'
@@ -1748,7 +1763,7 @@ function _poRenderModal(faseIdx) {
     + '</div>'
     + '<div style="flex:1;overflow-y:auto;padding:16px 20px;">' + discsHtml
     + '<button onclick="_poAdicionarDisc('+faseIdx+')" '
-    + 'style="width:100%;height:32px;background:var(--bg-surface2);border:1px dashed var(--border);border-radius:6px;font-family:var(--font);font-size:10px;font-weight:700;color:var(--txt-muted);cursor:pointer;">+ Adicionar Disciplina</button>'
+    + 'style="width:100%;height:34px;background:var(--bg-surface2);border:1px dashed var(--border);border-radius:6px;font-family:var(--font);font-size:10px;font-weight:700;color:var(--txt-muted);cursor:pointer;">+ Adicionar Disciplina</button>'
     + '</div>'
     + '<div style="padding:12px 20px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">'
     + '<button onclick="_poResetarCustom('+faseIdx+')" style="font-size:10px;color:var(--txt-dim);background:none;border:none;cursor:pointer;font-family:var(--font);">↺ Restaurar template</button>'
@@ -1759,7 +1774,6 @@ function _poRenderModal(faseIdx) {
 
   _poInitDragDisc(faseIdx);
 }
-
 function _poAdicionarDisc(faseIdx) {
   ESTADO.preObraCustom[faseIdx].disciplinas.push({id:'disc-'+Date.now(),label:'Nova Disciplina',ativo:true,tasks:[{n:'Nova tarefa',prof:2}]});
   onCfgChange(); _poRenderModal(faseIdx);
@@ -4753,3 +4767,8 @@ function _preObraMakeDiscs(templateId){
   });
 }
 function _preObraToggle(faseIdx,ativo){if(!ESTADO.cfg.obraFases[faseIdx])return;if(!ESTADO.cfg.obraFases[faseIdx].preObra)ESTADO.cfg.obraFases[faseIdx].preObra={ativo:false,templateId:'pre-obra-padrao',du:5};ESTADO.cfg.obraFases[faseIdx].preObra.ativo=ativo;onCfgChange();renderObraFases();gRender();}
+window._poSetPrep = function(sel) {
+  var fi = parseInt(sel.dataset.fi), di = parseInt(sel.dataset.di), ti = parseInt(sel.dataset.ti);
+  ESTADO.preObraCustom[fi].disciplinas[di].tasks[ti].prep = (sel.value === 'PREP');
+  onCfgChange();
+};
