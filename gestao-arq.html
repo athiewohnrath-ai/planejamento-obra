@@ -8,6 +8,7 @@
 <style>
 :root{
   --tf:#3FBFB0;--tf-dk:#2A9D8F;--tf-s:#E6F6F4;
+  --fscale:1;
   --black:#111213;--ink:#1F2326;--gray:#6B7280;--gl:#9CA3AF;
   --border:#E5E7EB;--bg:#F7F8F8;--white:#fff;
   --font:'Barlow Condensed',sans-serif;--body:'Barlow',sans-serif;
@@ -15,6 +16,7 @@
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;overflow:hidden}
 body{font-family:var(--body);background:var(--bg);color:var(--ink);display:flex;height:100vh}
+.fscale{font-size:calc(1em * var(--fscale))}
 button{font-family:inherit;cursor:pointer}
 input,select{font-family:inherit}
 aside{width:240px;background:var(--black);color:#fff;display:flex;flex-direction:column;padding:16px 13px;flex-shrink:0}
@@ -192,6 +194,12 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
     <button class="step-btn locked"><div class="step-dot">3</div><div><div class="step-label">Relatório</div><div class="step-sub">Visão geral + impressão</div></div></button>
   </div>
   <div class="spacer"></div>
+  <div style="display:flex;align-items:center;gap:6px;padding:8px 3px 4px;border-top:1px solid rgba(255,255,255,.08);margin-top:8px">
+    <span style="font-size:9.5px;color:#444c5a;font-family:var(--font);font-weight:700;letter-spacing:.04em;flex:1">Tamanho do texto</span>
+    <button onclick="adjFont(-0.1)" style="width:26px;height:26px;border-radius:6px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);color:#9CA3AF;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .14s" onmouseover="this.style.background='rgba(255,255,255,.12)'" onmouseout="this.style.background='rgba(255,255,255,.05)'">−</button>
+    <span id="fscale-label" style="font-size:10px;color:#9CA3AF;font-family:var(--font);font-weight:700;min-width:28px;text-align:center">100%</span>
+    <button onclick="adjFont(0.1)" style="width:26px;height:26px;border-radius:6px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);color:#9CA3AF;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .14s" onmouseover="this.style.background='rgba(255,255,255,.12)'" onmouseout="this.style.background='rgba(255,255,255,.05)'">+</button>
+  </div>
   <button class="back-btn" onclick="sair()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>Voltar ao planejamento</button>
 </aside>
 <main>
@@ -210,7 +218,13 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
     <div class="s2-topbar" id="etapa-tabs"></div>
     <div class="s2-main">
       <div class="ep">
-        <div class="ep-hdr"><div class="ep-hdr-title">Entregas a alocar</div><div class="ep-hdr-count" id="ep-count">—</div></div>
+        <div class="ep-hdr">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px">
+    <div class="ep-hdr-title">Entregas a alocar</div>
+    <button onclick="abrirAddEntrega()" title="Adicionar entrega personalizada" style="width:22px;height:22px;border-radius:5px;border:1px solid var(--border);background:#fff;color:var(--tf-dk);font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .14s" onmouseover="this.style.background='var(--tf-s)'" onmouseout="this.style.background='#fff'">+</button>
+  </div>
+  <div class="ep-hdr-count" id="ep-count">—</div>
+</div>
         <div class="ep-filters">
           <select id="filt-andar" onchange="renderEntregas()"><option value="">Todos os andares</option></select>
           <select id="filt-tipo" onchange="renderEntregas()"><option value="">Todos os tipos</option></select>
@@ -232,6 +246,41 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
     </div>
   </div>
 </main>
+<!-- Modal: adicionar entrega personalizada -->
+<div id="modal-add-ent" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:800;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:12px;box-shadow:0 16px 48px rgba(0,0,0,.22);width:340px;overflow:hidden">
+    <div style="padding:14px 18px;border-bottom:1px solid var(--border);font-family:var(--font);font-size:13px;font-weight:700;color:var(--ink);display:flex;align-items:center;justify-content:space-between">
+      Nova entrega personalizada
+      <button onclick="fecharAddEntrega()" style="background:none;border:none;font-size:16px;color:var(--gl);cursor:pointer">✕</button>
+    </div>
+    <div style="padding:16px 18px;display:flex;flex-direction:column;gap:12px">
+      <div>
+        <label style="font-size:10.5px;font-weight:700;color:var(--gl);text-transform:uppercase;letter-spacing:.06em;font-family:var(--font);display:block;margin-bottom:5px">Nome da entrega</label>
+        <input id="new-ent-nome" type="text" placeholder="ex: Perspectiva 3D, Memorial descritivo…" style="width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:12.5px;outline:none" onfocus="this.style.borderColor='var(--tf)'" onblur="this.style.borderColor='var(--border)'" onkeydown="if(event.key==='Enter')confirmarAddEnt()">
+      </div>
+      <div>
+        <label style="font-size:10.5px;font-weight:700;color:var(--gl);text-transform:uppercase;letter-spacing:.06em;font-family:var(--font);display:block;margin-bottom:5px">Vinculação a andar</label>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;font-family:var(--font);font-weight:600;color:var(--ink)">
+            <input type="radio" name="ent-andar-opt" id="opt-geral" value="geral" checked onchange="updAndares()" style="accent-color:var(--tf)"> Geral do projeto (sem andar)
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;font-family:var(--font);font-weight:600;color:var(--ink)">
+            <input type="radio" name="ent-andar-opt" id="opt-andar" value="andar" onchange="updAndares()" style="accent-color:var(--tf)"> Vinculado a andares
+          </label>
+          <div id="andar-sel-wrap" style="display:none;margin-left:24px;display:none">
+            <div style="font-size:10.5px;color:var(--gl);margin-bottom:5px">Selecione os andares:</div>
+            <div id="andar-chks" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="padding:12px 18px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px">
+      <button onclick="fecharAddEntrega()" style="height:32px;padding:0 14px;border:1.5px solid var(--border);border-radius:7px;background:transparent;font-family:var(--font);font-size:11.5px;font-weight:700;color:var(--gray);cursor:pointer">Cancelar</button>
+      <button onclick="confirmarAddEnt()" style="height:32px;padding:0 18px;background:var(--tf);border:none;border-radius:7px;font-family:var(--font);font-size:11.5px;font-weight:700;color:#111;cursor:pointer">Adicionar</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
@@ -338,11 +387,7 @@ function togAll(gNome){var db=EDB[eq.diretor];if(!db)return;var gd=db.gerentes.f
 function updCTA1(){var btn=document.getElementById('btn-prox'),info=document.getElementById('cta1-info');if(!eq.gerentes.length){btn.disabled=true;info.innerHTML='Selecione pelo menos um <strong>gerente</strong>';}else if(!eq.arquitetos.length){btn.disabled=true;info.innerHTML='Selecione pelo menos um <strong>arquiteto</strong>';}else{btn.disabled=false;info.innerHTML='<strong>'+eq.arquitetos.length+'</strong> arq · <strong>'+eq.gerentes.length+'</strong> GA';}updSB();}
 
 // ── Screen 2 ─────────────────────────────────────────────────────────────────
-function getEntregas(etId){
-  var tipos=EDEF[etId]||[],andares=(CTX&&CTX.andares)||['(andar)'],items=[],ci=0;
-  tipos.forEach(function(tipo,ti){andares.forEach(function(andar){items.push({id:etId+'__'+ti+'__'+andar.replace(/\s/g,'_'),tipo:tipo,andar:andar,colorIdx:ci%COLORS.length});ci++;});});
-  return items;
-}
+// getEntregas redefinida abaixo com suporte a personalizadas
 
 function isAllocated(etId,entId){
   return !!(plano[etId]&&plano[etId].some(function(a){return a.entId===entId;}));
@@ -631,6 +676,75 @@ function confirmar(){
 }
 function sair(){if(window.parent&&window.parent.fecharGestaoArq)window.parent.fecharGestaoArq(false);else window.location.href='app.html';}
 function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2600);}
+
+// ── Controle de fonte ─────────────────────────────────────────────────────────
+var _fscale=1.0;
+function adjFont(delta){
+  _fscale=Math.max(0.7,Math.min(1.5,Math.round((_fscale+delta)*10)/10));
+  document.documentElement.style.setProperty('--fscale',_fscale);
+  document.getElementById('fscale-label').textContent=Math.round(_fscale*100)+'%';
+  // Aplicar em toda a main (não na sidebar)
+  var main=document.querySelector('main');
+  if(main) main.style.fontSize=(_fscale*100)+'%';
+}
+
+// ── Entregas personalizadas ───────────────────────────────────────────────────
+// customEnts[etId] = [{id, tipo, andar}]  (andar pode ser 'Geral' ou andar específico)
+var customEnts={};
+
+function getEntregas(etId){
+  var tipos=EDEF[etId]||[],andares=(CTX&&CTX.andares)||['(andar)'],items=[],ci=0;
+  tipos.forEach(function(tipo,ti){andares.forEach(function(andar){items.push({id:etId+'__'+ti+'__'+andar.replace(/\s/g,'_'),tipo:tipo,andar:andar,colorIdx:ci%COLORS.length,custom:false});ci++;});});
+  // Adicionar personalizadas
+  (customEnts[etId]||[]).forEach(function(ce){
+    items.push({id:ce.id,tipo:ce.tipo,andar:ce.andar,colorIdx:ci%COLORS.length,custom:true});ci++;
+  });
+  return items;
+}
+
+function abrirAddEntrega(){
+  if(!curEt){toast('Selecione uma etapa primeiro');return;}
+  document.getElementById('new-ent-nome').value='';
+  document.getElementById('opt-geral').checked=true;
+  document.getElementById('andar-sel-wrap').style.display='none';
+  // Preencher checkboxes de andares
+  var andares=(CTX&&CTX.andares)||[];
+  var chks=document.getElementById('andar-chks');
+  chks.innerHTML=andares.map(function(a){
+    return '<label style="display:flex;align-items:center;gap:5px;font-size:12px;font-family:var(--font);cursor:pointer"><input type="checkbox" value="'+a+'" style="accent-color:var(--tf)"> '+a+'</label>';
+  }).join('');
+  document.getElementById('modal-add-ent').style.display='flex';
+  setTimeout(function(){document.getElementById('new-ent-nome').focus();},50);
+}
+
+function fecharAddEntrega(){
+  document.getElementById('modal-add-ent').style.display='none';
+}
+
+function updAndares(){
+  var opt=document.querySelector('input[name="ent-andar-opt"]:checked');
+  document.getElementById('andar-sel-wrap').style.display=(opt&&opt.value==='andar')?'block':'none';
+}
+
+function confirmarAddEnt(){
+  var nome=document.getElementById('new-ent-nome').value.trim();
+  if(!nome){toast('Digite um nome para a entrega');return;}
+  var opt=document.querySelector('input[name="ent-andar-opt"]:checked');
+  var andares=[];
+  if(opt&&opt.value==='andar'){
+    document.querySelectorAll('#andar-chks input:checked').forEach(function(cb){andares.push(cb.value);});
+    if(!andares.length){toast('Selecione pelo menos um andar');return;}
+  } else {
+    andares=['Geral'];
+  }
+  if(!customEnts[curEt])customEnts[curEt]=[];
+  andares.forEach(function(andar){
+    customEnts[curEt].push({id:'cust_'+Date.now()+'_'+Math.random().toString(36).slice(2),tipo:nome,andar:andar});
+  });
+  fecharAddEntrega();
+  populateFiltros();renderEntregas();renderCal();
+  toast('Entrega "'+nome+'" adicionada');
+}
 </script>
 </body>
 </html>
