@@ -1772,6 +1772,8 @@ function _poRenderModal(faseIdx) {
 function _poAdicionarDisc(faseIdx) {
   ESTADO.preObraCustom[faseIdx].disciplinas.push({id:'disc-'+Date.now(),label:'Nova Disciplina',ativo:true,tasks:[{n:'Nova tarefa',prof:2}]});
   onCfgChange(); _poRenderModal(faseIdx);
+  var _sc=document.querySelector('#modal-po-overlay [style*="overflow-y:auto"]');
+  if(_sc) requestAnimationFrame(function(){_sc.scrollTop=_sc.scrollHeight;});
 }
 window._poAdicionarDisc = _poAdicionarDisc;
 
@@ -1784,6 +1786,9 @@ window._poRemoverDisc = _poRemoverDisc;
 function _poAdicionarTarefa(faseIdx, di) {
   ESTADO.preObraCustom[faseIdx].disciplinas[di].tasks.push({n:'Nova tarefa',prof:2});
   onCfgChange(); _poRenderModal(faseIdx);
+  // Scroll até a disciplina que recebeu a tarefa
+  var _disc=document.querySelector('#modal-po-overlay [data-po-disc="'+di+'"]');
+  if(_disc) requestAnimationFrame(function(){_disc.scrollIntoView({behavior:'smooth',block:'end'});});
 }
 window._poAdicionarTarefa = _poAdicionarTarefa;
 
