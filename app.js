@@ -5023,6 +5023,34 @@ window.abrirPlanoFino=function(){
 
 // ── Modal Gestão ARQ ─────────────────────────────────────────────────────────
 window.abrirPlanoFino = function() {
+  // Serializar datas das etapas ARQ para o gestao-arq.html
+  try {
+    var etapas = [];
+    (gSt.projFases || []).forEach(function(fase) {
+      var subs = fase.rows && fase.rows.arq && fase.rows.arq.subs || {};
+      G.SUB_IDS.forEach(function(id) {
+        var s = subs[id];
+        if (!s) return;
+        etapas.push({
+          id: id,
+          label: G.SUB_NAMES[id] || id,
+          faseId: fase.id,
+          faseNome: fase.nome || ('F' + fase.id),
+          start: G.fmtISO(s.start instanceof Date ? s.start : G.parseD(s.start)),
+          end:   G.fmtISO(s.end   instanceof Date ? s.end   : G.parseD(s.end))
+        });
+      });
+    });
+    // Andares configurados
+    var andares = (typeof CFG_ANDARES !== 'undefined' ? CFG_ANDARES : []) ||
+                  (ESTADO.cfg && ESTADO.cfg.andares) || [];
+    // Etapas ativas no cfg
+    var etapasAtivas = {};
+    (ESTADO.cfg.projFases || []).forEach(function(f) {
+      Object.keys(f.etapas || {}).forEach(function(k) { if(f.etapas[k]) etapasAtivas[k] = true; });
+    });
+    sessionStorage.setItem('aw_gestao_ctx', JSON.stringify({andares: andares, etapas: etapas, etapasAtivas: etapasAtivas}));
+  } catch(e) {}
   // Salvar estado atual no sessionStorage antes de abrir o iframe
   try {
     var p = {ts: Date.now(), estado: ESTADO};
