@@ -681,11 +681,10 @@ function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.c
 var _fscale=1.0;
 function adjFont(delta){
   _fscale=Math.max(0.7,Math.min(1.5,Math.round((_fscale+delta)*10)/10));
-  document.documentElement.style.setProperty('--fscale',_fscale);
-  document.getElementById('fscale-label').textContent=Math.round(_fscale*100)+'%';
-  // Aplicar em toda a main (não na sidebar)
+  // Aplicar zoom na main — afeta TODOS os tamanhos de fonte filhos
   var main=document.querySelector('main');
-  if(main) main.style.fontSize=(_fscale*100)+'%';
+  if(main) main.style.zoom=_fscale;
+  document.getElementById('fscale-label').textContent=Math.round(_fscale*100)+'%';
 }
 
 // ── Entregas personalizadas ───────────────────────────────────────────────────
