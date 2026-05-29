@@ -5020,3 +5020,54 @@ window.abrirPlanoFino=function(){
   try{const p={ts:Date.now(),estado:ESTADO};sessionStorage.setItem('aw_estado_atual',JSON.stringify(p));}catch(e){}
   window.location.href='gestao-arq.html';
 };
+
+// ── Modal Gestão ARQ ─────────────────────────────────────────────────────────
+window.abrirPlanoFino = function() {
+  // Salvar estado atual no sessionStorage antes de abrir o iframe
+  try {
+    var p = {ts: Date.now(), estado: ESTADO};
+    sessionStorage.setItem('aw_estado_atual', JSON.stringify(p));
+  } catch(e) {}
+
+  var modal = document.getElementById('modal-gestao-arq');
+  var iframe = document.getElementById('iframe-gestao-arq');
+  if (!modal || !iframe) return;
+
+  // Recarregar o iframe sempre (garante dados frescos)
+  iframe.src = 'gestao-arq.html?_=' + Date.now();
+  modal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+};
+
+window.fecharGestaoArq = function(salvar) {
+  var modal = document.getElementById('modal-gestao-arq');
+  var iframe = document.getElementById('iframe-gestao-arq');
+  if (modal) modal.style.display = 'none';
+  if (iframe) iframe.src = '';
+  document.body.style.overflow = '';
+
+  // Se o iframe sinalizou que salvou, recarregar estado
+  if (salvar) {
+    try {
+      var raw = sessionStorage.getItem('aw_estado_atual');
+      if (raw) {
+        var parsed = JSON.parse(raw);
+        if (parsed.estado) {
+          ESTADO = parsed.estado;
+          window.__AW_ESTADO = ESTADO;
+          showToast('Equipe de arquitetura confirmada ✓');
+        }
+      }
+    } catch(e) {}
+  }
+};
+
+// Fechar ao clicar no fundo do modal
+document.addEventListener('DOMContentLoaded', function() {
+  var modal = document.getElementById('modal-gestao-arq');
+  if (modal) {
+    modal.addEventListener('click', function(e) {
+      if (e.target === modal) window.fecharGestaoArq(false);
+    });
+  }
+});

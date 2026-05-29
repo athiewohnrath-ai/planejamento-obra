@@ -548,12 +548,22 @@ function confirmarEquipe() {
   } catch(e) {}
 
   showToast('Equipe confirmada — '+equipeLocal.arquitetos.length+' arquiteto(s)');
-  setTimeout(function(){ voltarApp(); }, 900);
+  setTimeout(function(){
+    if (window.parent && window.parent.fecharGestaoArq) {
+      window.parent.fecharGestaoArq(true);
+    } else {
+      window.location.href = 'app.html';
+    }
+  }, 700);
 }
 
 // ── Navegação ─────────────────────────────────────────────────────────────────
 function voltarApp() {
-  window.location.href = 'app.html';
+  if (window.parent && window.parent.fecharGestaoArq) {
+    window.parent.fecharGestaoArq(false);
+  } else {
+    window.location.href = 'app.html';
+  }
 }
 
 function goStep(n) {
@@ -570,6 +580,10 @@ function showToast(msg) {
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 carregarEstado();
+// Fechar com ESC
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') voltarApp();
+});
 </script>
 </body>
 </html>
