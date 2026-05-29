@@ -5046,11 +5046,17 @@ window.abrirPlanoFino = function() {
     });
     localStorage.setItem('aw_gestao_ctx', JSON.stringify({andares: andares, etapas: etapas, etapasAtivas: etapasAtivas}));
   } catch(e) {}
-  // Salvar estado em localStorage (acessível pelo iframe mesmo em browsing context diferente)
+  // Salvar apenas o necessário no localStorage (ESTADO completo pode ser grande demais)
   try {
-    var p = {ts: Date.now(), estado: ESTADO};
-    localStorage.setItem('aw_gestao_arq_state', JSON.stringify(p));
-  } catch(e) {}
+    var slimEstado = {
+      meta: ESTADO.meta || {},
+      cfg: {
+        equipeARQ: (ESTADO.cfg && ESTADO.cfg.equipeARQ) || {},
+        andares: (ESTADO.cfg && ESTADO.cfg.andares) || []
+      }
+    };
+    localStorage.setItem('aw_gestao_arq_state', JSON.stringify({ts: Date.now(), estado: slimEstado}));
+  } catch(e) { console.error('[abrirPlanoFino] localStorage erro:', e); }
 
   var modal = document.getElementById('modal-gestao-arq');
   var iframe = document.getElementById('iframe-gestao-arq');
@@ -5076,7 +5082,10 @@ window.fecharGestaoArq = function(salvar) {
       if (raw) {
         var parsed = JSON.parse(raw);
         if (parsed.estado) {
-          ESTADO = parsed.estado;
+          // Restaurar só equipeARQ no ESTADO principal (não substituir tudo)
+          if (parsed.estado.cfg && parsed.estado.cfg.equipeARQ) {
+            ESTADO.cfg.equipeARQ = parsed.estado.cfg.equipeARQ;
+          }
           window.__AW_ESTADO = ESTADO;
           localStorage.removeItem('aw_gestao_arq_state'); // limpar após usar
           showToast('Equipe de arquitetura confirmada ✓');
