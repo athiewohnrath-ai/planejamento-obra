@@ -581,10 +581,10 @@ function gGridLines(t,e,o,noWkLine){const a=[];return t.forEach((t,n)=>{const r=
   if(!pc||!pc.ativo)return;
   var du=pc.du||5;
   var fim=G.addD(new Date(obraFase.obra.start),-1);
-  while(CALENDARIO.isNaoUtil(fim))fim=G.addD(fim,-1);
+  while(_isNaoUtilPO(fim))fim=G.addD(fim,-1);
   var ini=new Date(fim),cnt=1;
-  while(cnt<du){ini=G.addD(ini,-1);if(!CALENDARIO.isNaoUtil(ini))cnt++;}
-  while(CALENDARIO.isNaoUtil(ini))ini=G.addD(ini,1);
+  while(cnt<du){ini=G.addD(ini,-1);if(!_isNaoUtilPO(ini))cnt++;}
+  while(_isNaoUtilPO(ini))ini=G.addD(ini,1);
   var xi=gPx(ini);
   var xw=Math.max((G.diff(ini,fim)+1)*gSt.dayW,2*gSt.dayW);
   var cm=darkenHex(COR.OBRA_MOM,.72);
@@ -616,10 +616,10 @@ gObraRow(t,o,e,r,i),t.expanded&&(t.disciplinas||[]).forEach((a,n)=>{a&&a.ativo&&
   if(!pc||!pc.ativo)return;
   var du=pc.du||5;
   var fim=G.addD(new Date(obraFase.obra.start),-1);
-  while(CALENDARIO.isNaoUtil(fim))fim=G.addD(fim,-1);
+  while(_isNaoUtilPO(fim))fim=G.addD(fim,-1);
   var ini=new Date(fim),cnt=1;
-  while(cnt<du){ini=G.addD(ini,-1);if(!CALENDARIO.isNaoUtil(ini))cnt++;}
-  while(CALENDARIO.isNaoUtil(ini))ini=G.addD(ini,1);
+  while(cnt<du){ini=G.addD(ini,-1);if(!_isNaoUtilPO(ini))cnt++;}
+  while(_isNaoUtilPO(ini))ini=G.addD(ini,1);
   var xi=gPx(ini);
   var xw=Math.max((G.diff(ini,fim)+1)*gSt.dayW,2*gSt.dayW);
   var cm=darkenHex(COR.OBRA_MOM,.72);
@@ -741,17 +741,17 @@ function getPreObraEfetivoByDay(faseIdx) {
 
   var du = poCfg.du || 5;
   var fim = G.addD(new Date(obraFase.obra.start), -1);
-  while (CALENDARIO.isNaoUtil(fim)) fim = G.addD(fim, -1);
+  while (_isNaoUtilPO(fim)) fim = G.addD(fim, -1);
   var ini = new Date(fim), cnt = 1;
-  while (cnt < du) { ini = G.addD(ini, -1); if (!CALENDARIO.isNaoUtil(ini)) cnt++; }
-  while (CALENDARIO.isNaoUtil(ini)) ini = G.addD(ini, 1);
+  while (cnt < du) { ini = G.addD(ini, -1); if (!_isNaoUtilPO(ini)) cnt++; }
+  while (_isNaoUtilPO(ini)) ini = G.addD(ini, 1);
 
   var discs = _getPoDiscs(faseIdx);
 
-  // Somar efetivo de todas as disciplinas por dia
+  // Somar efetivo de todas as disciplinas por dia (inclui sábados)
   var cur = new Date(ini);
   while (G.ms(cur) <= G.ms(fim)) {
-    if (!CALENDARIO.isNaoUtil(cur)) {
+    if (!_isNaoUtilPO(cur)) {
       var iso = G.fmtISO(cur);
       var total = discs.reduce(function(sum, disc) {
         return sum + (disc.tasks || []).reduce(function(s, t) { return s + (t.prof || 0); }, 0);
@@ -772,17 +772,27 @@ function getPreObraDays(faseIdx) {
   if (!obraFase) return result;
   var du = poCfg.du || 5;
   var fim = G.addD(new Date(obraFase.obra.start), -1);
-  while (CALENDARIO.isNaoUtil(fim)) fim = G.addD(fim, -1);
+  while (_isNaoUtilPO(fim)) fim = G.addD(fim, -1);
   var ini = new Date(fim), cnt = 1;
-  while (cnt < du) { ini = G.addD(ini, -1); if (!CALENDARIO.isNaoUtil(ini)) cnt++; }
-  while (CALENDARIO.isNaoUtil(ini)) ini = G.addD(ini, 1);
+  while (cnt < du) { ini = G.addD(ini, -1); if (!_isNaoUtilPO(ini)) cnt++; }
+  while (_isNaoUtilPO(ini)) ini = G.addD(ini, 1);
   var cur = new Date(ini);
   while (G.ms(cur) <= G.ms(fim)) {
     var dow = cur.getDay();
-    result.push({date:new Date(cur), dow:dow, isSat:dow===6, isSun:dow===0, buffer:false, mod:0, isPreObra:true});
+    if (dow !== 0) { // pula apenas domingos
+      result.push({date:new Date(cur), dow:dow, isSat:dow===6, isSun:false, buffer:false, mod:0, isPreObra:true});
+    }
     cur = G.addD(cur, 1);
   }
   return result;
+}
+
+function _isNaoUtilPO(d) {
+  // Pré-obra trabalha sábado — só bloqueia domingos e feriados em dias de semana
+  var dow = d.getDay();
+  if (dow === 0) return true;          // domingo: sempre bloqueado
+  if (dow === 6) return false;         // sábado: sempre permitido na pré-obra
+  return CALENDARIO.isNaoUtil(d);      // segunda a sexta: segue feriados normais
 }
 
 function _getPoDiscs(faseIdx) {
