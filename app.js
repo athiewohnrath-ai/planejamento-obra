@@ -4834,3 +4834,184 @@ window._poSetPrep = function(sel) {
   ESTADO.preObraCustom[fi].disciplinas[di].tasks[ti].prep = (sel.value === 'PREP');
   onCfgChange();
 };
+
+// ═══════════════════════════════════════════════════════════
+//  EQUIPE ARQ — dados e lógica do seletor no Config
+// ═══════════════════════════════════════════════════════════
+
+var EQUIPE_DB = {
+  "Pedro Coivo": {
+    gerentes: [
+      { nome: "Paula Torres", cargo: "Gerente de Arquitetura",
+        arquitetos: [
+          { nome: "Andre Milhomens",     cargo: "Arquiteto" },
+          { nome: "Caroline Rodrigues",  cargo: "Arquiteto" },
+          { nome: "Gabriela Pugliese",   cargo: "Arquiteto" },
+          { nome: "Ana Rodrigues",       cargo: "Arquiteto" },
+          { nome: "Alice Souza",         cargo: "Arquiteto" }
+        ]
+      },
+      { nome: "Ana Pollizello", cargo: "Gerente de Arquitetura",
+        arquitetos: [
+          { nome: "Rafaela Justo",       cargo: "Arquiteto" },
+          { nome: "Thiago Oliveira",     cargo: "Arquiteto" },
+          { nome: "Emilio Bertolini",    cargo: "Arquiteto" },
+          { nome: "Franciela Gehrke",    cargo: "Arquiteto" },
+          { nome: "Carolina Plascak",    cargo: "Arquiteto" },
+          { nome: "Caroline Guerrero",   cargo: "Arquiteto" }
+        ]
+      }
+    ]
+  },
+  "Daniel Ingarano": {
+    gerentes: [
+      { nome: "Nathalia Gomes", cargo: "Gerente de Arquitetura",
+        arquitetos: [
+          { nome: "Sergio Sampaio",  cargo: "Arquiteto" },
+          { nome: "Aline Leal",      cargo: "Arquiteto" }
+        ]
+      },
+      { nome: "Tais Neiva", cargo: "Gerente de Arquitetura",
+        arquitetos: [
+          { nome: "Rafaella Silva",   cargo: "Arquiteto" },
+          { nome: "Vinicius Bressan", cargo: "Arquiteto" }
+        ]
+      }
+    ]
+  },
+  "Virginia Nehmi": {
+    gerentes: [
+      { nome: "Giulia Previato", cargo: "Gerente de Arquitetura",
+        arquitetos: [
+          { nome: "Itamara Lima",    cargo: "Arquiteto" },
+          { nome: "Leo Teruo",       cargo: "Arquiteto" }
+        ]
+      },
+      { nome: "Priscila Pary", cargo: "Gerente de Arquitetura",
+        arquitetos: [
+          { nome: "Sabryna Ribeiro",  cargo: "Arquiteto" },
+          { nome: "Guilherme Fazano", cargo: "Arquiteto" },
+          { nome: "Kazuo Daido",      cargo: "Arquiteto" }
+        ]
+      }
+    ]
+  }
+};
+
+// Chip visual reutilizável
+function _equipeChip(nome, role, sel, onclick) {
+  var bg  = sel ? 'var(--accent)'  : 'var(--bg-surface2)';
+  var clr = sel ? '#0D1117'        : 'var(--txt-muted)';
+  var brd = sel ? 'var(--accent)'  : 'var(--border)';
+  return '<button onclick="'+onclick+'" style="display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:20px;border:1px solid '+brd+';background:'+bg+';color:'+clr+';font-size:11px;font-weight:700;font-family:var(--font);cursor:pointer;transition:all .15s;">'
+    + nome
+    + (role ? '<span style="font-size:9px;font-weight:400;opacity:.7;">'+role+'</span>' : '')
+    + '</button>';
+}
+
+window.equipeOnDiretor = function() {
+  if (!ESTADO.cfg) ESTADO.cfg = {};
+  if (!ESTADO.cfg.equipeARQ) ESTADO.cfg.equipeARQ = {diretor:'', gerentes:[], arquitetos:[]};
+  var dir = document.getElementById('equipe-diretor').value;
+  ESTADO.cfg.equipeARQ.diretor  = dir;
+  ESTADO.cfg.equipeARQ.gerentes = [];
+  ESTADO.cfg.equipeARQ.arquitetos = [];
+  equipeRenderGerentes();
+  onCfgChange(); salvarDados();
+};
+
+window.equipeToggleGerente = function(nome) {
+  var ea = ESTADO.cfg.equipeARQ;
+  var idx = ea.gerentes.indexOf(nome);
+  if (idx >= 0) ea.gerentes.splice(idx, 1);
+  else          ea.gerentes.push(nome);
+  ea.arquitetos = []; // reset arquitetos ao mudar gerentes
+  equipeRenderGerentes();
+  onCfgChange(); salvarDados();
+};
+
+window.equipeToggleArq = function(nome) {
+  var ea = ESTADO.cfg.equipeARQ;
+  var idx = ea.arquitetos.indexOf(nome);
+  if (idx >= 0) ea.arquitetos.splice(idx, 1);
+  else          ea.arquitetos.push(nome);
+  equipeRenderArqs();
+  onCfgChange(); salvarDados();
+};
+
+function equipeRenderGerentes() {
+  var ea  = ESTADO.cfg.equipeARQ || {};
+  var dir = ea.diretor || '';
+  var gWrap = document.getElementById('equipe-gerentes-wrap');
+  var gLista = document.getElementById('equipe-gerentes-lista');
+  if (!gWrap || !gLista) return;
+
+  if (!dir || !EQUIPE_DB[dir]) { gWrap.style.display = 'none'; equipeRenderArqs(); return; }
+  gWrap.style.display = '';
+  var gerentes = EQUIPE_DB[dir].gerentes;
+  gLista.innerHTML = gerentes.map(function(g) {
+    var sel = (ea.gerentes || []).indexOf(g.nome) >= 0;
+    return _equipeChip(g.nome, 'GA', sel, "equipeToggleGerente('"+g.nome+"')");
+  }).join('');
+  equipeRenderArqs();
+}
+
+function equipeRenderArqs() {
+  var ea  = ESTADO.cfg.equipeARQ || {};
+  var dir = ea.diretor || '';
+  var aWrap  = document.getElementById('equipe-arqs-wrap');
+  var aLista = document.getElementById('equipe-arqs-lista');
+  var resumo = document.getElementById('equipe-resumo');
+  var resumoBody = document.getElementById('equipe-resumo-body');
+  if (!aWrap || !aLista) return;
+
+  var gerSel = ea.gerentes || [];
+  if (!dir || !EQUIPE_DB[dir] || gerSel.length === 0) {
+    aWrap.style.display = 'none';
+    return;
+  }
+  aWrap.style.display = '';
+
+  // Montar lista de arquitetos dos gerentes selecionados
+  var todosArqs = [];
+  EQUIPE_DB[dir].gerentes.forEach(function(g) {
+    if (gerSel.indexOf(g.nome) < 0) return;
+    g.arquitetos.forEach(function(a) { todosArqs.push({...a, gerente: g.nome}); });
+  });
+
+  aLista.innerHTML = todosArqs.map(function(a) {
+    var sel = (ea.arquitetos || []).indexOf(a.nome) >= 0;
+    return _equipeChip(a.nome, a.cargo, sel, "equipeToggleArq('"+a.nome+"')");
+  }).join('');
+
+  // Resumo
+  var arqSel = ea.arquitetos || [];
+  if (arqSel.length > 0 && resumo && resumoBody) {
+    resumo.style.display = '';
+    resumoBody.innerHTML =
+      '<div><strong style="color:var(--txt);">'+dir+'</strong> · Dir. Arquitetura</div>'
+      + gerSel.map(function(g) {
+          var arqDoG = todosArqs.filter(function(a){ return a.gerente===g && arqSel.indexOf(a.nome)>=0; });
+          if (!arqDoG.length) return '';
+          return '<div style="margin-top:4px;"><strong style="color:var(--txt);">'+g+'</strong> (GA)'
+            + '<div style="margin-left:12px;color:var(--txt-dim);">'
+            + arqDoG.map(function(a){return '· '+a.nome+' <span style="font-size:10px;">('+a.cargo+')</span>';}).join('<br>')
+            + '</div></div>';
+        }).join('')
+      + '<div style="margin-top:6px;font-size:11px;color:var(--accent);font-weight:700;">'+arqSel.length+' arquiteto(s) selecionado(s)</div>';
+  } else if (resumo) {
+    resumo.style.display = 'none';
+  }
+}
+
+// Carregar estado salvo ao abrir o Config
+var _equipeOrigCfgCarregar = window.cfgCarregar;
+window.cfgCarregar = function() {
+  if (typeof _equipeOrigCfgCarregar === 'function') _equipeOrigCfgCarregar();
+  setTimeout(function() {
+    var ea = ESTADO.cfg && ESTADO.cfg.equipeARQ;
+    if (!ea) return;
+    var sel = document.getElementById('equipe-diretor');
+    if (sel && ea.diretor) { sel.value = ea.diretor; equipeRenderGerentes(); }
+  }, 50);
+};
