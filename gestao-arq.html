@@ -81,6 +81,17 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .ent-andar{font-size:9px;font-weight:700;color:var(--tf-dk);background:var(--tf-s);padding:1px 5px;border-radius:7px;white-space:nowrap;margin-left:auto;align-self:flex-start;flex-shrink:0}
 .ent-item.sel .ent-andar{background:rgba(0,0,0,.15);color:#111}
 .drag-hint{font-size:9.5px;color:var(--gl);text-align:center;padding:8px 10px;font-style:italic}
+.grp-hdr{display:flex;align-items:center;justify-content:space-between;padding:7px 12px 5px;border-bottom:1px solid var(--border);flex-shrink:0}
+.grp-hdr-label{font-family:var(--font);font-size:10px;font-weight:700;color:var(--gl);text-transform:uppercase;letter-spacing:.06em}
+.grp-item{display:flex;align-items:center;gap:6px;padding:5px 8px;border-radius:6px;margin-bottom:3px;border:1.5px solid var(--border);background:#fff;cursor:grab;transition:all .14s;font-size:11px;font-family:var(--font);font-weight:600;color:var(--ink);user-select:none}
+.grp-item:hover{border-color:var(--tf);background:var(--tf-s)}
+.grp-item.dragging{opacity:.4;cursor:grabbing}
+.grp-badge{font-size:9px;font-weight:700;color:#fff;padding:1px 6px;border-radius:8px;margin-left:auto;flex-shrink:0}
+.ep-toggle{display:flex;gap:0;padding:0 10px 6px;flex-shrink:0}
+.ep-tog-btn{flex:1;height:24px;border:1px solid var(--border);background:#fff;font-family:var(--font);font-size:10px;font-weight:700;color:var(--gl);cursor:pointer;transition:all .14s}
+.ep-tog-btn:first-child{border-radius:5px 0 0 5px}
+.ep-tog-btn:last-child{border-radius:0 5px 5px 0;border-left:none}
+.ep-tog-btn.active{background:var(--tf);border-color:var(--tf);color:#111}
 .cal-wrap{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .cal-hdr{display:flex;align-items:center;gap:8px;padding:9px 14px;border-bottom:1px solid var(--border);flex-shrink:0;background:#fff}
 .cal-badge{font-size:10px;padding:2px 8px;border-radius:7px;background:var(--tf-s);color:var(--tf-dk);font-weight:700;font-family:var(--font)}
@@ -201,11 +212,20 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
           </div>
           <div class="ep-hdr-count" id="ep-count">—</div>
         </div>
-        <div class="ep-filters">
-          <select id="filt-andar" onchange="renderEnt()"><option value="">Todos os andares</option></select>
-          <select id="filt-tipo" onchange="renderEnt()"><option value="">Todos os tipos</option></select>
+        <div class="ep-toggle" style="padding:6px 10px 4px">
+          <button class="ep-tog-btn active" id="tog-ind" onclick="setEpMode('ind')">Individual</button>
+          <button class="ep-tog-btn" id="tog-grp" onclick="setEpMode('grp')">Grupos</button>
         </div>
-        <div class="ep-body" id="ep-body"></div>
+        <div id="ep-ind-wrap" style="display:flex;flex-direction:column;overflow:hidden;flex:1;min-height:0">
+          <div class="ep-filters">
+            <select id="filt-andar" onchange="renderEnt()"><option value="">Todos os andares</option></select>
+            <select id="filt-tipo" onchange="renderEnt()"><option value="">Todos os tipos</option></select>
+          </div>
+          <div class="ep-body" id="ep-body"></div>
+        </div>
+        <div id="ep-grp-wrap" style="display:none;flex:1;overflow-y:auto;padding:7px">
+          <div id="grp-body"></div>
+        </div>
         <div class="drag-hint">💡 Arraste para o calendário ou clique para selecionar</div>
       </div>
       <div class="cal-wrap">
@@ -302,7 +322,7 @@ function computeDatas(isoStart,dias){var r=[],cur=pD(isoStart),cnt=0;while(cnt<d
   if(ea.planoAloc)plano=ea.planoAloc;
   renderS1();updSB();
   document.addEventListener('keydown',function(e){if(e.key==='Escape'){closePop();sair();}});
-  document.addEventListener('click',function(e){if(!e.target.closest('.aloc-pop'))closePop();});
+  document.addEventListener('click',function(e){if(!e.target.closest('.aloc-pop')){closePop();closeGrpPop();closeEditPop();}});
 })();
 
 function adjFont(d){_fscale=Math.max(0.7,Math.min(1.5,Math.round((_fscale+d)*10)/10));document.getElementById('main-area').style.zoom=_fscale;document.getElementById('fscale-lbl').textContent=Math.round(_fscale*100)+'%';}
@@ -368,7 +388,7 @@ function initS2(){
   CTX.etapas.forEach(function(e){if(ativas[e.id]===false)return;if(!first)first=e.id;tabs+='<button class="etapa-tab" id="et-'+e.id+'" onclick="setEt(\''+e.id+'\')">'+(e.label||e.id)+'</button>';});
   document.getElementById('etapa-tabs').innerHTML=tabs;if(first)setEt(first);
 }
-function setEt(id){curEt=id;selEnt=null;document.querySelectorAll('.etapa-tab').forEach(function(t){t.classList.toggle('active',t.id==='et-'+id);});var et=CTX&&CTX.etapas.find(function(e){return e.id===id;});if(et)document.getElementById('cal-badge').textContent=(et.label||id)+' · '+fBR(pD(et.start))+'–'+fBR(pD(et.end));populateFilt();renderEnt();renderCal();updCTA2();}
+function setEt(id){curEt=id;selEnt=null;document.querySelectorAll('.etapa-tab').forEach(function(t){t.classList.toggle('active',t.id==='et-'+id);});var et=CTX&&CTX.etapas.find(function(e){return e.id===id;});if(et)document.getElementById('cal-badge').textContent=(et.label||id)+' · '+fBR(pD(et.start))+'–'+fBR(pD(et.end));populateFilt();renderEnt();renderGrp=renderGrp||function(){};renderCal();updCTA2();}
 
 function populateFilt(){var items=getEnt(curEt),andares=[],tipos=[];items.forEach(function(it){if(andares.indexOf(it.andar)<0)andares.push(it.andar);if(tipos.indexOf(it.tipo)<0)tipos.push(it.tipo);});var sa=document.getElementById('filt-andar'),ca=sa.value;sa.innerHTML='<option value="">Todos os andares</option>';andares.forEach(function(a){sa.innerHTML+='<option value="'+a+'"'+(a===ca?' selected':'')+'>'+a+'</option>';});var st=document.getElementById('filt-tipo'),ct=st.value;st.innerHTML='<option value="">Todos os tipos</option>';tipos.forEach(function(t){st.innerHTML+='<option value="'+t+'"'+(t===ct?' selected':'')+'>'+t+'</option>';});}
 
@@ -382,7 +402,7 @@ function getItemsOnDay(etId,arqNome,iso){if(!plano[etId])return[];return plano[e
 
 function renderCal(){var days=buildCalDays(curEt),arqs=eq.arquitetos,today=new Date();today.setHours(12,0,0,0);var todayISO=fISO(today),entAll=getEnt(curEt);
   var thead='<thead><tr><th class="lbl">Arquiteto</th>';days.forEach(function(d){var iso=fISO(d.date),cls='dcol'+(d.out?' out':(iso===todayISO?' today-col':''));thead+='<th class="'+cls+'"><span class="dh-dow">'+DOWS[d.date.getDay()]+'</span><span class="dh-date">'+pd(d.date.getDate())+'/'+pd(d.date.getMonth()+1)+'</span></th>';});thead+='</tr></thead>';
-  var tbody='<tbody>';arqs.forEach(function(arqNome){tbody+='<tr><td class="arq-lbl"><div class="arq-name">'+arqNome+'</div><div class="arq-role">Arquiteto</div></td>';days.forEach(function(d,di){var iso=fISO(d.date);if(d.out){tbody+='<td class="acell out"></td>';return;}var cls='acell'+(iso===todayISO?' today-col':'');if(selEnt||dragItem)cls+=' sel-ready';var cellItems=getItemsOnDay(curEt,arqNome,iso),hasChips=cellItems.length>0;tbody+='<td class="'+cls+(hasChips?' has-chips':'')+'" ondragover="onDragOver(event)" ondrop="onDrop(event,\''+arqNome+'\',\''+iso+'\')" ondragleave="onDragLeave(event)" onclick="cellClick(\''+arqNome+'\',\''+iso+'\',event)">';if(hasChips){tbody+='<div class="chips-wrap">';cellItems.forEach(function(item){var eIdx=entAll.findIndex(function(e){return e.id===item.entId;});var col=eIdx>=0?COLORS[entAll[eIdx].colorIdx]:COLORS[0];var datas=computeDatas(item.dataInicio,item.dias),dayNum=datas.indexOf(iso)+1,isCont=dayNum>1;tbody+='<div class="achip'+(isCont?' cont':'')+'" style="background:'+col+'" onclick="rmAloc(\''+item.id+'\',event)" title="'+item.tipo+' · '+item.andar+(item.dias>1?' ('+dayNum+'/'+item.dias+' dias)':'')+' — clique para remover">'+item.tipo+(item.dias>1?'<span class="chip-days"> '+dayNum+'/'+item.dias+'d</span>':'')+(dayNum===1?'<span class="chip-del">✕</span>':'')+'</div>';});tbody+='</div>';}tbody+='<div class="add-cell-btn">+</div></td>';});tbody+='</tr>';});tbody+='</tbody>';document.getElementById('at').innerHTML=thead+tbody;updCTA2();}
+  var tbody='<tbody>';arqs.forEach(function(arqNome){tbody+='<tr><td class="arq-lbl"><div class="arq-name">'+arqNome+'</div><div class="arq-role">Arquiteto</div></td>';days.forEach(function(d,di){var iso=fISO(d.date);if(d.out){tbody+='<td class="acell out"></td>';return;}var cls='acell'+(iso===todayISO?' today-col':'');if(selEnt||dragItem)cls+=' sel-ready';var cellItems=getItemsOnDay(curEt,arqNome,iso),hasChips=cellItems.length>0;tbody+='<td class="'+cls+(hasChips?' has-chips':'')+'" ondragover="onDragOver(event)" ondrop="onDrop(event,\''+arqNome+'\',\''+iso+'\')" ondragleave="onDragLeave(event)" onclick="cellClick(\''+arqNome+'\',\''+iso+'\',event)">';if(hasChips){tbody+='<div class="chips-wrap">';cellItems.forEach(function(item){var eIdx=entAll.findIndex(function(e){return e.id===item.entId;});var col=eIdx>=0?COLORS[entAll[eIdx].colorIdx]:COLORS[0];var datas=computeDatas(item.dataInicio,item.dias),dayNum=datas.indexOf(iso)+1,isCont=dayNum>1;tbody+='<div class="achip'+(isCont?' cont':'')+'" style="background:'+col+'" onclick="editAloc('"+item.id+"',event)" title="'+item.tipo+' · '+item.andar+(item.dias>1?' ('+dayNum+'/'+item.dias+' dias)':'')+' — clique para remover">'+item.tipo+(item.dias>1?'<span class="chip-days"> '+dayNum+'/'+item.dias+'d</span>':'')+(dayNum===1?'<span class="chip-del">✕</span>':'')+'</div>';});tbody+='</div>';}tbody+='<div class="add-cell-btn">+</div></td>';});tbody+='</tr>';});tbody+='</tbody>';document.getElementById('at').innerHTML=thead+tbody;updCTA2();}
 
 function cellClick(arqNome,iso,ev){ev.stopPropagation();if(selEnt)openAlocPop(selEnt,arqNome,iso,ev);else openPickPop(arqNome,iso,ev);}
 
@@ -400,7 +420,13 @@ function onDragStart(ev,el){try{dragItem=JSON.parse(el.dataset.ent);}catch(e){dr
 function onDragEnd(){dragItem=null;document.querySelectorAll('.ent-item').forEach(function(el){el.classList.remove('dragging');});renderCal();}
 function onDragOver(ev){ev.preventDefault();ev.dataTransfer.dropEffect='copy';ev.currentTarget.classList.add('drag-over');}
 function onDragLeave(ev){ev.currentTarget.classList.remove('drag-over');}
-function onDrop(ev,arqNome,iso){ev.preventDefault();ev.currentTarget.classList.remove('drag-over');var data=ev.dataTransfer.getData('text/plain'),it=null;try{it=JSON.parse(data);}catch(e){}if(!it)return;if(isAloc(curEt,it.id)){toast('Esta entrega já foi alocada');return;}openAlocPop(it,arqNome,iso,ev);}
+function onDrop(ev,arqNome,iso){
+  ev.preventDefault();ev.currentTarget.classList.remove('drag-over');
+  var data=ev.dataTransfer.getData('text/plain'),it=null,grp=null;
+  try{var parsed=JSON.parse(data);if(parsed.items)grp=parsed;else it=parsed;}catch(e){}
+  if(grp){openGrpPop(grp,arqNome,iso,ev);return;}
+  if(!it)return;if(isAloc(curEt,it.id)){toast('Esta entrega já foi alocada');return;}openAlocPop(it,arqNome,iso,ev);
+}
 function updCTA2(){if(!CTX||!CTX.etapas)return;var tot=0,done=0;(CTX.etapas||[]).forEach(function(e){var items=getEnt(e.id);tot+=items.length;items.forEach(function(it){if(isAloc(e.id,it.id))done++;});});document.getElementById('cta2-info').innerHTML='<strong>'+done+'</strong>/'+tot+' entregas alocadas';}
 function salvAloc(){if(!ESTADO||!ESTADO.cfg||!ESTADO.cfg.equipeARQ)return;ESTADO.cfg.equipeARQ.planoAloc=plano;try{sessionStorage.setItem('aw_estado_atual',JSON.stringify({ts:Date.now(),estado:ESTADO}));}catch(e){}}
 
@@ -466,6 +492,175 @@ function confirmar(){
   setTimeout(function(){if(window.parent&&window.parent.fecharGestaoArq)window.parent.fecharGestaoArq(true);else window.location.href='app.html';},700);
 }
 function sair(){if(window.parent&&window.parent.fecharGestaoArq)window.parent.fecharGestaoArq(false);else window.location.href='app.html';}
+
+// ── Modo do painel de entregas ────────────────────────────────────────────────
+var epMode='ind';
+function setEpMode(m){
+  epMode=m;
+  document.getElementById('tog-ind').className='ep-tog-btn'+(m==='ind'?' active':'');
+  document.getElementById('tog-grp').className='ep-tog-btn'+(m==='grp'?' active':'');
+  document.getElementById('ep-ind-wrap').style.display=m==='ind'?'flex':'none';
+  document.getElementById('ep-grp-wrap').style.display=m==='grp'?'block':'none';
+  if(m==='grp') renderGrp();
+}
+
+// ── Grupos de entregas ────────────────────────────────────────────────────────
+var dragGrp=null;
+
+function getGrupos(etId){
+  var items=getEnt(etId), grupos={};
+  items.forEach(function(it){
+    if(!grupos[it.tipo]) grupos[it.tipo]={tipo:it.tipo,colorIdx:it.colorIdx,items:[]};
+    if(!isAloc(etId,it.id)) grupos[it.tipo].items.push(it);
+  });
+  return Object.values(grupos).filter(function(g){return g.items.length>0;});
+}
+
+function renderGrp(){
+  var grupos=getGrupos(curEt);
+  var h='';
+  if(!grupos.length){h='<div class="empty" style="padding:16px"><div class="empty-txt">Todos os grupos já alocados</div></div>';}
+  grupos.forEach(function(g){
+    var c=COLORS[g.colorIdx];
+    var dataStr=JSON.stringify(g).replace(/'/g,"&#39;");
+    h+='<div class="grp-item" draggable="true" data-grp=''+dataStr.replace(/\\/g,'\\').replace(/'/g,"&#39;")+'' ondragstart="onGrpDragStart(event,this)" ondragend="onGrpDragEnd(event)" style="border-left:3px solid '+c+'">';
+    h+='<div class="ent-dot" style="background:'+c+'"></div>';
+    h+=g.tipo;
+    h+='<span class="grp-badge" style="background:'+c+'">×'+g.items.length+'</span>';
+    h+='</div>';
+  });
+  document.getElementById('grp-body').innerHTML=h;
+}
+
+function onGrpDragStart(ev,el){
+  try{dragGrp=JSON.parse(el.dataset.grp);}catch(e){dragGrp=null;return;}
+  ev.dataTransfer.effectAllowed='copy';
+  ev.dataTransfer.setData('text/plain',el.dataset.grp);
+  el.classList.add('dragging');
+  renderCal();
+}
+function onGrpDragEnd(){
+  dragGrp=null;
+  document.querySelectorAll('.grp-item').forEach(function(el){el.classList.remove('dragging');});
+  renderCal();
+}
+
+// Popup para grupo
+var _popGrp=null,_popGrpData=null,_popGrpArq=null,_popGrpIso=null,_popGrpDias=1,_popGrpModo='seq';
+function openGrpPop(grp,arqNome,iso,ev){
+  closeGrpPop();
+  _popGrpData=grp; _popGrpArq=arqNome; _popGrpIso=iso; _popGrpDias=1; _popGrpModo='seq';
+  var c=COLORS[grp.colorIdx];
+  var p=document.createElement('div'); p.className='aloc-pop'; p.style.width='280px';
+  p.innerHTML='<div class="aloc-pop-hdr">Alocar grupo: '+grp.tipo+'</div>'
+    +'<div class="aloc-pop-body">'
+    +'<div class="aloc-pop-ent" style="background:'+c+'22;color:'+c+';border-left:3px solid '+c+'"><span style="background:'+c+';width:8px;height:8px;border-radius:2px;flex-shrink:0;display:inline-block"></span>'+grp.tipo+' — <strong>'+grp.items.length+' andares</strong></div>'
+    +'<div class="aloc-pop-label">Dias por entrega:</div>'
+    +'<div class="aloc-pop-dias"><button class="dias-btn" onclick="adjGrpDias(-1)">−</button><span class="dias-val" id="grp-pop-dias">1</span><span class="dias-label">dia(s)</span><button class="dias-btn" onclick="adjGrpDias(1)">+</button></div>'
+    +'<div style="margin-bottom:10px"><div class="aloc-pop-label">Modo:</div>'
+    +'<div style="display:flex;gap:6px">'
+    +'<button id="modo-seq" onclick="setGrpModo('seq')" style="flex:1;height:26px;border-radius:5px;border:1.5px solid var(--tf);background:var(--tf);font-family:var(--font);font-size:10px;font-weight:700;color:#111">Sequencial</button>'
+    +'<button id="modo-same" onclick="setGrpModo('same')" style="flex:1;height:26px;border-radius:5px;border:1.5px solid var(--border);background:#fff;font-family:var(--font);font-size:10px;font-weight:700;color:var(--gray)">Mesmo dia</button>'
+    +'</div></div>'
+    +'<div class="aloc-pop-btns"><button class="pop-btn-cancel" onclick="closeGrpPop()">Cancelar</button><button class="pop-btn-ok" onclick="confirmGrpAloc()">Alocar '+grp.items.length+' entregas</button></div>'
+    +'</div>';
+  document.body.appendChild(p); _popGrp=p;
+  positionPop(p,ev);
+}
+function adjGrpDias(d){_popGrpDias=Math.max(1,Math.min(20,_popGrpDias+d));document.getElementById('grp-pop-dias').textContent=_popGrpDias;}
+function setGrpModo(m){
+  _popGrpModo=m;
+  document.getElementById('modo-seq').style.background=m==='seq'?'var(--tf)':'#fff';
+  document.getElementById('modo-seq').style.borderColor=m==='seq'?'var(--tf)':'var(--border)';
+  document.getElementById('modo-seq').style.color=m==='seq'?'#111':'var(--gray)';
+  document.getElementById('modo-same').style.background=m==='same'?'var(--tf)':'#fff';
+  document.getElementById('modo-same').style.borderColor=m==='same'?'var(--tf)':'var(--border)';
+  document.getElementById('modo-same').style.color=m==='same'?'#111':'var(--gray)';
+}
+function confirmGrpAloc(){
+  if(!_popGrpData||!_popGrpArq||!_popGrpIso){closeGrpPop();return;}
+  if(!plano[curEt])plano[curEt]=[];
+  var curIso=_popGrpIso, added=0;
+  _popGrpData.items.forEach(function(it){
+    if(isAloc(curEt,it.id)){return;}
+    plano[curEt].push({id:'a'+Date.now()+'_'+Math.random().toString(36).slice(2),entId:it.id,tipo:it.tipo,andar:it.andar,arquiteto:_popGrpArq,dataInicio:curIso,dias:_popGrpDias});
+    added++;
+    if(_popGrpModo==='seq'){
+      // Avançar N dias úteis
+      var datas=computeDatas(curIso,_popGrpDias);
+      if(datas.length) curIso=nextWork(pD(datas[datas.length-1]));
+      else curIso=nextWork(pD(curIso));
+    }
+  });
+  closeGrpPop(); salvAloc(); renderEnt(); renderGrp(); renderCal();
+  toast(added+' entrega(s) alocada(s) para '+_popGrpArq);
+}
+function closeGrpPop(){if(_popGrp){_popGrp.remove();_popGrp=null;}}
+
+// ── Editar alocação existente ─────────────────────────────────────────────────
+var _editPop=null,_editId=null;
+function editAloc(alocId,ev){
+  ev.stopPropagation();
+  if(!plano[curEt])return;
+  var item=plano[curEt].find(function(a){return a.id===alocId;});
+  if(!item)return;
+  closeEditPop();
+  _editId=alocId;
+  var p=document.createElement('div'); p.className='aloc-pop'; p.style.width='270px';
+  var arqOpts=eq.arquitetos.map(function(a){return'<option value="'+a+'"'+(a===item.arquiteto?' selected':'')+'>'+a+'</option>';}).join('');
+  p.innerHTML='<div class="aloc-pop-hdr">Editar: '+item.tipo+' · '+item.andar+'</div>'
+    +'<div class="aloc-pop-body">'
+    +'<div style="margin-bottom:10px"><div class="aloc-pop-label">Arquiteto:</div>'
+    +'<select id="edit-arq" style="width:100%;height:28px;border:1px solid var(--border);border-radius:5px;padding:0 6px;font-size:11.5px;font-family:var(--font);background:#fff">'+arqOpts+'</select></div>'
+    +'<div style="margin-bottom:10px"><div class="aloc-pop-label">Data início:</div>'
+    +'<div style="display:flex;align-items:center;gap:8px"><button class="dias-btn" onclick="adjEditData(-1)">‹</button><span id="edit-data-lbl" style="font-family:var(--font);font-size:13px;font-weight:700;color:var(--tf-dk);min-width:60px;text-align:center">'+item.dataInicio.split('-').reverse().join('/')+'</span><button class="dias-btn" onclick="adjEditData(1)">›</button></div></div>'
+    +'<div class="aloc-pop-label">Dias:</div>'
+    +'<div class="aloc-pop-dias"><button class="dias-btn" onclick="adjEditDias(-1)">−</button><span class="dias-val" id="edit-dias">'+item.dias+'</span><span class="dias-label">dia(s)</span><button class="dias-btn" onclick="adjEditDias(1)">+</button></div>'
+    +'<div class="aloc-pop-btns" style="margin-top:12px">'
+    +'<button onclick="rmAlocById(''+alocId+'')" style="height:30px;padding:0 10px;background:rgba(220,76,46,.1);border:1px solid rgba(220,76,46,.3);border-radius:6px;font-family:var(--font);font-size:10.5px;font-weight:700;color:#DC4C2E;cursor:pointer">Remover</button>'
+    +'<button class="pop-btn-cancel" onclick="closeEditPop()">Cancelar</button>'
+    +'<button class="pop-btn-ok" onclick="confirmEdit()">Salvar</button>'
+    +'</div></div>';
+  p.dataset.curIso=item.dataInicio;
+  p.dataset.curDias=String(item.dias);
+  document.body.appendChild(p); _editPop=p;
+  positionPop(p,ev);
+}
+function adjEditData(d){
+  if(!_editPop)return;
+  var et=CTX&&CTX.etapas.find(function(e){return e.id===curEt;});
+  var cur=pD(_editPop.dataset.curIso);
+  var next=addD(cur,d);
+  // Pular fins de semana
+  while(!isWork(next))next=addD(next,d>0?1:-1);
+  // Limitar ao range da etapa
+  if(et){var s=pD(et.start),e2=pD(et.end);if(next<s||next>e2)return;}
+  _editPop.dataset.curIso=fISO(next);
+  document.getElementById('edit-data-lbl').textContent=fISO(next).split('-').reverse().join('/');
+}
+function adjEditDias(d){
+  if(!_editPop)return;
+  var cur=parseInt(_editPop.dataset.curDias)||1;
+  cur=Math.max(1,Math.min(20,cur+d));
+  _editPop.dataset.curDias=String(cur);
+  document.getElementById('edit-dias').textContent=cur;
+}
+function confirmEdit(){
+  if(!_editId||!plano[curEt]){closeEditPop();return;}
+  var item=plano[curEt].find(function(a){return a.id===_editId;});
+  if(!item){closeEditPop();return;}
+  item.arquiteto=document.getElementById('edit-arq').value;
+  item.dataInicio=_editPop.dataset.curIso;
+  item.dias=parseInt(_editPop.dataset.curDias)||1;
+  closeEditPop(); salvAloc(); renderEnt(); renderGrp(); renderCal();
+  toast('Alocação atualizada');
+}
+function rmAlocById(id){
+  if(!plano[curEt])return;
+  plano[curEt]=plano[curEt].filter(function(a){return a.id!==id;});
+  closeEditPop(); salvAloc(); renderEnt(); renderGrp(); renderCal();
+}
+function closeEditPop(){if(_editPop){_editPop.remove();_editPop=null;}_editId=null;}
 function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2600);}
 </script>
 </body>
