@@ -599,8 +599,7 @@ function gGridLines(t,e,o,noWkLine){const a=[];return t.forEach((t,n)=>{const r=
   i.push('<div style="height:'+(G.ROW_H+8)+'px;background:'+cb+';position:relative;border-bottom:1px solid #EEE0C8;overflow:visible;">'+gGridLines(o,e,false)+gBar(xi,xw,G.ROW_H,cm,ini,fim,null,payload,true)+'</div>');
   // Disciplinas
   if(tpl){
-    var ds=typeof _preObraMakeDiscs==='function'?_preObraMakeDiscs(pc.templateId):tpl.disciplinas.filter(function(d){return d.ativo!==false;});
-    console.log('[PO4] ds.length='+ds.length+' xi='+xi+' xw='+xw);
+    var ds=_getPoDiscs(obraFaseIdx);
     ds.forEach(function(pd,pi){
       var _dcArr=typeof getDiscPal==='function'?getDiscPal(pi):[cm];var dc=Array.isArray(_dcArr)?_dcArr[0]:_dcArr;
       var xiC=Math.max(0,xi);
@@ -635,8 +634,7 @@ gObraRow(t,o,e,r,i),t.expanded&&(t.disciplinas||[]).forEach((a,n)=>{a&&a.ativo&&
   i.push('<div style="height:'+(G.ROW_H+8)+'px;background:'+cb+';position:relative;border-bottom:1px solid #EEE0C8;overflow:visible;">'+gGridLines(o,e,false)+gBar(xi,xw,G.ROW_H,cm,ini,fim,null,payload,true)+'</div>');
   // Disciplinas
   if(tpl){
-    var ds=typeof _preObraMakeDiscs==='function'?_preObraMakeDiscs(pc.templateId):tpl.disciplinas.filter(function(d){return d.ativo!==false;});
-    console.log('[PO4] ds.length='+ds.length+' xi='+xi+' xw='+xw);
+    var ds=_getPoDiscs(obraFaseIdx);
     ds.forEach(function(pd,pi){
       var _dcArr=typeof getDiscPal==='function'?getDiscPal(pi):[cm];var dc=Array.isArray(_dcArr)?_dcArr[0]:_dcArr;
       var xiC=Math.max(0,xi);
@@ -748,15 +746,7 @@ function getPreObraEfetivoByDay(faseIdx) {
   while (cnt < du) { ini = G.addD(ini, -1); if (!CALENDARIO.isNaoUtil(ini)) cnt++; }
   while (CALENDARIO.isNaoUtil(ini)) ini = G.addD(ini, 1);
 
-  var _custom = ESTADO.preObraCustom && ESTADO.preObraCustom[faseIdx];
-  var discs;
-  if (_custom && _custom.disciplinas && _custom.disciplinas.length) {
-    discs = _custom.disciplinas.filter(function(d){return d.ativo!==false;});
-  } else {
-    var tpl = typeof _preObraGetTemplate === 'function' ? _preObraGetTemplate(poCfg.templateId) : null;
-    if (!tpl) return result;
-    discs = typeof _preObraMakeDiscs === 'function' ? _preObraMakeDiscs(poCfg.templateId) : tpl.disciplinas.filter(function(d){return d.ativo!==false;});
-  }
+  var discs = _getPoDiscs(faseIdx);
 
   // Somar efetivo de todas as disciplinas por dia
   var cur = new Date(ini);
@@ -795,6 +785,19 @@ function getPreObraDays(faseIdx) {
   return result;
 }
 
+function _getPoDiscs(faseIdx) {
+  // Sempre retorna as disciplinas customizadas se existirem; senão usa o template
+  var _custom = ESTADO.preObraCustom && ESTADO.preObraCustom[faseIdx];
+  if (_custom && _custom.disciplinas && _custom.disciplinas.length) {
+    return _custom.disciplinas.filter(function(d){return d.ativo!==false;});
+  }
+  var poCfg = ESTADO.cfg.obraFases && ESTADO.cfg.obraFases[faseIdx] && ESTADO.cfg.obraFases[faseIdx].preObra;
+  if (!poCfg) return [];
+  var tpl = typeof _preObraGetTemplate==='function' ? _preObraGetTemplate(poCfg.templateId) : null;
+  if (!tpl) return [];
+  return typeof _preObraMakeDiscs==='function' ? _preObraMakeDiscs(poCfg.templateId) : tpl.disciplinas.filter(function(d){return d.ativo!==false;});
+}
+
 function getPreObraDiscsByDay(faseIdx) {
   // Retorna [{label, id, profByDay: {iso:{total}}, isPO:true}] para cada disciplina de pré-obra
   var result = [];
@@ -802,15 +805,7 @@ function getPreObraDiscsByDay(faseIdx) {
   if (!poCfg || !poCfg.ativo) return result;
   var days = getPreObraDays(faseIdx);
   if (!days.length) return result;
-  var _custom = ESTADO.preObraCustom && ESTADO.preObraCustom[faseIdx];
-  var discs;
-  if (_custom && _custom.disciplinas && _custom.disciplinas.length) {
-    discs = _custom.disciplinas.filter(function(d){return d.ativo!==false;});
-  } else {
-    var tpl = typeof _preObraGetTemplate === 'function' ? _preObraGetTemplate(poCfg.templateId) : null;
-    if (!tpl) return result;
-    discs = typeof _preObraMakeDiscs === 'function' ? _preObraMakeDiscs(poCfg.templateId) : tpl.disciplinas.filter(function(d){return d.ativo!==false;});
-  }
+  var discs = _getPoDiscs(faseIdx);
   discs.forEach(function(disc) {
     var totalProf = (disc.tasks||[]).reduce(function(s,t){return s+(t.prof||0);},0);
     if (!totalProf) return;
