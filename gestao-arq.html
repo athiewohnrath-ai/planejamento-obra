@@ -336,23 +336,30 @@ function computeDatas(isoStart,dias){
 }
 
 // Init
-(function(){
-  try{var r=localStorage.getItem('aw_gestao_arq_state');if(r){var p=JSON.parse(r);ESTADO=p.estado||p;}}catch(e){}
-  try{var c=localStorage.getItem('aw_gestao_ctx');if(c)CTX=JSON.parse(c);}catch(e){}
-  if(!ESTADO){document.getElementById('s1-body').innerHTML='<div class="empty fi"><div class="empty-icon">⚠️</div><div class="empty-txt" style="color:#DC4C2E">Abra a partir do planejamento de obra.</div></div>';return;}
-  var meta=ESTADO.meta||{};
-  document.getElementById('ctx-cod').textContent=meta.codigo||'';
-  document.getElementById('ctx-nome').textContent=meta.nome||'Sem título';
-  var ea=(ESTADO.cfg&&ESTADO.cfg.equipeARQ)||{};
-  document.getElementById('ctx-dir').textContent=ea.diretor||'—';
-  eq.diretor=ea.diretor||'';
-  eq.gerentes=(ea.gerentes||[]).slice();
-  eq.arquitetos=(ea.arquitetos||[]).slice();
-  if(ea.planoAloc)plano=ea.planoAloc;
-  renderS1();updSB();
-  document.addEventListener('keydown',function(e){if(e.key==='Escape'){closePop();sair();}});
-  document.addEventListener('click',function(e){if(!e.target.closest('.aloc-pop'))closePop();});
-})();
+// Chamada pelo parent via iframe.contentWindow.initWithData (mesma origem)
+window.initWithData = function(estado, ctx) {
+  ESTADO = estado;
+  CTX = ctx;
+
+  if (!ESTADO) {
+    document.getElementById('s1-body').innerHTML='<div class="empty fi"><div class="empty-icon">⚠️</div><div class="empty-txt" style="color:#DC4C2E">Erro ao carregar dados do projeto.</div></div>';
+    return;
+  }
+  var meta = ESTADO.meta || {};
+  document.getElementById('ctx-cod').textContent = meta.codigo || '';
+  document.getElementById('ctx-nome').textContent = meta.nome || 'Sem título';
+  var ea = (ESTADO.cfg && ESTADO.cfg.equipeARQ) || {};
+  document.getElementById('ctx-dir').textContent = ea.diretor || '—';
+  eq.diretor    = ea.diretor || '';
+  eq.gerentes   = (ea.gerentes   || []).slice();
+  eq.arquitetos = (ea.arquitetos || []).slice();
+  if (ea.planoAloc) plano = ea.planoAloc;
+  renderS1(); updSB();
+};
+
+// Eventos globais (não dependem de dados)
+document.addEventListener('keydown', function(e) { if (e.key === 'Escape') { closePop(); sair(); } });
+document.addEventListener('click',   function(e) { if (!e.target.closest('.aloc-pop')) closePop(); });
 
 var curScr=1;
 function goScr(n){

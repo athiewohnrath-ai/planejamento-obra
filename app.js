@@ -5018,54 +5018,54 @@ window.cfgCarregar = function() {
 
 // ── Modal Gestão ARQ ─────────────────────────────────────────────────────────
 window.abrirPlanoFino = function() {
-  // Serializar datas das etapas ARQ para o gestao-arq.html
+  var modal = document.getElementById('modal-gestao-arq');
+  var iframe = document.getElementById('iframe-gestao-arq');
+  if (!modal || !iframe) return;
+
+  // Montar dados para injetar no iframe (mesma origem — acesso direto via contentWindow)
+  var etapas = [];
   try {
-    var etapas = [];
     (gSt.projFases || []).forEach(function(fase) {
       var subs = fase.rows && fase.rows.arq && fase.rows.arq.subs || {};
       G.SUB_IDS.forEach(function(id) {
-        var s = subs[id];
-        if (!s) return;
+        var s = subs[id]; if (!s) return;
         etapas.push({
-          id: id,
-          label: G.SUB_NAMES[id] || id,
-          faseId: fase.id,
-          faseNome: fase.nome || ('F' + fase.id),
+          id: id, label: G.SUB_NAMES[id] || id,
+          faseId: fase.id, faseNome: fase.nome || ('F' + fase.id),
           start: G.fmtISO(s.start instanceof Date ? s.start : G.parseD(s.start)),
           end:   G.fmtISO(s.end   instanceof Date ? s.end   : G.parseD(s.end))
         });
       });
     });
-    // Andares configurados
-    var andares = (typeof CFG_ANDARES !== 'undefined' ? CFG_ANDARES : []) ||
-                  (ESTADO.cfg && ESTADO.cfg.andares) || [];
-    // Etapas ativas no cfg
-    var etapasAtivas = {};
+  } catch(e) {}
+
+  var andares = (typeof CFG_ANDARES !== 'undefined' && CFG_ANDARES) ||
+                (ESTADO.cfg && ESTADO.cfg.andares) || [];
+  var etapasAtivas = {};
+  try {
     (ESTADO.cfg.projFases || []).forEach(function(f) {
       Object.keys(f.etapas || {}).forEach(function(k) { if(f.etapas[k]) etapasAtivas[k] = true; });
     });
-    localStorage.setItem('aw_gestao_ctx', JSON.stringify({andares: andares, etapas: etapas, etapasAtivas: etapasAtivas}));
   } catch(e) {}
-  // Salvar apenas o necessário no localStorage (ESTADO completo pode ser grande demais)
-  try {
-    var slimEstado = {
-      meta: ESTADO.meta || {},
-      cfg: {
-        equipeARQ: (ESTADO.cfg && ESTADO.cfg.equipeARQ) || {},
-        andares: (ESTADO.cfg && ESTADO.cfg.andares) || []
-      }
-    };
-    localStorage.setItem('aw_gestao_arq_state', JSON.stringify({ts: Date.now(), estado: slimEstado}));
-  } catch(e) { console.error('[abrirPlanoFino] localStorage erro:', e); }
 
-  var modal = document.getElementById('modal-gestao-arq');
-  var iframe = document.getElementById('iframe-gestao-arq');
-  if (!modal || !iframe) return;
+  var slimEstado = {
+    meta: ESTADO.meta || {},
+    cfg: {
+      equipeARQ: (ESTADO.cfg && ESTADO.cfg.equipeARQ) || {},
+      andares: andares
+    }
+  };
+  var ctx = {andares: andares, etapas: etapas, etapasAtivas: etapasAtivas};
 
-  // Recarregar o iframe sempre (garante dados frescos)
-  iframe.src = 'gestao-arq.html?_=' + Date.now();
+  // Abrir modal e injetar dados via contentWindow após carregamento (mesma origem)
   modal.style.display = 'flex';
   document.body.style.overflow = 'hidden';
+  iframe.src = 'gestao-arq.html?_=' + Date.now();
+  iframe.onload = function() {
+    try {
+      iframe.contentWindow.initWithData(slimEstado, ctx);
+    } catch(e) { console.error('[gestao-arq] initWithData:', e); }
+  };
 };
 
 window.fecharGestaoArq = function(salvar) {
