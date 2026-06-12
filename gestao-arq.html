@@ -363,7 +363,12 @@ function computeDatas(isoStart,dias){var r=[],cur=pD(isoStart),cnt=0;while(cnt<d
 (function(){
   try{var r=sessionStorage.getItem('aw_estado_atual');if(r){var p=JSON.parse(r);ESTADO=p.estado||p;}}catch(e){}
   try{var c=sessionStorage.getItem('aw_gestao_ctx');if(c)CTX=JSON.parse(c);}catch(e){}
-  if(!ESTADO){document.getElementById('s1-body').innerHTML='<div class="empty fi"><div class="empty-icon">⚠️</div><div class="empty-txt" style="color:#DC4C2E">Abra a partir do planejamento de obra.</div></div>';return;}
+  if(!ESTADO){
+    // col-dir existe no novo layout de 3 colunas
+    var colDir=document.getElementById('col-dir');
+    if(colDir)colDir.innerHTML='<div class="empty fi" style="padding:20px 8px"><div class="empty-txt" style="color:#DC4C2E">Abra a partir do planejamento de obra.</div></div>';
+    return;
+  }
   var meta=ESTADO.meta||{};
   document.getElementById('ctx-cod').textContent=meta.codigo||'';
   document.getElementById('ctx-nome').textContent=meta.nome||'Sem título';
@@ -375,14 +380,16 @@ function computeDatas(isoStart,dias){var r=[],cur=pD(isoStart),cnt=0;while(cnt<d
   eq.arquitetos=temAloc?(ea.arquitetos||[]).slice():[];
   if(ea.planoAloc)plano=ea.planoAloc;
   renderColDir();renderColGA();renderColArq();renderFooter();updSB();
+  // Zoom inicial
+  _fscale=1.15;
+  var _ma=document.getElementById('main-area');if(_ma)_ma.style.zoom=_fscale;
+  var _fl=document.getElementById('fscale-lbl');if(_fl)_fl.textContent=Math.round(_fscale*100)+'%';
   document.addEventListener('keydown',function(e){if(e.key==='Escape'){closePop();sair();}});
   document.addEventListener('click',function(e){if(!e.target.closest('.aloc-pop')){closePop();closeGrpPop();}});
 })();
 
 function adjFont(d){_fscale=Math.max(0.7,Math.min(1.8,Math.round((_fscale+d)*10)/10));document.getElementById('main-area').style.zoom=_fscale;document.getElementById('fscale-lbl').textContent=Math.round(_fscale*100)+'%';}
-// Zoom inicial um pouco maior
-var _fscale=1.15;
-document.addEventListener('DOMContentLoaded',function(){var m=document.getElementById('main-area');if(m)m.style.zoom=_fscale;document.getElementById('fscale-lbl').textContent=Math.round(_fscale*100)+'%';});
+// Zoom inicial aplicado pelo init
 
 function goScr(n){
   if(n===2&&!eq.gerentes.length){toast('Selecione gerentes primeiro');return;}
