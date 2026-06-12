@@ -163,6 +163,19 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .achip .chip-days{font-size:8px;color:var(--gl);font-weight:400;white-space:nowrap}
 .achip-floor{font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;color:#fff;flex-shrink:0;line-height:1.4}
 .achip-tipo{font-size:10px;color:var(--ink);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.achip.all-mode{background:#111;border-color:#111}
+.achip.all-mode .achip-tipo{color:#fff}
+.achip.all-mode .days-badge{color:rgba(255,255,255,.6)}
+.achip-all-badge{font-size:8px;font-weight:700;padding:1px 5px;border-radius:4px;background:#fff;color:#111;flex-shrink:0}
+.achip.span-chip{border-radius:5px;width:100%}
+.ent-item .na-btn{display:none;margin-left:auto;font-size:10px;color:var(--gl);cursor:pointer;padding:1px 4px;border-radius:3px;border:none;background:transparent;flex-shrink:0}
+.ent-item:hover .na-btn{display:block}
+.ent-item.na{opacity:.45;border-style:dashed}
+.ent-item.na .ent-tipo-small{text-decoration:line-through;color:var(--gl)}
+.ent-item.na .ent-andar-big{background:#9CA3AF}
+.kit-toggle{display:flex;align-items:center;gap:6px;margin-left:auto}
+.kit-btn{height:22px;padding:0 9px;border-radius:5px;border:1px solid var(--border);background:var(--white);font-family:var(--font);font-size:10px;font-weight:700;color:var(--gl);cursor:pointer;transition:all .13s}
+.kit-btn.active{background:var(--ink);border-color:var(--ink);color:#fff}
 .add-cell-btn{width:100%;height:44px;display:flex;align-items:center;justify-content:center;color:#d1d5db;font-size:16px;border-radius:4px;transition:all .14s}
 .add-cell-btn:hover{background:var(--tf-s);color:var(--tf-dk)}.has-chips .add-cell-btn{height:18px;font-size:13px;margin-top:1px}
 .aloc-pop{position:fixed;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 12px 32px rgba(0,0,0,.18);z-index:700;width:260px;overflow:hidden}
@@ -293,7 +306,7 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
         <div class="drag-hint">💡 Clique ou arraste para o calendário</div>
       </div>
       <div class="cal-wrap">
-        <div class="cal-hdr"><span class="cal-badge" id="cal-badge">—</span><div class="cal-prog" id="cal-prog"></div></div>
+        <div class="cal-hdr"><span class="cal-badge" id="cal-badge">—</span><div class="cal-prog" id="cal-prog"></div><div class="kit-toggle"><span style="font-size:10px;color:var(--gl);font-family:var(--font)">Vista:</span><button class="kit-btn active" id="kit-btn-ind" onclick="setKitMode(false)">Individual</button><button class="kit-btn" id="kit-btn-kit" onclick="setKitMode(true)">Kit ALL</button></div></div>
         <div class="cal-body"><table class="at" id="at"></table></div>
       </div>
     </div>
@@ -350,6 +363,7 @@ var ESTADO=null,CTX=null;
 var eq={diretor:'',gerentes:[],arquitetos:[]};
 var plano={};var customEnts={};
 var selEnt=null,curEt=null,dragItem=null;window._outrasOpen=false;
+var notNeeded={};var _kitMode=false;
 var curScr=1,curRTab=1,_fscale=1;
 var _pop=null,_popDias=1,_popEnt=null,_popArq=null,_popIso=null;
 
@@ -587,16 +601,26 @@ function getFloorColor(andar){
   return FLOOR_COLORS_MAP[andar]||'#888';
 }
 
+function isNN(etId,entId){return !!(notNeeded[etId]&&notNeeded[etId].indexOf(entId)>=0);}
+function togNN(entId){
+  if(!notNeeded[curEt])notNeeded[curEt]=[];
+  var idx=notNeeded[curEt].indexOf(entId);
+  if(idx>=0)notNeeded[curEt].splice(idx,1);else notNeeded[curEt].push(entId);
+  renderEnt();renderCal();
+}
+
 function _entItemHtml(it){
-  var alloc=isAloc(curEt,it.id),sel=selEnt&&selEnt.id===it.id;
+  var alloc=isAloc(curEt,it.id),nn=isNN(curEt,it.id),sel=selEnt&&selEnt.id===it.id;
   var fc=getFloorColor(it.andar);
-  var h='<div class="ent-item'+(alloc?' done':sel?' sel':' clickable')+'" draggable="'+(alloc?'false':'true')+'" ';
+  var cls='ent-item'+(alloc?' done':nn?' na clickable':sel?' sel':' clickable');
+  var h='<div class="'+cls+'" draggable="'+(alloc||nn?'false':'true')+'" ';
   h+='data-ent=\''+JSON.stringify(it).replace(/'/g,"&#39;")+'\' ';
-  h+='onclick="'+(alloc?'void 0':'selItem(\''+it.id+'\')"');
+  h+='onclick="'+(alloc||nn?'void 0':'selItem(\''+it.id+'\')"');
   h+=' ondragstart="onDragStart(event,this)" ondragend="onDragEnd(event)"';
   h+=' style="'+(sel?'border-color:var(--tf);background:var(--tf);':'')+'background:var(--bg);border:0.5px solid var(--border)">';
-  h+='<span class="ent-andar-big" style="background:'+(alloc?'var(--gl)':sel?'rgba(0,0,0,.2)':fc)+'">'+it.andar+'</span>';
+  h+='<span class="ent-andar-big" style="background:'+(alloc?'var(--gl)':nn?'#9CA3AF':sel?'rgba(0,0,0,.2)':fc)+'">'+it.andar+'</span>';
   h+='<span class="ent-tipo-small">'+it.tipo+'</span>';
+  h+='<button class="na-btn" onclick="event.stopPropagation();togNN(\''+it.id+'\')" title="'+(nn?'Reativar entrega':'Marcar como não necessária')+'">'+(nn?'↩':'⊘')+'</button>';
   h+='</div>';
   return h;
 }
@@ -641,15 +665,135 @@ function renderEntByTema(items){
 function selItem(entId){var items=getEnt(curEt),it=items.find(function(x){return x.id===entId;});selEnt=(selEnt&&selEnt.id===entId)?null:it;renderEnt();renderCal();if(selEnt)toast('Clique em um dia para alocar: '+selEnt.tipo+' · '+selEnt.andar);}
 function buildCalDays(etId){var et=CTX&&CTX.etapas.find(function(e){return e.id===etId;});if(!et)return[];var start=pD(et.start),end=pD(et.end),before=prevWork(start),after=nextWork(end),days=[{date:before,out:true}],cur=new Date(start);while(cur<=end){if(isWork(cur))days.push({date:new Date(cur),out:false});cur=addD(cur,1);}days.push({date:after,out:true});return days;}
 function getItemsOnDay(etId,arqNome,iso){if(!plano[etId])return[];return plano[etId].filter(function(item){if(item.arquiteto!==arqNome)return false;return computeDatas(item.dataInicio,item.dias).indexOf(iso)>=0;});}
-function renderCal(){var days=buildCalDays(curEt),arqs=eq.arquitetos,today=new Date();today.setHours(12,0,0,0);var todayISO=fISO(today),entAll=getEnt(curEt);
-  var thead='<thead><tr><th class="lbl">Arquiteto</th>';days.forEach(function(d){var iso=fISO(d.date),cls='dcol'+(d.out?' out':(iso===todayISO?' today-col':''));thead+='<th class="'+cls+'"><span class="dh-dow">'+DOWS[d.date.getDay()]+'</span><span class="dh-date">'+pd(d.date.getDate())+'/'+pd(d.date.getMonth()+1)+'</span></th>';});thead+='</tr></thead>';
-  var tbody='<tbody>';arqs.forEach(function(arqNome){tbody+='<tr><td class="arq-lbl"><div class="arq-name">'+arqNome+'</div><div class="arq-role">Arquiteto</div></td>';days.forEach(function(d){var iso=fISO(d.date);if(d.out){tbody+='<td class="acell out"></td>';return;}var cls='acell'+(iso===todayISO?' today-col':'');if(selEnt||dragItem)cls+=' sel-ready';var cellItems=getItemsOnDay(curEt,arqNome,iso),hasChips=cellItems.length>0;tbody+='<td class="'+cls+(hasChips?' has-chips':'')+'" ondragover="onDragOver(event)" ondrop="onDrop(event,\''+arqNome+'\',\''+iso+'\')" ondragleave="onDragLeave(event)" onclick="cellClick(\''+arqNome+'\',\''+iso+'\',event)">';if(hasChips){tbody+='<div class="chips-wrap">';cellItems.forEach(function(item){var eIdx=entAll.findIndex(function(e){return e.id===item.entId;});var col=eIdx>=0?COLORS[entAll[eIdx].colorIdx]:COLORS[0];var datas=computeDatas(item.dataInicio,item.dias),dayNum=datas.indexOf(iso)+1,isCont=dayNum>1;var fc2=getFloorColor(item.andar);
-            tbody+='<div class="achip'+(isCont?' cont':'')+'" onclick="rmAloc(\''+item.id+'\',event)" title="'+item.tipo+' · '+item.andar+(item.dias>1?' ('+dayNum+'/'+item.dias+' dias)':'')+' — clique para remover">'
-              +'<span class="achip-floor" style="background:'+(isCont?'var(--gl)':fc2)+'">'+item.andar+'</span>'
-              +'<span class="achip-tipo">'+item.tipo+'</span>'
-              +(item.dias>1?'<span class="chip-days">'+dayNum+'/'+item.dias+'d</span>':'')
-              +(dayNum===1?'<span class="chip-del">✕</span>':'')
-              +'</div>';});tbody+='</div>';}tbody+='<div class="add-cell-btn">+</div></td>';});tbody+='</tr>';});tbody+='</tbody>';document.getElementById('at').innerHTML=thead+tbody;updCTA2();}
+function setKitMode(v){
+  _kitMode=v;
+  document.getElementById('kit-btn-ind').className='kit-btn'+(v?'':' active');
+  document.getElementById('kit-btn-kit').className='kit-btn'+(v?' active':'');
+  renderCal();
+}
+
+function renderCal(){
+  var days=buildCalDays(curEt),arqs=eq.arquitetos,today=new Date();
+  today.setHours(12,0,0,0);var todayISO=fISO(today),entAll=getEnt(curEt);
+
+  var thead='<thead><tr><th class="lbl">Arquiteto</th>';
+  days.forEach(function(d){
+    var iso=fISO(d.date),cls='dcol'+(d.out?' out':(iso===todayISO?' today-col':''));
+    thead+='<th class="'+cls+'"><span class="dh-dow">'+DOWS[d.date.getDay()]+'</span>'
+      +'<span class="dh-date">'+pd(d.date.getDate())+'/'+pd(d.date.getMonth()+1)+'</span></th>';
+  });
+  thead+='</tr></thead>';
+
+  var tbody='<tbody>';
+  arqs.forEach(function(arqNome){
+    tbody+='<tr><td class="arq-lbl"><div class="arq-name">'+arqNome+'</div>'
+      +'<div class="arq-role">Arquiteto</div></td>';
+
+    // Pré-calcular células cobertas por colspan de itens multi-dia
+    var skipped={};
+    (plano[curEt]||[]).forEach(function(item){
+      if(item.arquiteto!==arqNome||item.dias<=1) return;
+      if(fISO(pD(item.dataInicio))!==fISO(pD(item.dataInicio))) return; // sanity
+      var datas=computeDatas(item.dataInicio,item.dias);
+      // Marcar todos os dias APÓS o primeiro como cobertos
+      datas.slice(1).forEach(function(iso){ skipped[iso]=item.id; });
+    });
+
+    days.forEach(function(d,di){
+      var iso=fISO(d.date);
+      // Se coberto por colspan de item anterior — não emitir <td>
+      if(skipped[iso]) return;
+
+      if(d.out){tbody+='<td class="acell out"></td>';return;}
+
+      var cellItems=getItemsOnDay(curEt,arqNome,iso);
+      var hasChips=cellItems.length>0;
+      var cls='acell'+(iso===todayISO?' today-col':'');
+      if(selEnt||dragItem||_dragGrp) cls+=' sel-ready';
+
+      // Calcular colspan para item único multi-dia
+      var colspan=1;
+      var singleMulti=cellItems.length===1&&cellItems[0].dias>1&&fISO(pD(cellItems[0].dataInicio))===iso;
+      if(singleMulti){
+        var datas2=computeDatas(cellItems[0].dataInicio,cellItems[0].dias);
+        var lastIso=datas2[datas2.length-1];
+        for(var k=di+1;k<days.length;k++){
+          var kiso=fISO(days[k].date);
+          if(kiso>lastIso) break;
+          colspan++;
+          if(kiso===lastIso) break;
+        }
+      }
+
+      var cs=colspan>1?' colspan="'+colspan+'"':'';
+      tbody+='<td class="'+cls+(hasChips?' has-chips':'')+'"'+cs
+        +' ondragover="onDragOver(event)"'
+        +' ondrop="onDrop(event,\''+arqNome+'\',\''+iso+'\')"'
+        +' ondragleave="onDragLeave(event)"'
+        +' onclick="cellClick(\''+arqNome+'\',\''+iso+'\',event)">';
+
+      if(hasChips){
+        tbody+='<div class="chips-wrap">';
+        if(_kitMode){
+          // Agrupar por tipo
+          var byTipo={};
+          cellItems.forEach(function(item){
+            if(!byTipo[item.tipo])byTipo[item.tipo]=[];
+            byTipo[item.tipo].push(item);
+          });
+          Object.keys(byTipo).forEach(function(tipo){
+            var grp=byTipo[tipo];
+            if(grp.length>=2){
+              var ids=grp.map(function(i){return i.id;}).join('~');
+              tbody+='<div class="achip all-mode" onclick="rmAlocGrp(\''+ids+'\',event)">'
+                +'<span class="achip-all-badge">ALL</span>'
+                +'<span class="achip-tipo">'+tipo+'</span>'
+                +'<span class="days-badge">'+grp.length+' and.</span>'
+                +'</div>';
+            } else {
+              var item=grp[0],fc2=getFloorColor(item.andar);
+              tbody+='<div class="achip" onclick="rmAloc(\''+item.id+'\',event)">'
+                +'<span class="achip-floor" style="background:'+fc2+'">'+item.andar+'</span>'
+                +'<span class="achip-tipo">'+item.tipo+'</span>'
+                +'</div>';
+            }
+          });
+        } else {
+          cellItems.forEach(function(item){
+            var fc2=getFloorColor(item.andar);
+            var isFirst=fISO(pD(item.dataInicio))===iso;
+            tbody+='<div class="achip" onclick="rmAloc(\''+item.id+'\',event)"'
+              +' title="'+item.tipo+' · '+item.andar+(item.dias>1?' ('+item.dias+' dias)':'')+' — remover">';
+            if(isFirst){
+              tbody+='<span class="achip-floor" style="background:'+fc2+'">'+item.andar+'</span>';
+            } else {
+              tbody+='<span class="achip-floor" style="background:#fff;color:#9CA3AF;border:0.5px solid #E5E7EB">'+item.andar+'</span>';
+            }
+            tbody+='<span class="achip-tipo">'+item.tipo+'</span>';
+            if(colspan>1&&isFirst) tbody+='<span class="chip-days">'+item.dias+'d</span>';
+            if(isFirst) tbody+='<span class="chip-del">✕</span>';
+            tbody+='</div>';
+          });
+        }
+        tbody+='</div>';
+      }
+      tbody+='<div class="add-cell-btn">+</div></td>';
+    });
+    tbody+='</tr>';
+  });
+  tbody+='</tbody>';
+  document.getElementById('at').innerHTML=thead+tbody;
+  updCTA2();
+}
+
+function rmAlocGrp(ids,ev){
+  if(ev)ev.stopPropagation();
+  if(!plano[curEt])return;
+  var arr=ids.split('~');
+  plano[curEt]=plano[curEt].filter(function(a){return arr.indexOf(a.id)<0;});
+  salvAloc();renderEnt();renderCal();
+}
+
 function cellClick(arqNome,iso,ev){ev.stopPropagation();if(selEnt)openAlocPop(selEnt,arqNome,iso,ev);else openPickPop(arqNome,iso,ev);}
 function openAlocPop(it,arqNome,iso,ev){closePop();_popEnt=it;_popArq=arqNome;_popIso=iso;_popDias=1;var c=COLORS[it.colorIdx];var et=CTX&&CTX.etapas.find(function(e){return e.id===curEt;});var etEnd=et?pD(et.end):null;var maxDias=20;if(etEnd){var cur=pD(iso),cnt=0;while(cur<=etEnd){if(isWork(cur))cnt++;cur=addD(cur,1);}maxDias=cnt;}var p=document.createElement('div');p.className='aloc-pop';p.innerHTML='<div class="aloc-pop-hdr">Alocar entrega</div><div class="aloc-pop-body"><div class="aloc-pop-ent" style="background:'+c+'22;color:'+c+';border-left:3px solid '+c+'"><span style="background:'+c+';width:8px;height:8px;border-radius:2px;flex-shrink:0;display:inline-block"></span>'+it.tipo+' · '+it.andar+'</div><div class="aloc-pop-label">Quantos dias úteis?</div><div class="aloc-pop-dias"><button class="dias-btn" onclick="adjDias(-1)">−</button><span class="dias-val" id="pop-dias">1</span><span class="dias-label">dia(s)</span><button class="dias-btn" onclick="adjDias(1)">+</button></div><div class="aloc-pop-btns"><button class="pop-btn-cancel" onclick="closePop()">Cancelar</button><button class="pop-btn-ok" onclick="confirmAloc()">Confirmar</button></div></div>';document.body.appendChild(p);_pop=p;p.dataset.max=maxDias;positionPop(p,ev);}
 function openPickPop(arqNome,iso,ev){closePop();_popArq=arqNome;_popIso=iso;var avail=getEnt(curEt).filter(function(it){return!isAloc(curEt,it.id);});var p=document.createElement('div');p.className='aloc-pop';var h='<div class="aloc-pop-hdr">'+pd(parseInt(iso.split('-')[2]))+'/'+pd(parseInt(iso.split('-')[1]))+' · '+arqNome+'</div><div class="aloc-pop-body" style="padding:7px">';if(!avail.length)h+='<div style="text-align:center;padding:11px;color:var(--gl);font-size:11.5px">Todas as entregas já alocadas</div>';avail.forEach(function(it){var c=COLORS[it.colorIdx];h+='<div style="padding:6px 8px;border-radius:5px;font-size:11.5px;font-family:var(--font);font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;margin-bottom:3px" onmouseover="this.style.background=\'var(--tf-s)\'" onmouseout="this.style.background=\'\'" onclick="pickItem(\''+it.id+'\')">'+'<div style="width:7px;height:7px;border-radius:2px;background:'+c+';flex-shrink:0"></div>'+it.tipo+' <span style="font-size:9px;font-family:var(--font);padding:1px 5px;background:var(--tf-s);color:var(--tf-dk);border-radius:7px">'+it.andar+'</span></div>';});h+='</div>';p.innerHTML=h;document.body.appendChild(p);_pop=p;positionPop(p,ev);}
