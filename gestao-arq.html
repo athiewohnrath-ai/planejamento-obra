@@ -306,7 +306,7 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
         <div class="drag-hint">💡 Clique ou arraste para o calendário</div>
       </div>
       <div class="cal-wrap">
-        <div class="cal-hdr"><span class="cal-badge" id="cal-badge">—</span><div class="cal-prog" id="cal-prog"></div><div class="kit-toggle"><span style="font-size:10px;color:var(--gl);font-family:var(--font)">Vista:</span><button class="kit-btn active" id="kit-btn-ind" onclick="setKitMode(false)">Individual</button><button class="kit-btn" id="kit-btn-kit" onclick="setKitMode(true)">Kit ALL</button></div></div>
+        <div class="cal-hdr"><span class="cal-badge" id="cal-badge">—</span><div class="cal-prog" id="cal-prog"></div></div>
         <div class="cal-body"><table class="at" id="at"></table></div>
       </div>
     </div>
@@ -665,13 +665,6 @@ function renderEntByTema(items){
 function selItem(entId){var items=getEnt(curEt),it=items.find(function(x){return x.id===entId;});selEnt=(selEnt&&selEnt.id===entId)?null:it;renderEnt();renderCal();if(selEnt)toast('Clique em um dia para alocar: '+selEnt.tipo+' · '+selEnt.andar);}
 function buildCalDays(etId){var et=CTX&&CTX.etapas.find(function(e){return e.id===etId;});if(!et)return[];var start=pD(et.start),end=pD(et.end),before=prevWork(start),after=nextWork(end),days=[{date:before,out:true}],cur=new Date(start);while(cur<=end){if(isWork(cur))days.push({date:new Date(cur),out:false});cur=addD(cur,1);}days.push({date:after,out:true});return days;}
 function getItemsOnDay(etId,arqNome,iso){if(!plano[etId])return[];return plano[etId].filter(function(item){if(item.arquiteto!==arqNome)return false;return computeDatas(item.dataInicio,item.dias).indexOf(iso)>=0;});}
-function setKitMode(v){
-  _kitMode=v;
-  document.getElementById('kit-btn-ind').className='kit-btn'+(v?'':' active');
-  document.getElementById('kit-btn-kit').className='kit-btn'+(v?' active':'');
-  renderCal();
-}
-
 function renderCal(){
   var days=buildCalDays(curEt),arqs=eq.arquitetos,today=new Date();
   today.setHours(12,0,0,0);var todayISO=fISO(today),entAll=getEnt(curEt);
@@ -734,8 +727,8 @@ function renderCal(){
 
       if(hasChips){
         tbody+='<div class="chips-wrap">';
-        if(_kitMode){
-          // Agrupar por tipo
+        {
+          // ALL automático quando 2+ itens do mesmo tipo na mesma célula
           var byTipo={};
           cellItems.forEach(function(item){
             if(!byTipo[item.tipo])byTipo[item.tipo]=[];
@@ -745,34 +738,19 @@ function renderCal(){
             var grp=byTipo[tipo];
             if(grp.length>=2){
               var ids=grp.map(function(i){return i.id;}).join('~');
-              tbody+='<div class="achip all-mode" onclick="rmAlocGrp(\''+ids+'\',event)">'
+              tbody+='<div class="achip all-mode" onclick="rmAlocGrp(\''+ids+'\',event)" title="'+tipo+' em '+grp.length+' andares">'
                 +'<span class="achip-all-badge">ALL</span>'
                 +'<span class="achip-tipo">'+tipo+'</span>'
-                +'<span class="days-badge">'+grp.length+' and.</span>'
+                +'<span class="days-badge">'+grp.length+'×</span>'
                 +'</div>';
             } else {
               var item=grp[0],fc2=getFloorColor(item.andar);
+              var isFirst=fISO(pD(item.dataInicio))===iso;
               tbody+='<div class="achip" onclick="rmAloc(\''+item.id+'\',event)">'
-                +'<span class="achip-floor" style="background:'+fc2+'">'+item.andar+'</span>'
+                +'<span class="achip-floor" style="background:'+(isFirst?fc2:'#fff')+';color:'+(isFirst?'#fff':'#9CA3AF')+';border:'+(isFirst?'none':'0.5px solid #E5E7EB')+'">'+item.andar+'</span>'
                 +'<span class="achip-tipo">'+item.tipo+'</span>'
                 +'</div>';
             }
-          });
-        } else {
-          cellItems.forEach(function(item){
-            var fc2=getFloorColor(item.andar);
-            var isFirst=fISO(pD(item.dataInicio))===iso;
-            tbody+='<div class="achip" onclick="rmAloc(\''+item.id+'\',event)"'
-              +' title="'+item.tipo+' · '+item.andar+(item.dias>1?' ('+item.dias+' dias)':'')+' — remover">';
-            if(isFirst){
-              tbody+='<span class="achip-floor" style="background:'+fc2+'">'+item.andar+'</span>';
-            } else {
-              tbody+='<span class="achip-floor" style="background:#fff;color:#9CA3AF;border:0.5px solid #E5E7EB">'+item.andar+'</span>';
-            }
-            tbody+='<span class="achip-tipo">'+item.tipo+'</span>';
-            if(colspan>1&&isFirst) tbody+='<span class="chip-days">'+item.dias+'d</span>';
-            if(isFirst) tbody+='<span class="chip-del">✕</span>';
-            tbody+='</div>';
           });
         }
         tbody+='</div>';
