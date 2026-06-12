@@ -284,7 +284,10 @@ function computeDatas(isoStart,dias){var r=[],cur=pD(isoStart),cnt=0;while(cnt<d
   document.getElementById('ctx-nome').textContent=meta.nome||'Sem título';
   var ea=(ESTADO.cfg&&ESTADO.cfg.equipeARQ)||{};
   document.getElementById('ctx-dir').textContent=ea.diretor||'—';
-  eq.diretor=ea.diretor||'';eq.gerentes=(ea.gerentes||[]).slice();eq.arquitetos=(ea.arquitetos||[]).slice();
+  eq.diretor=ea.diretor||'';eq.gerentes=(ea.gerentes||[]).slice();
+  // Só restaurar arquitetos se houver alocações salvas (evita manter seleção automática antiga)
+  var temAloc=ea.planoAloc&&Object.keys(ea.planoAloc).length>0;
+  eq.arquitetos=temAloc?(ea.arquitetos||[]).slice():[];
   if(ea.planoAloc)plano=ea.planoAloc;
   renderS1();updSB();
   document.addEventListener('keydown',function(e){if(e.key==='Escape'){closePop();sair();}});
