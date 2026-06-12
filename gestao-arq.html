@@ -115,7 +115,7 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .ep-filters{padding:7px 10px 6px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:5px;flex-shrink:0}
 .ep-filters select{width:100%;padding:4px 7px;border:1px solid var(--border);border-radius:5px;font-size:11px;color:var(--ink);background:#fff;outline:none;height:26px}
 .ep-filters select:focus{border-color:var(--tf)}.ep-body{flex:1;overflow-y:auto;padding:7px}
-.ent-item{display:flex;align-items:flex-start;gap:5px;padding:7px 9px;border-radius:6px;margin-bottom:3px;border:1.5px solid var(--border);background:#fff;transition:all .14s;font-size:12px;font-family:var(--font);font-weight:600;color:var(--ink);line-height:1.3;user-select:none}
+.ent-item{display:flex;align-items:center;gap:7px;padding:5px 8px;border-radius:6px;margin-bottom:3px;border:0.5px solid var(--border);background:var(--bg);transition:all .14s;font-size:12px;font-family:var(--font);font-weight:600;color:var(--ink);line-height:1.3;user-select:none}
 .ent-item.clickable{cursor:pointer}.ent-item.clickable:hover{border-color:var(--tf);background:var(--tf-s)}
 .ent-item.dragging{opacity:.4;cursor:grabbing}.ent-item.sel{border-color:var(--tf);background:var(--tf);color:#111;cursor:pointer}
 .ent-item.done{opacity:.35;background:#f3f4f6;text-decoration:line-through}
@@ -134,8 +134,8 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .ent-grp-label{font-family:var(--font);font-size:12px;font-weight:800;color:var(--ink);flex:1}
 .ent-grp-badge{font-size:9px;font-weight:700;color:#fff;padding:2px 7px;border-radius:8px}
 .ent-grp-hint{font-size:9px;color:var(--gl);font-style:italic}
-.ent-andar-big{font-family:var(--font);font-size:12px;font-weight:800;color:var(--ink);flex-shrink:0}
-.ent-tipo-small{font-size:10.5px;color:var(--gl);flex:1}
+.ent-andar-big{font-size:10px;font-weight:500;padding:2px 7px;border-radius:5px;color:#fff;flex-shrink:0}
+.ent-tipo-small{font-size:12px;color:var(--gl);flex:1}
 .cal-wrap{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .cal-hdr{display:flex;align-items:center;gap:8px;padding:9px 14px;border-bottom:1px solid var(--border);flex-shrink:0;background:#fff}
 .cal-badge{font-size:10px;padding:2px 8px;border-radius:7px;background:var(--tf-s);color:var(--tf-dk);font-weight:700;font-family:var(--font)}
@@ -567,15 +567,32 @@ function renderEnt(){
   else renderEntByAndar(items);
 }
 
+var FLOOR_COLORS_MAP={};
+(function(){
+  var andares=(CTX&&CTX.andares)||[];
+  var palette=['#378ADD','#1D9E75','#BA7517','#7F77DD','#D85A30','#D4537E','#639922'];
+  andares.forEach(function(a,i){FLOOR_COLORS_MAP[a]=palette[i%palette.length];});
+})();
+
+function getFloorColor(andar){
+  if(!FLOOR_COLORS_MAP[andar]){
+    var andares=(CTX&&CTX.andares)||[];
+    var palette=['#378ADD','#1D9E75','#BA7517','#7F77DD','#D85A30','#D4537E','#639922'];
+    andares.forEach(function(a,i){FLOOR_COLORS_MAP[a]=palette[i%palette.length];});
+  }
+  return FLOOR_COLORS_MAP[andar]||'#888';
+}
+
 function _entItemHtml(it){
-  var alloc=isAloc(curEt,it.id),sel=selEnt&&selEnt.id===it.id,c=COLORS[it.colorIdx];
+  var alloc=isAloc(curEt,it.id),sel=selEnt&&selEnt.id===it.id;
+  var fc=getFloorColor(it.andar);
   var h='<div class="ent-item'+(alloc?' done':sel?' sel':' clickable')+'" draggable="'+(alloc?'false':'true')+'" ';
   h+='data-ent=\''+JSON.stringify(it).replace(/'/g,"&#39;")+'\' ';
   h+='onclick="'+(alloc?'void 0':'selItem(\''+it.id+'\')"');
   h+=' ondragstart="onDragStart(event,this)" ondragend="onDragEnd(event)"';
-  h+=' style="'+(sel?'border-color:var(--tf);background:var(--tf);color:#111':'border-left:3px solid '+c)+'">';
-  h+='<span class="ent-andar-big">'+it.andar+'</span>';
-  h+='<span class="ent-tipo-small">&nbsp;&middot;&nbsp;'+it.tipo+'</span>';
+  h+=' style="'+(sel?'border-color:var(--tf);background:var(--tf);':'')+'background:var(--bg);border:0.5px solid var(--border)">';
+  h+='<span class="ent-andar-big" style="background:'+(alloc?'var(--gl)':sel?'rgba(0,0,0,.2)':fc)+'">'+it.andar+'</span>';
+  h+='<span class="ent-tipo-small">'+it.tipo+'</span>';
   h+='</div>';
   return h;
 }
