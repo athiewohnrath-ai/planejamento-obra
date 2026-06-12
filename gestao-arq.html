@@ -260,7 +260,7 @@ var COLORS=["#3FBFB0","#2563EB","#7C3AED","#D97706","#059669","#DC4C2E","#0891B2
 var ESTADO=null,CTX=null;
 var eq={diretor:'',gerentes:[],arquitetos:[]};
 var plano={};var customEnts={};
-var selEnt=null,curEt=null,dragItem=null;
+var selEnt=null,curEt=null,dragItem=null;window._outrasOpen=false;
 var curScr=1,curRTab=1,_fscale=1;
 var _pop=null,_popDias=1,_popEnt=null,_popArq=null,_popIso=null;
 
@@ -311,34 +311,98 @@ function updSB(){
 }
 
 function renderS1(){
-  var dir=eq.diretor,db=EDB[dir],el=document.getElementById('s1-body');
-  if(!dir||!db){el.innerHTML='<div class="empty fi"><div class="empty-icon">📋</div><div class="empty-txt">Configure o diretor em <strong>Config → Identificação</strong></div></div>';updCTA1();return;}
-  var init=dir.split(' ').map(function(w){return w[0];}).slice(0,2).join('');
-  var h='<div class="fi"><div class="dir-banner"><div class="dir-av">'+init+'</div><div style="flex:1"><div class="dir-name">'+dir+'</div><div class="dir-role">Diretor de Arquitetura</div></div><span class="dir-badge">'+db.gerentes.length+' GAs</span></div>';
-  h+='<div class="card accent"><div class="card-hdr"><div class="card-ico"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></div><div><div class="card-title">Gerentes responsáveis</div></div></div><div class="card-body"><div class="chip-grid">';
-  db.gerentes.forEach(function(g){var s=eq.gerentes.indexOf(g.nome)>=0;h+='<button class="chip'+(s?' sel':'')+'" onclick="togG(\''+g.nome+'\')">'+'<div class="chip-ck">'+(s?'✓':'')+'</div>'+g.nome+'<span class="role">GA</span></button>';});
+  var el=document.getElementById('s1-body');
+  var dir=eq.diretor, db=EDB[dir];
+  var h='<div class="fi">';
+
+  // Seletor de Diretor
+  h+='<div class="card accent" style="margin-bottom:14px"><div class="card-hdr"><div class="card-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div><div><div class="card-title">Diretor de Arquitetura</div><div class="card-sub">Selecione a diretoria responsável por este projeto</div></div></div><div class="card-body"><div class="chip-grid">';
+  Object.keys(EDB).forEach(function(dNome){var s=dir===dNome;h+='<button class="chip'+(s?' sel':'')+'" onclick="setDiretor(\''+dNome+'\')">'+'<div class="chip-ck">'+(s?'&#10003;':'')+'</div>'+dNome+'<span class="role">DIR</span></button>';});
   h+='</div></div></div>';
-  if(eq.gerentes.length){
-    h+='<div class="card"><div class="card-hdr"><div class="card-ico" style="background:#EEF2FA"><svg viewBox="0 0 24 24" style="stroke:#1A5294"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div><div class="card-title">Arquitetos</div></div></div><div class="card-body">';
-    db.gerentes.forEach(function(g){
-      if(eq.gerentes.indexOf(g.nome)<0)return;
-      var allS=g.arquitetos.every(function(a){return eq.arquitetos.indexOf(a.nome)>=0;});
-      h+='<div class="ga-sec"><div class="ga-hdr"><div class="ga-dot"></div><span class="ga-name">'+g.nome+'</span><span class="ga-tag">GA</span><button class="ga-all-btn'+(allS?' sel':'')+'" onclick="togAll(\''+g.nome+'\')">'+(allS?'Todos ✓':'Sel. todos')+'</button></div><div class="chip-grid">';
-      g.arquitetos.forEach(function(a){var s=eq.arquitetos.indexOf(a.nome)>=0;h+='<button class="chip'+(s?' sel':'')+'" onclick="togA(\''+a.nome+'\')">'+'<div class="chip-ck">'+(s?'✓':'')+'</div>'+a.nome+'<span class="role">'+a.cargo+'</span></button>';});
-      h+='</div></div>';
-    });
+
+  if(!dir||!db){el.innerHTML=h+'<div class="empty" style="padding:20px 0"><div class="empty-txt">Selecione o diretor para ver os gerentes</div></div></div>';updCTA1();return;}
+
+  // Gerentes
+  h+='<div class="card"><div class="card-hdr"><div class="card-ico"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></div><div><div class="card-title">Gerentes responsáveis</div><div class="card-sub">Clique para adicionar gerentes ao projeto</div></div></div><div class="card-body"><div class="chip-grid">';
+  db.gerentes.forEach(function(g){var s=eq.gerentes.indexOf(g.nome)>=0;h+='<button class="chip'+(s?' sel':'')+'" onclick="togG(\''+g.nome+'\')">'+'<div class="chip-ck">'+(s?'&#10003;':'')+'</div>'+g.nome+'<span class="role">GA</span></button>';});
+  h+='</div></div></div>';
+
+  if(!eq.gerentes.length){el.innerHTML=h+'</div>';updCTA1();return;}
+
+  // Arquitetos
+  h+='<div class="card"><div class="card-hdr"><div class="card-ico" style="background:#EEF2FA"><svg viewBox="0 0 24 24" style="stroke:#1A5294"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div><div class="card-title">Arquitetos da equipe</div><div class="card-sub">Clique para adicionar ao projeto</div></div></div><div class="card-body">';
+  db.gerentes.forEach(function(g){
+    if(eq.gerentes.indexOf(g.nome)<0)return;
+    h+='<div class="ga-sec"><div class="ga-hdr"><div class="ga-dot"></div><span class="ga-name">'+g.nome+'</span><span class="ga-tag">GA</span>';
+    h+='<button class="ga-all-btn" onclick="addTodosGA(\''+g.nome+'\')" style="color:var(--tf-dk);border-color:var(--tf)">+ Todos</button></div><div class="chip-grid">';
+    g.arquitetos.forEach(function(a){var s=eq.arquitetos.indexOf(a.nome)>=0;h+='<button class="chip'+(s?' sel':'')+'" onclick="togA(\''+a.nome+'\')">'+'<div class="chip-ck">'+(s?'&#10003;':'')+'</div>'+a.nome+'<span class="role">'+a.cargo+'</span></button>';});
     h+='</div></div>';
+  });
+  h+='</div></div>';
+
+  // Outras equipes
+  var outrasOpen=window._outrasOpen||false;
+  h+='<div class="card"><div class="card-hdr" style="cursor:pointer" onclick="togOutras()">';
+  h+='<div class="card-ico" style="background:#FEF3E2"><svg viewBox="0 0 24 24" style="stroke:#D97706"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg></div>';
+  h+='<div style="flex:1"><div class="card-title">Outras equipes</div><div class="card-sub">Adicionar arquitetos de outras diretorias</div></div>';
+  h+='<span style="font-size:12px;color:var(--gl)">'+(outrasOpen?'&#9650;':'&#9660;')+'</span></div>';
+  if(outrasOpen){
+    h+='<div class="card-body">';
+    Object.keys(EDB).forEach(function(dNome){
+      if(dNome===dir)return;
+      h+='<div style="margin-bottom:14px"><div style="font-family:var(--font);font-size:10px;font-weight:700;color:#D97706;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;padding:4px 8px;background:#FEF3E2;border-radius:5px">'+dNome+'</div>';
+      EDB[dNome].gerentes.forEach(function(g){
+        h+='<div class="ga-sec"><div class="ga-hdr" style="background:#FFFAF0"><div class="ga-dot" style="background:#D97706"></div><span class="ga-name">'+g.nome+'</span><span class="ga-tag" style="background:#FEF3E2;color:#D97706">GA</span></div><div class="chip-grid">';
+        g.arquitetos.forEach(function(a){var s=eq.arquitetos.indexOf(a.nome)>=0;h+='<button class="chip'+(s?' sel':'')+'" onclick="togA(\''+a.nome+'\')">'+'<div class="chip-ck">'+(s?'&#10003;':'')+'</div>'+a.nome+'<span class="role">'+a.cargo+'</span></button>';});
+        h+='</div></div>';
+      });
+      h+='</div>';
+    });
+    h+='</div>';
   }
-  if(eq.gerentes.length&&eq.arquitetos.length){
-    h+='<div class="eq-resumo"><div class="eq-rt">Resumo</div>';
-    db.gerentes.forEach(function(g){if(eq.gerentes.indexOf(g.nome)<0)return;var arqs=g.arquitetos.filter(function(a){return eq.arquitetos.indexOf(a.nome)>=0;});if(!arqs.length)return;h+='<div style="margin-bottom:8px"><div style="font-family:var(--font);font-size:11.5px;font-weight:700;color:var(--ink);margin-bottom:4px">'+g.nome+' <span style="font-size:9.5px;color:var(--tf-dk)">GA</span></div><div style="display:flex;flex-wrap:wrap;gap:4px">';arqs.forEach(function(a){h+='<span class="eq-chip">'+a.nome+'</span>';});h+='</div></div>';});
-    h+='<div style="font-family:var(--font);font-size:11.5px;font-weight:700;color:var(--tf-dk);padding-top:7px;border-top:1px solid rgba(63,191,176,.25)">'+eq.arquitetos.length+' arq · '+eq.gerentes.length+' GA</div></div>';
+  h+='</div>';
+
+  // Resumo
+  if(eq.arquitetos.length){
+    h+='<div class="eq-resumo"><div class="eq-rt">Equipe selecionada &mdash; '+eq.arquitetos.length+' arquiteto(s)</div><div style="display:flex;flex-wrap:wrap;gap:5px">';
+    eq.arquitetos.forEach(function(nome){h+='<span class="eq-chip" style="cursor:pointer" onclick="togA(\''+nome+'\')" title="Remover">'+nome+' &times;</span>';});
+    h+='</div></div>';
   }
   el.innerHTML=h+'</div>';updCTA1();
 }
+
+function setDiretor(nome){
+  eq.diretor=nome;eq.gerentes=[];eq.arquitetos=[];
+  document.getElementById('ctx-dir').textContent=nome;
+  if(ESTADO&&ESTADO.cfg&&ESTADO.cfg.equipeARQ)ESTADO.cfg.equipeARQ.diretor=nome;
+  renderS1();
+}
+
+function togOutras(){window._outrasOpen=!window._outrasOpen;renderS1();}
+
+function addTodosGA(gNome){
+  var db=EDB[eq.diretor];if(!db)return;
+  var gd=db.gerentes.find(function(g){return g.nome===gNome;});if(!gd)return;
+  gd.arquitetos.forEach(function(a){if(eq.arquitetos.indexOf(a.nome)<0)eq.arquitetos.push(a.nome);});
+  renderS1();
+}
+
+function togG(nome){
+  var idx=eq.gerentes.indexOf(nome);
+  if(idx>=0){
+    eq.gerentes.splice(idx,1);
+    var db=EDB[eq.diretor];
+    if(db){var gd=db.gerentes.find(function(g){return g.nome===nome;});
+      if(gd)gd.arquitetos.forEach(function(a){var i=eq.arquitetos.indexOf(a.nome);if(i>=0)eq.arquitetos.splice(i,1);});}
+  } else {
+    eq.gerentes.push(nome);
+    // NÃO auto-seleciona arquitetos
+  }
+  renderS1();
+}
 function togG(nome){var idx=eq.gerentes.indexOf(nome),db=EDB[eq.diretor];if(idx>=0){eq.gerentes.splice(idx,1);if(db){var gd=db.gerentes.find(function(g){return g.nome===nome;});if(gd)gd.arquitetos.forEach(function(a){var i=eq.arquitetos.indexOf(a.nome);if(i>=0)eq.arquitetos.splice(i,1);});}}else{eq.gerentes.push(nome);if(db){var gd2=db.gerentes.find(function(g){return g.nome===nome;});if(gd2)gd2.arquitetos.forEach(function(a){if(eq.arquitetos.indexOf(a.nome)<0)eq.arquitetos.push(a.nome);});}}renderS1();}
 function togA(nome){var i=eq.arquitetos.indexOf(nome);if(i>=0)eq.arquitetos.splice(i,1);else eq.arquitetos.push(nome);renderS1();}
-function togAll(gNome){var db=EDB[eq.diretor];if(!db)return;var gd=db.gerentes.find(function(g){return g.nome===gNome;});if(!gd)return;var all=gd.arquitetos.every(function(a){return eq.arquitetos.indexOf(a.nome)>=0;});if(all)gd.arquitetos.forEach(function(a){var i=eq.arquitetos.indexOf(a.nome);if(i>=0)eq.arquitetos.splice(i,1);});else gd.arquitetos.forEach(function(a){if(eq.arquitetos.indexOf(a.nome)<0)eq.arquitetos.push(a.nome);});renderS1();}
+
 function updCTA1(){var btn=document.getElementById('btn-prox'),info=document.getElementById('cta1-info');if(!eq.gerentes.length){btn.disabled=true;info.innerHTML='Selecione pelo menos um <strong>gerente</strong>';}else if(!eq.arquitetos.length){btn.disabled=true;info.innerHTML='Selecione pelo menos um <strong>arquiteto</strong>';}else{btn.disabled=false;info.innerHTML='<strong>'+eq.arquitetos.length+'</strong> arq · <strong>'+eq.gerentes.length+'</strong> GA';}updSB();}
 
 function getEnt(etId){var tipos=EDEF[etId]||[],andares=(CTX&&CTX.andares)||['(andar)'],items=[],ci=0;tipos.forEach(function(tipo,ti){andares.forEach(function(andar){items.push({id:etId+'__'+ti+'__'+andar.replace(/\s/g,'_'),tipo:tipo,andar:andar,colorIdx:ci%COLORS.length});ci++;});});(customEnts[etId]||[]).forEach(function(ce){items.push({id:ce.id,tipo:ce.tipo,andar:ce.andar,colorIdx:ci%COLORS.length});ci++;});return items;}
