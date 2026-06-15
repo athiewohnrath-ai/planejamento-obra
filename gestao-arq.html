@@ -676,22 +676,14 @@ function setKitMode(v){
   renderCal();
 }
 
-function _getSpanClass(item,iso,calDays){
-  var datas=computeDatas(item.dataInicio,item.dias);
-  var idx=datas.indexOf(iso);
-  var isFirst=idx===0;
-  // Verificar se próximo dia útil da tarefa está no calendário ativo
-  var nextIso=datas[idx+1]||null;
-  var nextInCal=nextIso&&calDays.some(function(d){return !d.out&&fISO(d.date)===nextIso;});
-  if(isFirst&&nextInCal)  return 'sp-r';
-  if(!isFirst&&nextInCal) return 'sp-m';
-  if(!isFirst&&!nextInCal)return 'sp-l';
-  return ''; // dia único
-}
-
 function renderCal(){
-  var days=buildCalDays(curEt),arqs=eq.arquitetos,today=new Date();
-  today.setHours(12,0,0,0);var todayISO=fISO(today),entAll=getEnt(curEt);
+  var days=buildCalDays(curEt),arqs=eq.arquitetos;
+  var today=new Date();today.setHours(12,0,0,0);var todayISO=fISO(today);
+  var COL_W=92,CHIP_H=24,CHIP_GAP=3,PAD=4;
+
+  // Mapa iso→índice de coluna
+  var dayMap={};
+  days.forEach(function(d,i){dayMap[fISO(d.date)]=i;});
 
   var thead='<thead><tr><th class="lbl">Arquiteto</th>';
   days.forEach(function(d){
@@ -703,93 +695,114 @@ function renderCal(){
 
   var tbody='<tbody>';
   arqs.forEach(function(arqNome){
-    tbody+='<tr><td class="arq-lbl"><div class="arq-name">'+arqNome+'</div>'
+    var allItems=(plano[curEt]||[]).filter(function(i){return i.arquiteto===arqNome;});
+
+    // Montar lista de itens renderizáveis (agrupando em ALL se kitMode)
+    var ri=[];
+    if(_kitMode){
+      var byGrp={};
+      allItems.forEach(function(item){
+        var k=item.tipo+'|'+item.dataInicio+'|'+item.dias;
+        if(!byGrp[k])byGrp[k]={tipo:item.tipo,dataInicio:item.dataInicio,dias:item.dias,ids:[],andares:[]};
+        byGrp[k].ids.push(item.id);byGrp[k].andares.push(item.andar);
+      });
+      Object.keys(byGrp).forEach(function(k){
+        var g=byGrp[k];
+        ri.push({tipo:g.tipo,dataInicio:g.dataInicio,dias:g.dias,
+          isAll:g.ids.length>=2,ids:g.ids,andares:g.andares,
+          andar:g.ids.length>=2?'ALL':g.andares[0]});
+      });
+    } else {
+      allItems.forEach(function(item){
+        ri.push({tipo:item.tipo,dataInicio:item.dataInicio,dias:item.dias,
+          isAll:false,ids:[item.id],andares:[item.andar],andar:item.andar});
+      });
+    }
+
+    // Calcular slot (posição vertical) — algoritmo greedy
+    ri.sort(function(a,b){return a.dataInicio<b.dataInicio?-1:1;});
+    var slotEnd=[];
+    ri.forEach(function(item){
+      var si=dayMap[item.dataInicio];
+      if(si===undefined)return;
+      var datas=computeDatas(item.dataInicio,item.dias);
+      var ei=dayMap[datas[datas.length-1]];
+      if(ei===undefined)ei=si+item.dias-1;
+      var slot=0;
+      while(slotEnd[slot]!==undefined&&slotEnd[slot]>=si)slot++;
+      slotEnd[slot]=ei;
+      item._si=si;item._ei=ei;item._slot=slot;
+    });
+    var maxSlot=ri.length?Math.max.apply(null,ri.map(function(i){return i._slot||0;})):0;
+    var rowH=Math.max(52,(maxSlot+1)*(CHIP_H+CHIP_GAP)+PAD*2);
+
+    tbody+='<tr>';
+    tbody+='<td class="arq-lbl" style="height:'+rowH+'px">'
+      +'<div class="arq-name">'+arqNome+'</div>'
       +'<div class="arq-role">Arquiteto</div></td>';
 
-    days.forEach(function(d){
+    // Uma única célula cobrindo todos os dias
+    tbody+='<td colspan="'+days.length+'" style="position:relative;height:'+rowH+'px;padding:0;vertical-align:top;overflow:visible;border-bottom:1px solid var(--border);">';
+
+    // Faixas de fundo (out, today)
+    days.forEach(function(d,di){
       var iso=fISO(d.date);
-      if(d.out){tbody+='<td class="acell out"></td>';return;}
-
-      var cellItems=getItemsOnDay(curEt,arqNome,iso);
-      var hasChips=cellItems.length>0;
-      var cls='acell'+(iso===todayISO?' today-col':'');
-      if(selEnt||dragItem||_dragGrp) cls+=' sel-ready';
-
-      tbody+='<td class="'+cls+(hasChips?' has-chips':'')+'"'
-        +' ondragover="onDragOver(event)"'
-        +' ondrop="onDrop(event,\''+arqNome+'\',\''+iso+'\')"'
-        +' ondragleave="onDragLeave(event)"'
-        +' onclick="cellClick(\''+arqNome+'\',\''+iso+'\',event)">';
-
-      if(hasChips){
-        tbody+='<div class="chips-wrap">';
-
-        if(_kitMode){
-          // Agrupar por tipo para ALL
-          var byTipo={};
-          cellItems.forEach(function(item){
-            if(!byTipo[item.tipo])byTipo[item.tipo]=[];
-            byTipo[item.tipo].push(item);
-          });
-          Object.keys(byTipo).forEach(function(tipo){
-            var grp=byTipo[tipo];
-            // Calcular span pela classe CSS usando o primeiro item do grupo
-            var spCls=_getSpanClass(grp[0],iso,days);
-            if(grp.length>=2){
-              // Só mostrar o chip ALL quando todos os itens do grupo começam no mesmo dia
-              // (evita repetir o chip ALL em dias de continuação)
-              var allSameStart=grp.every(function(i){return i.dataInicio===grp[0].dataInicio&&i.dias===grp[0].dias;});
-              if(!allSameStart){
-                // Itens de tipo igual mas datas diferentes — mostrar individualmente
-                grp.forEach(function(item){
-                  var fc2=getFloorColor(item.andar);
-                  var sc=_getSpanClass(item,iso,days);
-                  var isFirst=fISO(pD(item.dataInicio))===iso;
-                  tbody+='<div class="achip'+(sc?' '+sc:'')+'" onclick="rmAloc(\''+item.id+'\',event)">'
-                    +'<span class="achip-floor" style="background:'+(isFirst?fc2:'#fff')+';color:'+(isFirst?'#fff':'#9CA3AF')+';border:'+(isFirst?'none':'0.5px solid #E5E7EB')+'">'+item.andar+'</span>'
-                    +'<span class="achip-tipo">'+item.tipo+'</span>'
-                    +(isFirst?'<span class="chip-del">✕</span>':'')
-                    +'</div>';
-                });
-              } else {
-                // Kit: todos mesma data/duração → ALL chip
-                var ids=grp.map(function(i){return i.id;}).join('~');
-                var isFirst=fISO(pD(grp[0].dataInicio))===iso;
-                if(isFirst||!spCls||spCls==='sp-l'||spCls==='sp-m'||spCls==='sp-r'){
-                  tbody+='<div class="achip all-mode'+(spCls?' '+spCls:'')+'" onclick="rmAlocGrp(\''+ids+'\',event)">'
-                    +'<span class="achip-all-badge">ALL</span>'
-                    +'<span class="achip-tipo">'+tipo+'</span>'
-                    +'</div>';
-                }
-              }
-            } else {
-              var item=grp[0],fc2=getFloorColor(item.andar);
-              var isFirst=fISO(pD(item.dataInicio))===iso;
-              tbody+='<div class="achip'+(spCls?' '+spCls:'')+'" onclick="rmAloc(\''+item.id+'\',event)">'
-                +'<span class="achip-floor" style="background:'+(isFirst?fc2:'#fff')+';color:'+(isFirst?'#fff':'#9CA3AF')+';border:'+(isFirst?'none':'0.5px solid #E5E7EB')+'">'+item.andar+'</span>'
-                +'<span class="achip-tipo">'+item.tipo+'</span>'
-                +(isFirst?'<span class="chip-del">✕</span>':'')
-                +'</div>';
-            }
-          });
-        } else {
-          // Individual: cada item com CSS spanning
-          cellItems.forEach(function(item){
-            var fc2=getFloorColor(item.andar);
-            var isFirst=fISO(pD(item.dataInicio))===iso;
-            var spCls=_getSpanClass(item,iso,days);
-            tbody+='<div class="achip'+(spCls?' '+spCls:'')+'" onclick="rmAloc(\''+item.id+'\',event)">'
-              +'<span class="achip-floor" style="background:'+(isFirst?fc2:'#fff')+';color:'+(isFirst?'#fff':'#9CA3AF')+';border:'+(isFirst?'none':'0.5px solid #E5E7EB')+'">'+item.andar+'</span>'
-              +'<span class="achip-tipo">'+item.tipo+'</span>'
-              +(isFirst?'<span class="chip-del">✕</span>':'')
-              +'</div>';
-          });
-        }
-        tbody+='</div>';
+      var bg=d.out?'#F2F3F5':iso===todayISO?'rgba(63,191,176,.04)':'';
+      if(bg)tbody+='<div style="position:absolute;left:'+(di*COL_W)+'px;top:0;width:'+COL_W+'px;height:100%;background:'+bg+';pointer-events:none;z-index:0"></div>';
+      if(!d.out){
+        // Linhas verticais entre colunas
+        tbody+='<div style="position:absolute;left:'+(di*COL_W)+'px;top:0;width:1px;height:100%;background:var(--border);z-index:0"></div>';
       }
-      tbody+='<div class="add-cell-btn">+</div></td>';
     });
-    tbody+='</tr>';
+
+    // Chips posicionados absolutamente
+    ri.forEach(function(item){
+      if(item._si===undefined)return;
+      var L=item._si*COL_W+3;
+      var W=(item._ei-item._si+1)*COL_W-6;
+      var T=PAD+item._slot*(CHIP_H+CHIP_GAP);
+      var fc=item.isAll?'#111':getFloorColor(item.andar);
+      var rmFn=item.isAll
+        ?'rmAlocGrp(\''+item.ids.join('~')+'\',event)'
+        :'rmAloc(\''+item.ids[0]+'\',event)';
+      var bg=item.isAll?'#111':'var(--white)';
+      var bdColor=item.isAll?'#444':'var(--border)';
+      tbody+='<div onclick="'+rmFn+'" '
+        +'style="position:absolute;left:'+L+'px;top:'+T+'px;width:'+W+'px;height:'+CHIP_H+'px;'
+        +'background:'+bg+';border:0.5px solid '+bdColor+';border-radius:4px;'
+        +'display:flex;align-items:center;gap:4px;padding:0 6px;cursor:pointer;z-index:3;overflow:hidden;" '
+        +'title="'+item.tipo+' · '+item.andares.join('+')+' — clique para remover">'
+        +'<span style="font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;background:'+fc+';color:#fff;flex-shrink:0">'+item.andar+'</span>'
+        +'<span style="font-size:10px;color:'+(item.isAll?'#fff':'var(--ink)')+';overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">'+item.tipo+'</span>'
+        +(item.dias>1?'<span style="font-size:9px;color:'+(item.isAll?'rgba(255,255,255,.6)':'var(--gl)')+';flex-shrink:0">'+item.dias+'d</span>':'')
+        +'</div>';
+    });
+
+    // Botões "+" para dias sem atividade
+    days.forEach(function(d,di){
+      if(d.out)return;
+      var iso=fISO(d.date);
+      var busy=ri.some(function(item){
+        if(item._si===undefined)return false;
+        return computeDatas(item.dataInicio,item.dias).indexOf(iso)>=0;
+      });
+      if(!busy){
+        tbody+='<div onclick="cellClick(\''+arqNome+'\',\''+iso+'\',event)" '
+          +'ondragover="onDragOver(event)" ondrop="onDrop(event,\''+arqNome+'\',\''+iso+'\')" ondragleave="onDragLeave(event)" '
+          +'style="position:absolute;left:'+(di*COL_W+1)+'px;top:0;width:'+(COL_W-2)+'px;height:'+rowH+'px;'
+          +'display:flex;align-items:center;justify-content:center;color:#d1d5db;font-size:16px;cursor:pointer;z-index:1">'
+          +'+'
+          +'</div>';
+      } else {
+        // Área de click sobre chips existentes (para adicionar mais)
+        tbody+='<div '
+          +'ondragover="onDragOver(event)" ondrop="onDrop(event,\''+arqNome+'\',\''+iso+'\')" ondragleave="onDragLeave(event)" '
+          +'style="position:absolute;left:'+(di*COL_W+1)+'px;top:0;width:'+(COL_W-2)+'px;height:'+rowH+'px;z-index:1;pointer-events:none">'
+          +'</div>';
+      }
+    });
+
+    tbody+='</td></tr>';
   });
   tbody+='</tbody>';
   document.getElementById('at').innerHTML=thead+tbody;
