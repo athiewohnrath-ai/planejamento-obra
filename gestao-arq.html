@@ -10,7 +10,11 @@
 *{box-sizing:border-box;margin:0;padding:0}html,body{height:100%;overflow:hidden}
 body{font-family:var(--body);background:var(--bg);color:var(--ink);display:flex;height:100vh;font-size:13px}
 button{font-family:inherit;cursor:pointer}input,select{font-family:inherit}
-aside{width:240px;background:var(--black);color:#fff;display:flex;flex-direction:column;padding:16px 13px;flex-shrink:0}
+aside{width:240px;background:var(--black);color:#fff;display:flex;flex-direction:column;padding:16px 13px;flex-shrink:0;transition:width .22s ease,padding .22s ease,min-width .22s ease;overflow:hidden;position:relative}
+aside.collapsed{width:0;min-width:0;padding:0;overflow:hidden}
+.aside-toggle{position:fixed;left:0;top:50%;transform:translateY(-50%);width:18px;height:72px;background:#111213;border:1px solid rgba(255,255,255,.15);border-left:none;border-radius:0 6px 6px 0;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:200;color:rgba(255,255,255,.6);transition:left .22s ease,background .15s}
+.aside-toggle:hover{background:#222;color:#fff}
+aside.collapsed~.aside-toggle,aside.collapsed+.aside-toggle{left:0}
 .logo-row{display:flex;align-items:center;gap:9px;margin-bottom:16px}
 .logo{width:34px;height:34px;border-radius:8px;background:var(--tf);display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .logo svg{width:17px;height:17px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round}
@@ -251,7 +255,7 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 </style>
 </head>
 <body>
-<aside>
+<aside id="sidebar" class="collapsed">
   <div class="logo-row">
     <div class="logo"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
     <div><div class="logo-title">Gestão de Arquitetura</div><div class="logo-sub">Athié Wohnrath</div></div>
@@ -274,6 +278,9 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
   </div>
   <button class="back-btn" onclick="sair()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>Voltar ao planejamento</button>
 </aside>
+<button class="aside-toggle" id="aside-toggle" onclick="togSidebar()" title="Expandir/recolher menu">
+  <span id="aside-toggle-lbl" style="writing-mode:vertical-rl;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-family:var(--font);line-height:1">MENU</span>
+</button>
 <main id="main-area">
   <div class="scr active" id="scr1">
     <div class="s1-hdr"><h1>Equipe de Arquitetura</h1><p class="s1-sub">Selecione a diretoria, os gerentes e os arquitetos para este projeto</p></div>
@@ -836,10 +843,13 @@ function renderCal(){
           +'display:flex;align-items:center;justify-content:center;color:#d1d5db;font-size:16px;cursor:pointer;z-index:1">'
           +'+</div>';
       } else {
+        // Drop zone de altura total para receber drag de barras
+        tbody+='<div ondragover="onDragOver(event)" ondrop="onDrop(event,\''+arqNome+'\',\''+iso+'\',event)" ondragleave="onDragLeave(event)" '
+          +'style="position:absolute;left:'+(di*COL_W+1)+'px;top:0;width:'+(COL_W-2)+'px;height:'+rowH+'px;z-index:2"></div>';
+        // Botão + fixo na base
         tbody+='<div onclick="cellClick(\''+arqNome+'\',\''+iso+'\',event)" '
-          +'ondragover="onDragOver(event)" ondrop="onDrop(event,\''+arqNome+'\',\''+iso+'\',event)" ondragleave="onDragLeave(event)" '
-          +'style="position:absolute;left:'+(di*COL_W+2)+'px;bottom:3px;width:'+(COL_W-6)+'px;height:16px;'
-          +'display:flex;align-items:center;justify-content:center;color:#d1d5db;font-size:12px;cursor:pointer;z-index:5;'
+          +'style="position:absolute;left:'+(di*COL_W+2)+'px;bottom:3px;width:'+(COL_W-6)+'px;height:22px;'
+          +'display:flex;align-items:center;justify-content:center;color:#d1d5db;font-size:12px;cursor:pointer;z-index:6;'
           +'border-radius:3px" '
           +'onmouseover="this.style.background=\'var(--tf-s)\';this.style.color=\'var(--tf-dk)\'" '
           +'onmouseout="this.style.background=\'\';this.style.color=\'#d1d5db\'">'
@@ -854,7 +864,7 @@ function renderCal(){
 }
 
 // ── Barras do calendário: drag, edit, delete ─────────────────────────────────
-var _dragBarData=null,_barEditPop=null,_barEditData=null,_barEditDias=1;
+var _dragBarData=null,_barEditPop=null,_barEditData=null,_barEditDias=1,_barEditIso=null;
 
 function onBarDragStart(ev,el){
   ev.stopPropagation();
@@ -891,6 +901,9 @@ function openBarEdit(ev,el){
   var arqOpts=arqs.map(function(a){return'<option value="'+a+'"'+(a===bar.arquiteto?' selected':'')+'>'+a+'</option>';}).join('');
   var fc=bar.isAll?'#111':getFloorColor(bar.andar);
   var p=document.createElement('div');p.className='aloc-pop';p.style.width='270px';
+  _barEditIso=bar.dataInicio;
+  var fimDatas=computeDatas(bar.dataInicio,bar.dias);
+  var fimStr=fimDatas.length?fBR2(fimDatas[fimDatas.length-1]):'-';
   p.innerHTML='<div class="aloc-pop-hdr">Editar: '+bar.tipo+(bar.isAll?' ('+bar.andares.length+' andares)':' · '+bar.andar)+'</div>'
     +'<div class="aloc-pop-body">'
     +'<div class="aloc-pop-ent" style="background:'+fc+'22;color:'+fc+';border-left:3px solid '+fc+'">'
@@ -898,6 +911,13 @@ function openBarEdit(ev,el){
     +bar.tipo+(bar.isAll?' — '+bar.andares.join(', '):'')+'</div>'
     +'<div class="aloc-pop-label" style="margin-bottom:4px">Arquiteto:</div>'
     +'<select id="bar-edit-arq" style="width:100%;height:28px;border:1px solid var(--border);border-radius:5px;padding:0 6px;font-size:11.5px;font-family:var(--font);background:#fff;margin-bottom:10px">'+arqOpts+'</select>'
+    +'<div class="aloc-pop-label" style="margin-bottom:4px">Data de início:</div>'
+    +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">'
+    +'<button class="dias-btn" style="font-size:16px" onclick="adjBarIni(-1)">&#8249;</button>'
+    +'<span id="bar-edit-ini" style="font-family:var(--font);font-size:14px;font-weight:700;color:var(--tf-dk);min-width:56px;text-align:center">'+fBR2(bar.dataInicio)+'</span>'
+    +'<button class="dias-btn" style="font-size:16px" onclick="adjBarIni(1)">&#8250;</button>'
+    +'</div>'
+    +'<div style="font-size:10px;color:var(--gl);margin-bottom:10px" id="bar-edit-fim">Término: '+fimStr+'</div>'
     +'<div class="aloc-pop-label">Dias:</div>'
     +'<div class="aloc-pop-dias"><button class="dias-btn" onclick="adjBarDias(-1)">&#8722;</button>'
     +'<span class="dias-val" id="bar-edit-dias">'+bar.dias+'</span>'
@@ -911,17 +931,34 @@ function openBarEdit(ev,el){
   document.body.appendChild(p);_barEditPop=p;
   positionPop(p,ev);
 }
+function adjBarIni(d){
+  if(!_barEditIso)return;
+  var cur=pD(_barEditIso),step=d>0?1:-1,next=addD(cur,step);
+  while(!isWork(next))next=addD(next,step);
+  _barEditIso=fISO(next);
+  var el=document.getElementById('bar-edit-ini');
+  if(el)el.textContent=fBR2(_barEditIso);
+  var fim=computeDatas(_barEditIso,_barEditDias);
+  var felm=document.getElementById('bar-edit-fim');
+  if(felm)felm.textContent='Término: '+(fim.length?fBR2(fim[fim.length-1]):'-');
+}
+
 function adjBarDias(d){
   _barEditDias=Math.max(1,Math.min(20,_barEditDias+d));
   var el=document.getElementById('bar-edit-dias');
   if(el)el.textContent=_barEditDias;
+  if(_barEditIso){
+    var fim=computeDatas(_barEditIso,_barEditDias);
+    var felm=document.getElementById('bar-edit-fim');
+    if(felm)felm.textContent='Término: '+(fim.length?fBR2(fim[fim.length-1]):'-');
+  }
 }
 function confirmBarEdit(){
   if(!_barEditData||!plano[curEt]){closeBarEdit();return;}
   var novoArq=document.getElementById('bar-edit-arq').value;
   _barEditData.ids.forEach(function(id){
     var item=plano[curEt].find(function(a){return a.id===id;});
-    if(item){item.dias=_barEditDias;item.arquiteto=novoArq;}
+    if(item){item.dias=_barEditDias;item.arquiteto=novoArq;if(_barEditIso)item.dataInicio=_barEditIso;}
   });
   closeBarEdit();salvAloc();renderEnt();renderCal();
   toast('Alocação atualizada');
@@ -1050,6 +1087,17 @@ function renderRptArq(){var el=document.getElementById('rpt-body'),arqs=eq.arqui
 function imprimirRpt(){var etapas=CTX&&CTX.etapas||[],ativas=CTX&&CTX.etapasAtivas||{},meta=ESTADO&&ESTADO.meta||{};var proj=(meta.codigo?meta.codigo+' — ':'')+( meta.nome||'Planejamento');var arqs=eq.arquitetos,agenda={};arqs.forEach(function(a){agenda[a]={};});Object.keys(plano).forEach(function(etId){(plano[etId]||[]).forEach(function(item){if(!agenda[item.arquiteto])return;computeDatas(item.dataInicio,item.dias).forEach(function(iso){if(!agenda[item.arquiteto][iso])agenda[item.arquiteto][iso]=[];agenda[item.arquiteto][iso].push(item);});});});var rows='';etapas.forEach(function(et){if(ativas[et.id]===false)return;var list=plano[et.id]||[];if(!list.length)return;rows+='<tr><td colspan="6" style="padding:6px 10px;background:#1A5294;color:#fff;font-family:Oswald,sans-serif;font-size:10px;font-weight:700;text-transform:uppercase">'+(et.label||et.id)+'</td></tr>';list.forEach(function(item,i){var datas=computeDatas(item.dataInicio,item.dias),c=COLORS[i%COLORS.length];rows+='<tr style="border-bottom:1px solid #eee"><td style="padding:5px 10px"><span style="display:inline-block;padding:2px 7px;border-radius:8px;font-size:10px;font-weight:700;background:'+c+'22;color:'+c+'">'+item.tipo+'</span></td><td style="padding:5px 10px;font-weight:700">'+item.andar+'</td><td style="padding:5px 10px">'+item.arquiteto+'</td><td style="padding:5px 10px;font-family:monospace">'+fBR2(datas[0]||item.dataInicio)+'</td><td style="padding:5px 10px;font-family:monospace">'+fBR2(datas[datas.length-1]||item.dataInicio)+'</td><td style="padding:5px 10px;font-weight:700;color:#2A9D8F">'+item.dias+'d</td></tr>';});});var agHtml='';arqs.forEach(function(arqNome){var dias=Object.keys(agenda[arqNome]||{}).sort();if(!dias.length)return;var init=arqNome.split(' ').map(function(w){return w[0];}).slice(0,2).join('');agHtml+='<div style="margin-bottom:16px;break-inside:avoid"><div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;padding:6px 10px;background:#f0faf9;border-radius:6px"><div style="width:28px;height:28px;border-radius:7px;background:#3FBFB0;display:flex;align-items:center;justify-content:center;font-family:Oswald,sans-serif;font-size:11px;font-weight:800;color:#111">'+init+'</div><div style="font-family:Oswald,sans-serif;font-size:13px;font-weight:800;color:#1F2326">'+arqNome+'</div><div style="font-size:10px;color:#9CA3AF;margin-left:auto">'+dias.length+' dia(s)</div></div>';dias.forEach(function(iso){var items=agenda[arqNome][iso];agHtml+='<div style="display:flex;align-items:flex-start;padding:4px 10px;gap:10px;border-bottom:1px solid #f3f4f6"><div style="font-family:monospace;font-size:11px;color:#6B7280;min-width:50px;padding-top:2px">'+fBR2(iso)+'</div><div style="display:flex;flex-wrap:wrap;gap:4px">';items.forEach(function(item,i){var c=COLORS[i%COLORS.length];agHtml+='<span style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;background:'+c+';color:#fff;font-size:10px;font-weight:700;font-family:Oswald,sans-serif">'+item.tipo+' <span style="opacity:.8;font-size:9px">'+item.andar+'</span></span>';});agHtml+='</div></div>';});agHtml+='</div>';});var html='<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Plano ARQ</title><style>@page{size:A4 portrait;margin:14mm 12mm}*{box-sizing:border-box}body{font-family:Segoe UI,Arial,sans-serif;font-size:9pt;color:#1F2326;margin:0}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style></head><body>'+'<div style="border-bottom:3px solid #1A5294;padding-bottom:10px;margin-bottom:14px;display:flex;align-items:flex-end;justify-content:space-between"><div><div style="font-size:18pt;font-weight:800;color:#1A2535;text-transform:uppercase">Plano de Arquitetura</div><div style="font-size:10pt;color:#6B7280;margin-top:3px"><strong>'+proj+'</strong></div></div><div style="text-align:right;font-size:8pt;color:#9CA3AF;line-height:1.7"><div>Diretor: <strong>'+eq.diretor+'</strong></div><div>Emitido: <strong>'+new Date().toLocaleDateString('pt-BR')+'</strong></div></div></div>'+'<div style="font-size:10px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Alocação por etapa</div>'+'<table style="width:100%;border-collapse:collapse;font-size:8.5pt;margin-bottom:20px"><thead><tr style="background:#F8F9FA"><th style="text-align:left;padding:6px 10px;border-bottom:2px solid #E5E7EB;font-size:9px;font-weight:700;text-transform:uppercase;color:#9CA3AF">Entrega</th><th style="text-align:left;padding:6px 10px;border-bottom:2px solid #E5E7EB;font-size:9px;font-weight:700;text-transform:uppercase;color:#9CA3AF">Andar</th><th style="text-align:left;padding:6px 10px;border-bottom:2px solid #E5E7EB;font-size:9px;font-weight:700;text-transform:uppercase;color:#9CA3AF">Arquiteto</th><th style="text-align:left;padding:6px 10px;border-bottom:2px solid #E5E7EB;font-size:9px;font-weight:700;text-transform:uppercase;color:#9CA3AF">Início</th><th style="text-align:left;padding:6px 10px;border-bottom:2px solid #E5E7EB;font-size:9px;font-weight:700;text-transform:uppercase;color:#9CA3AF">Fim</th><th style="text-align:left;padding:6px 10px;border-bottom:2px solid #E5E7EB;font-size:9px;font-weight:700;text-transform:uppercase;color:#9CA3AF">Dias</th></tr></thead><tbody>'+rows+'</tbody></table>'+'<div style="font-size:10px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;padding-top:12px;border-top:2px solid #E5E7EB">Agenda por arquiteto</div>'+agHtml+'<scr'+'ipt>window.onload=function(){setTimeout(function(){window.print();},400);}<'+'/scr'+'ipt></body></html>';var w=window.open('','_blank');if(w){w.document.write(html);w.document.close();}}
 function confirmar(){if(!ESTADO)return;if(!ESTADO.cfg)ESTADO.cfg={};if(!ESTADO.cfg.equipeARQ)ESTADO.cfg.equipeARQ={};ESTADO.cfg.equipeARQ.gerentes=eq.gerentes.slice();ESTADO.cfg.equipeARQ.arquitetos=eq.arquitetos.slice();ESTADO.cfg.equipeARQ.planoAloc=plano;try{sessionStorage.setItem('aw_estado_atual',JSON.stringify({ts:Date.now(),estado:ESTADO}));}catch(e){}toast('Equipe e alocação confirmadas ✓');setTimeout(function(){if(window.parent&&window.parent.fecharGestaoArq)window.parent.fecharGestaoArq(true);else window.location.href='app.html';},700);}
 function sair(){if(window.parent&&window.parent.fecharGestaoArq)window.parent.fecharGestaoArq(false);else window.location.href='app.html';}
+function togSidebar(){
+  var sb=document.getElementById('sidebar');
+  var btn=document.getElementById('aside-toggle');
+  var lbl=document.getElementById('aside-toggle-lbl');
+  var collapsed=sb.classList.toggle('collapsed');
+  if(btn)btn.style.left=collapsed?'0':'240px';
+  if(lbl){lbl.textContent=collapsed?'MENU':'‹';lbl.style.writingMode=collapsed?'vertical-rl':'horizontal-tb';}
+}
+// Sidebar começa recolhida: toggle parte do left=0
+(function(){var btn=document.getElementById('aside-toggle');if(btn)btn.style.left='0';})();
+
 function togEpanel(){
   var ep=document.getElementById('ep-panel');
   var lbl=document.getElementById('ep-toggle-label');
