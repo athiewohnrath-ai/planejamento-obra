@@ -615,6 +615,7 @@ function togNN(entId){
 
 function _entItemHtml(it){
   var alloc=isAloc(curEt,it.id),nn=isNN(curEt,it.id),sel=selEnt&&selEnt.id===it.id;
+  if(alloc) return ''; // ocultar itens já alocados
   var fc=getFloorColor(it.andar);
   var cls='ent-item'+(alloc?' done':nn?' na clickable':sel?' sel':' clickable');
   var h='<div class="'+cls+'" draggable="'+(alloc||nn?'false':'true')+'" ';
