@@ -778,7 +778,7 @@ function renderCal(){
         +'</div>';
     });
 
-    // Botões "+" para dias sem atividade
+    // Botão "+" sempre visível — no centro se vazio, na base se ocupado
     days.forEach(function(d,di){
       if(d.out)return;
       var iso=fISO(d.date);
@@ -788,20 +788,21 @@ function renderCal(){
       });
       if(!busy){
         tbody+='<div onclick="cellClick(\''+arqNome+'\',\''+iso+'\',event)" '
-          +'ondragover="onDragOver(event)" ondrop="onDrop(event,\''+arqNome+'\',\''+iso+'\')" ondragleave="onDragLeave(event)" '
+          +'ondragover="onDragOver(event)" ondrop="onDrop(event,\''+arqNome+'\',\''+iso+'\',event)" ondragleave="onDragLeave(event)" '
           +'style="position:absolute;left:'+(di*COL_W+1)+'px;top:0;width:'+(COL_W-2)+'px;height:'+rowH+'px;'
           +'display:flex;align-items:center;justify-content:center;color:#d1d5db;font-size:16px;cursor:pointer;z-index:1">'
-          +'+'
-          +'</div>';
+          +'+</div>';
       } else {
-        // Área de click sobre chips existentes (para adicionar mais)
-        tbody+='<div '
-          +'ondragover="onDragOver(event)" ondrop="onDrop(event,\''+arqNome+'\',\''+iso+'\')" ondragleave="onDragLeave(event)" '
-          +'style="position:absolute;left:'+(di*COL_W+1)+'px;top:0;width:'+(COL_W-2)+'px;height:'+rowH+'px;z-index:1;pointer-events:none">'
-          +'</div>';
+        tbody+='<div onclick="cellClick(\''+arqNome+'\',\''+iso+'\',event)" '
+          +'ondragover="onDragOver(event)" ondrop="onDrop(event,\''+arqNome+'\',\''+iso+'\',event)" ondragleave="onDragLeave(event)" '
+          +'style="position:absolute;left:'+(di*COL_W+2)+'px;bottom:3px;width:'+(COL_W-6)+'px;height:16px;'
+          +'display:flex;align-items:center;justify-content:center;color:#d1d5db;font-size:12px;cursor:pointer;z-index:5;'
+          +'border-radius:3px" '
+          +'onmouseover="this.style.background=\'var(--tf-s)\';this.style.color=\'var(--tf-dk)\'" '
+          +'onmouseout="this.style.background=\'\';this.style.color=\'#d1d5db\'">'
+          +'+</div>';
       }
     });
-
     tbody+='</td></tr>';
   });
   tbody+='</tbody>';
