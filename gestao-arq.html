@@ -10,11 +10,24 @@
 *{box-sizing:border-box;margin:0;padding:0}html,body{height:100%;overflow:hidden}
 body{font-family:var(--body);background:var(--bg);color:var(--ink);display:flex;height:100vh;font-size:13px}
 button{font-family:inherit;cursor:pointer}input,select{font-family:inherit}
-aside{width:240px;background:var(--black);color:#fff;display:flex;flex-direction:column;padding:16px 13px;flex-shrink:0;transition:width .22s ease,padding .22s ease,min-width .22s ease;overflow:hidden;position:relative}
-aside.collapsed{width:0;min-width:0;padding:0;overflow:hidden}
-.aside-toggle{position:fixed;left:0;top:50%;transform:translateY(-50%);width:18px;height:72px;background:#111213;border:1px solid rgba(255,255,255,.15);border-left:none;border-radius:0 6px 6px 0;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:200;color:rgba(255,255,255,.6);transition:left .22s ease,background .15s}
-.aside-toggle:hover{background:#222;color:#fff}
-aside.collapsed~.aside-toggle,aside.collapsed+.aside-toggle{left:0}
+aside{width:240px;background:var(--black);color:#fff;display:flex;flex-direction:column;padding:16px 13px;flex-shrink:0;transition:width .22s ease,padding .22s ease;overflow:hidden;position:relative}
+aside.collapsed{width:48px;padding:12px 6px}
+/* Itens que somem na versão mini */
+aside.collapsed .logo-title,aside.collapsed .logo-sub,
+aside.collapsed .ctx,aside.collapsed .divider,aside.collapsed .nav-label,
+aside.collapsed .step-label,aside.collapsed .step-sub,
+aside.collapsed .font-ctrl-label,aside.collapsed .font-pct,
+aside.collapsed .back-btn-label{display:none}
+/* Layout mini */
+aside.collapsed .logo-row{justify-content:center;margin-bottom:20px}
+aside.collapsed .steps{gap:6px}
+aside.collapsed .step-btn{justify-content:center;padding:9px 4px}
+aside.collapsed .step-dot{margin:0}
+aside.collapsed .font-ctrl{flex-direction:column;align-items:center;gap:4px;border-top:1px solid rgba(255,255,255,.08);padding-top:8px}
+aside.collapsed .back-btn{justify-content:center;padding:7px 4px}
+.aside-toggle{position:fixed;left:240px;top:50%;transform:translateY(-50%);width:16px;height:56px;background:#111213;border:1px solid rgba(255,255,255,.15);border-left:none;border-radius:0 5px 5px 0;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:200;color:rgba(255,255,255,.5);transition:left .22s ease,background .15s;font-size:11px}
+aside.collapsed+.aside-toggle,.aside-toggle.mini{left:48px}
+.aside-toggle:hover{background:#1a1a1a;color:#fff}
 .logo-row{display:flex;align-items:center;gap:9px;margin-bottom:16px}
 .logo{width:34px;height:34px;border-radius:8px;background:var(--tf);display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .logo svg{width:17px;height:17px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round}
@@ -130,8 +143,9 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 /* Painel recolhível */
 .ep{transition:width .22s ease,min-width .22s ease}
 .ep.collapsed{width:0!important;min-width:0!important;overflow:hidden;border-right:none}
-.ep-toggle-btn{position:absolute;right:-18px;top:50%;transform:translateY(-50%);width:18px;height:72px;background:#EAEBEE;border:1px solid var(--border);border-left:none;border-radius:0 6px 6px 0;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10;color:var(--gl);transition:all .15s;padding:4px 2px}
+.ep-toggle-btn{position:absolute;right:-20px;top:50%;transform:translateY(-50%);width:20px;height:80px;background:#EAEBEE;border:1px solid var(--border);border-left:none;border-radius:0 6px 6px 0;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:20;color:var(--gl);transition:all .15s;padding:4px 2px}
 .ep-toggle-btn:hover{background:var(--tf-s);color:var(--tf-dk)}
+.ep.collapsed+.ep-toggle-btn,.ep.collapsed .ep-toggle-btn{right:-20px}
 .ep-wrapper{position:relative;display:flex;flex-shrink:0}
 /* Calendário fundo */
 .cal-body{flex:1;overflow:auto;background:#EAEBEE}
@@ -265,9 +279,9 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
   <div class="divider"></div>
   <div class="nav-label">Etapas</div>
   <div class="steps">
-    <button class="step-btn clickable" id="sb1" onclick="goScr(1)"><div class="step-dot" id="sd1">1</div><div><div class="step-label">Equipe</div><div class="step-sub">Gerentes e arquitetos</div></div></button>
-    <button class="step-btn clickable" id="sb2" onclick="goScr(2)"><div class="step-dot" id="sd2">2</div><div><div class="step-label">Alocação</div><div class="step-sub">Calendário dia a dia</div></div></button>
-    <button class="step-btn locked" id="sb3" onclick="goScr(3)"><div class="step-dot" id="sd3">3</div><div><div class="step-label">Relatório</div><div class="step-sub">Visão geral + impressão</div></div></button>
+    <button class="step-btn clickable" id="sb1" onclick="goScr(1)" title="Equipe"><div class="step-dot" id="sd1">1</div><div><div class="step-label">Equipe</div><div class="step-sub">Gerentes e arquitetos</div></div></button>
+    <button class="step-btn clickable" id="sb2" onclick="goScr(2)" title="Alocação"><div class="step-dot" id="sd2">2</div><div><div class="step-label">Alocação</div><div class="step-sub">Calendário dia a dia</div></div></button>
+    <button class="step-btn locked" id="sb3" onclick="goScr(3)" title="Relatório"><div class="step-dot" id="sd3">3</div><div><div class="step-label">Relatório</div><div class="step-sub">Visão geral + impressão</div></div></button>
   </div>
   <div class="spacer"></div>
   <div class="font-ctrl">
@@ -276,11 +290,9 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
     <span class="font-pct" id="fscale-lbl">100%</span>
     <button class="font-btn" onclick="adjFont(0.1)">+</button>
   </div>
-  <button class="back-btn" onclick="sair()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>Voltar ao planejamento</button>
+  <button class="back-btn" onclick="sair()" title="Voltar ao planejamento"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg><span class="back-btn-label">Voltar ao planejamento</span></button>
 </aside>
-<button class="aside-toggle" id="aside-toggle" onclick="togSidebar()" title="Expandir/recolher menu">
-  <span id="aside-toggle-lbl" style="writing-mode:vertical-rl;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-family:var(--font);line-height:1">MENU</span>
-</button>
+<button class="aside-toggle" id="aside-toggle" onclick="togSidebar()" title="Expandir/recolher menu"><span id="aside-toggle-lbl">›</span></button>
 <main id="main-area">
   <div class="scr active" id="scr1">
     <div class="s1-hdr"><h1>Equipe de Arquitetura</h1><p class="s1-sub">Selecione a diretoria, os gerentes e os arquitetos para este projeto</p></div>
@@ -1092,11 +1104,14 @@ function togSidebar(){
   var btn=document.getElementById('aside-toggle');
   var lbl=document.getElementById('aside-toggle-lbl');
   var collapsed=sb.classList.toggle('collapsed');
-  if(btn)btn.style.left=collapsed?'0':'240px';
-  if(lbl){lbl.textContent=collapsed?'MENU':'‹';lbl.style.writingMode=collapsed?'vertical-rl':'horizontal-tb';}
+  if(btn){btn.style.left=collapsed?'48px':'240px';btn.classList.toggle('mini',collapsed);}
+  if(lbl)lbl.textContent=collapsed?'›':'‹';
 }
-// Sidebar começa recolhida: toggle parte do left=0
-(function(){var btn=document.getElementById('aside-toggle');if(btn)btn.style.left='0';})();
+// Sidebar começa recolhida
+(function(){
+  var btn=document.getElementById('aside-toggle');
+  if(btn){btn.style.left='48px';btn.classList.add('mini');}
+})();
 
 function togEpanel(){
   var ep=document.getElementById('ep-panel');
