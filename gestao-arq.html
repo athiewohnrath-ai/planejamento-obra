@@ -170,6 +170,15 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .acell.sel-ready{outline:2px dashed rgba(63,191,176,.5);outline-offset:-2px}
 .chips-wrap{display:flex;flex-direction:column;gap:2px}
 .achip{display:flex;align-items:center;gap:4px;padding:3px 6px;border-radius:4px;font-size:10px;font-weight:600;color:var(--ink);line-height:1.3;font-family:var(--font);cursor:pointer;position:relative;width:100%;transition:all .12s;background:var(--white);border:0.5px solid var(--border)}
+.cal-bar{position:absolute;border-radius:4px;display:flex;align-items:center;gap:5px;padding:0 7px;cursor:grab;z-index:3;overflow:visible!important;transition:filter .12s;box-sizing:border-box}
+.cal-bar:hover{filter:brightness(1.1)}
+.cal-bar:active{cursor:grabbing;filter:brightness(.95)}
+.bar-del{position:absolute;top:-7px;right:-7px;width:16px;height:16px;border-radius:50%;background:#DC4C2E;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;opacity:0;transition:opacity .15s;cursor:pointer;z-index:10;border:none;line-height:1;flex-shrink:0}
+.cal-bar:hover .bar-del{opacity:1}
+.bar-inner{display:flex;align-items:center;gap:5px;width:100%;overflow:hidden}
+.bar-andar{font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;background:rgba(0,0,0,.2);color:#fff;flex-shrink:0}
+.bar-tipo{font-size:10px;font-weight:600;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;text-shadow:0 1px 2px rgba(0,0,0,.15)}
+.bar-days{font-size:9px;color:rgba(255,255,255,.7);flex-shrink:0}
 .achip:hover{border-color:var(--tf);background:var(--tf-s)}
 .achip.cont{opacity:.6;border-style:dashed}
 .achip.sp-r{border-radius:4px 0 0 4px;margin-right:-1px;border-right:none;z-index:2;position:relative}
@@ -426,7 +435,7 @@ function computeDatas(isoStart,dias){var r=[],cur=pD(isoStart),cnt=0;while(cnt<d
   var _ma=document.getElementById('main-area');if(_ma)_ma.style.zoom=_fscale;
   var _fl=document.getElementById('fscale-lbl');if(_fl)_fl.textContent=Math.round(_fscale*100)+'%';
   document.addEventListener('keydown',function(e){if(e.key==='Escape'){closePop();sair();}});
-  document.addEventListener('click',function(e){if(!e.target.closest('.aloc-pop')){closePop();closeGrpPop();}});
+  document.addEventListener('click',function(e){if(!e.target.closest('.aloc-pop')){closePop();closeGrpPop();closeBarEdit();}});
 })();
 
 function adjFont(d){_fscale=Math.max(0.7,Math.min(1.8,Math.round((_fscale+d)*10)/10));document.getElementById('main-area').style.zoom=_fscale;document.getElementById('fscale-lbl').textContent=Math.round(_fscale*100)+'%';}
@@ -796,14 +805,19 @@ function renderCal(){
         :'rmAloc(\''+item.ids[0]+'\',event)';
       var bg=item.isAll?'#111':fc;
       var bdColor=item.isAll?'#333':getFloorColorDk(item.andar);
-      tbody+='<div onclick="'+rmFn+'" '
-        +'style="position:absolute;left:'+L+'px;top:'+T+'px;width:'+W+'px;height:'+CHIP_H+'px;'
-        +'background:'+bg+';border:2px solid '+bdColor+';border-radius:4px;'
-        +'display:flex;align-items:center;gap:5px;padding:0 7px;cursor:pointer;z-index:3;overflow:hidden;" '
-        +'title="'+item.tipo+' · '+item.andares.join('+')+' — clique para remover">'
-        +'<span style="font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;background:rgba(0,0,0,.2);color:#fff;flex-shrink:0">'+item.andar+'</span>'
-        +'<span style="font-size:10px;font-weight:600;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;text-shadow:0 1px 2px rgba(0,0,0,.15)">'+item.tipo+'</span>'
-        +(item.dias>1?'<span style="font-size:9px;color:rgba(255,255,255,.7);flex-shrink:0">'+item.dias+'d</span>':'')
+      var barData=JSON.stringify({ids:item.ids,tipo:item.tipo,andar:item.andar,dataInicio:item.dataInicio,dias:item.dias,isAll:item.isAll,arquiteto:arqNome,andares:item.andares}).replace(/'/g,"&#39;");
+      tbody+='<div class="cal-bar" draggable="true" '
+        +'ondragstart="onBarDragStart(event,this)" ondragend="onBarDragEnd(event)" '
+        +'onclick="openBarEdit(event,this)" '
+        +'data-bar=\''+barData+'\' '
+        +'style="left:'+L+'px;top:'+T+'px;width:'+W+'px;height:'+CHIP_H+'px;'
+        +'background:'+bg+';border:2px solid '+bdColor+';">'
+        +'<button class="bar-del" onclick="event.stopPropagation();barDelete(this)" title="Remover">&#10005;</button>'
+        +'<div class="bar-inner">'
+        +'<span class="bar-andar">'+item.andar+'</span>'
+        +'<span class="bar-tipo">'+item.tipo+'</span>'
+        +(item.dias>1?'<span class="bar-days">'+item.dias+'d</span>':'')
+        +'</div>'
         +'</div>';
     });
 
@@ -839,6 +853,87 @@ function renderCal(){
   updCTA2();
 }
 
+// ── Barras do calendário: drag, edit, delete ─────────────────────────────────
+var _dragBarData=null,_barEditPop=null,_barEditData=null,_barEditDias=1;
+
+function onBarDragStart(ev,el){
+  ev.stopPropagation();
+  try{_dragBarData=JSON.parse(el.dataset.bar);}catch(e){_dragBarData=null;return;}
+  ev.dataTransfer.effectAllowed='move';
+  ev.dataTransfer.setData('text/plain',JSON.stringify({_isBar:true,bar:_dragBarData}));
+  setTimeout(function(){el.style.opacity='.45';},0);
+}
+function onBarDragEnd(ev){
+  _dragBarData=null;
+  ev.target.style.opacity='';
+}
+
+function barDelete(btn){
+  var bar=null;
+  try{bar=JSON.parse(btn.closest('.cal-bar').dataset.bar);}catch(e){return;}
+  if(!plano[curEt])return;
+  if(bar.isAll){
+    plano[curEt]=plano[curEt].filter(function(a){return bar.ids.indexOf(a.id)<0;});
+  } else {
+    plano[curEt]=plano[curEt].filter(function(a){return a.id!==bar.ids[0];});
+  }
+  salvAloc();renderEnt();renderCal();
+}
+
+function openBarEdit(ev,el){
+  ev.stopPropagation();
+  var bar=null;
+  try{bar=JSON.parse(el.dataset.bar);}catch(e){return;}
+  closeBarEdit();
+  _barEditData=bar;_barEditDias=bar.dias;
+  var et=CTX&&CTX.etapas.find(function(e){return e.id===curEt;});
+  var arqs=eq.arquitetos;
+  var arqOpts=arqs.map(function(a){return'<option value="'+a+'"'+(a===bar.arquiteto?' selected':'')+'>'+a+'</option>';}).join('');
+  var fc=bar.isAll?'#111':getFloorColor(bar.andar);
+  var p=document.createElement('div');p.className='aloc-pop';p.style.width='270px';
+  p.innerHTML='<div class="aloc-pop-hdr">Editar: '+bar.tipo+(bar.isAll?' ('+bar.andares.length+' andares)':' · '+bar.andar)+'</div>'
+    +'<div class="aloc-pop-body">'
+    +'<div class="aloc-pop-ent" style="background:'+fc+'22;color:'+fc+';border-left:3px solid '+fc+'">'
+    +(bar.isAll?'<span class="achip-all-badge" style="background:'+fc+';color:#fff;font-size:9px;padding:1px 5px;border-radius:3px">ALL</span> ':'')
+    +bar.tipo+(bar.isAll?' — '+bar.andares.join(', '):'')+'</div>'
+    +'<div class="aloc-pop-label" style="margin-bottom:4px">Arquiteto:</div>'
+    +'<select id="bar-edit-arq" style="width:100%;height:28px;border:1px solid var(--border);border-radius:5px;padding:0 6px;font-size:11.5px;font-family:var(--font);background:#fff;margin-bottom:10px">'+arqOpts+'</select>'
+    +'<div class="aloc-pop-label">Dias:</div>'
+    +'<div class="aloc-pop-dias"><button class="dias-btn" onclick="adjBarDias(-1)">&#8722;</button>'
+    +'<span class="dias-val" id="bar-edit-dias">'+bar.dias+'</span>'
+    +'<span class="dias-label">dia(s)</span>'
+    +'<button class="dias-btn" onclick="adjBarDias(1)">+</button></div>'
+    +'<div class="aloc-pop-btns" style="margin-top:12px">'
+    +'<button onclick="barDelete2()" style="height:30px;padding:0 10px;background:rgba(220,76,46,.1);border:1px solid rgba(220,76,46,.3);border-radius:6px;font-family:var(--font);font-size:10.5px;font-weight:700;color:#DC4C2E;cursor:pointer">Remover</button>'
+    +'<button class="pop-btn-cancel" onclick="closeBarEdit()">Cancelar</button>'
+    +'<button class="pop-btn-ok" onclick="confirmBarEdit()">Salvar</button>'
+    +'</div></div>';
+  document.body.appendChild(p);_barEditPop=p;
+  positionPop(p,ev);
+}
+function adjBarDias(d){
+  _barEditDias=Math.max(1,Math.min(20,_barEditDias+d));
+  var el=document.getElementById('bar-edit-dias');
+  if(el)el.textContent=_barEditDias;
+}
+function confirmBarEdit(){
+  if(!_barEditData||!plano[curEt]){closeBarEdit();return;}
+  var novoArq=document.getElementById('bar-edit-arq').value;
+  _barEditData.ids.forEach(function(id){
+    var item=plano[curEt].find(function(a){return a.id===id;});
+    if(item){item.dias=_barEditDias;item.arquiteto=novoArq;}
+  });
+  closeBarEdit();salvAloc();renderEnt();renderCal();
+  toast('Alocação atualizada');
+}
+function barDelete2(){
+  if(!_barEditData||!plano[curEt]){closeBarEdit();return;}
+  plano[curEt]=plano[curEt].filter(function(a){return _barEditData.ids.indexOf(a.id)<0;});
+  closeBarEdit();salvAloc();renderEnt();renderCal();
+}
+function closeBarEdit(){if(_barEditPop){_barEditPop.remove();_barEditPop=null;}_barEditData=null;}
+
+
 function rmAlocGrp(ids,ev){
   if(ev)ev.stopPropagation();
   if(!plano[curEt])return;
@@ -868,9 +963,21 @@ function onDrop(ev,arqNome,iso){
   var data=ev.dataTransfer.getData('text/plain'),parsed=null;
   try{parsed=JSON.parse(data);}catch(e){}
   if(!parsed)return;
-  // Verificar se é um grupo (tem .items array)
+  // Drag de barra existente → mover
+  if(parsed._isBar&&parsed.bar){
+    var bar=parsed.bar;
+    if(!plano[curEt])return;
+    bar.ids.forEach(function(id){
+      var item=plano[curEt].find(function(a){return a.id===id;});
+      if(item){item.dataInicio=iso;item.arquiteto=arqNome;}
+    });
+    salvAloc();renderEnt();renderCal();
+    toast('Movido para '+arqNome+' — '+iso.split('-').reverse().slice(0,2).join('/'));
+    return;
+  }
+  // Drag de grupo do painel
   if(parsed.items){openGrpPop(parsed,arqNome,iso,ev);return;}
-  // Item individual
+  // Item individual do painel
   if(isAloc(curEt,parsed.id)){toast('Esta entrega já foi alocada');return;}
   openAlocPop(parsed,arqNome,iso,ev);
 }
