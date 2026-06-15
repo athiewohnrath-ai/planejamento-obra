@@ -306,7 +306,7 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
         <div class="drag-hint">💡 Clique ou arraste para o calendário</div>
       </div>
       <div class="cal-wrap">
-        <div class="cal-hdr"><span class="cal-badge" id="cal-badge">—</span><div class="cal-prog" id="cal-prog"></div><div class="kit-toggle"><span style="font-size:10px;color:var(--gl);font-family:var(--font)">Vista:</span><button class="kit-btn active" id="kit-btn-ind" onclick="setKitMode(false)">Individual</button><button class="kit-btn" id="kit-btn-kit" onclick="setKitMode(true)">Kit ALL</button></div></div>
+        <div class="cal-hdr"><span class="cal-badge" id="cal-badge">—</span><div class="cal-prog" id="cal-prog"></div><div class="kit-toggle"><span style="font-size:10px;color:var(--gl);font-family:var(--font)">Vista:</span><button class="kit-btn" id="kit-btn-ind" onclick="setKitMode(false)">Individual</button><button class="kit-btn active" id="kit-btn-kit" onclick="setKitMode(true)">Kit ALL</button></div></div>
         <div class="cal-body"><table class="at" id="at"></table></div>
       </div>
     </div>
@@ -363,7 +363,7 @@ var ESTADO=null,CTX=null;
 var eq={diretor:'',gerentes:[],arquitetos:[]};
 var plano={};var customEnts={};
 var selEnt=null,curEt=null,dragItem=null;window._outrasOpen=false;
-var notNeeded={};var _kitMode=false;
+var notNeeded={};var _kitMode=true;
 var curScr=1,curRTab=1,_fscale=1;
 var _pop=null,_popDias=1,_popEnt=null,_popArq=null,_popIso=null;
 
@@ -686,23 +686,26 @@ function renderCal(){
 
   var tbody='<tbody>';
   arqs.forEach(function(arqNome){
+
+    // No modo kit: dias seguintes de itens multi-dia são "skipped" (colspan os cobre)
+    var skipped={};
+    if(_kitMode){
+      (plano[curEt]||[]).forEach(function(item){
+        if(item.arquiteto!==arqNome||item.dias<=1) return;
+        computeDatas(item.dataInicio,item.dias).slice(1).forEach(function(iso){
+          skipped[iso]=true;
+        });
+      });
+    }
+
     tbody+='<tr><td class="arq-lbl"><div class="arq-name">'+arqNome+'</div>'
       +'<div class="arq-role">Arquiteto</div></td>';
 
-    // Pré-calcular células cobertas por colspan de itens multi-dia
-    var skipped={};
-    (plano[curEt]||[]).forEach(function(item){
-      if(item.arquiteto!==arqNome||item.dias<=1) return;
-      if(fISO(pD(item.dataInicio))!==fISO(pD(item.dataInicio))) return; // sanity
-      var datas=computeDatas(item.dataInicio,item.dias);
-      // Marcar todos os dias APÓS o primeiro como cobertos
-      datas.slice(1).forEach(function(iso){ skipped[iso]=item.id; });
-    });
-
     days.forEach(function(d,di){
       var iso=fISO(d.date);
-      // Se coberto por colspan de item anterior — não emitir <td>
-      if(skipped[iso]) return;
+
+      // Modo kit: pular células cobertas por colspan
+      if(_kitMode&&skipped[iso]) return;
 
       if(d.out){tbody+='<td class="acell out"></td>';return;}
 
@@ -711,33 +714,34 @@ function renderCal(){
       var cls='acell'+(iso===todayISO?' today-col':'');
       if(selEnt||dragItem||_dragGrp) cls+=' sel-ready';
 
-      // Calcular colspan para item único multi-dia
-      var colspan=1;
-      var singleMulti=cellItems.length===1&&cellItems[0].dias>1&&fISO(pD(cellItems[0].dataInicio))===iso;
-      if(singleMulti){
-        var datas2=computeDatas(cellItems[0].dataInicio,cellItems[0].dias);
-        var lastIso=datas2[datas2.length-1];
-        for(var k=di+1;k<days.length;k++){
-          var kiso=fISO(days[k].date);
-          if(kiso>lastIso) break;
-          colspan++;
-          if(kiso===lastIso) break;
+      if(_kitMode){
+        // Calcular colspan pelo item com mais dias que começa hoje
+        var startItems=cellItems.filter(function(i){return fISO(pD(i.dataInicio))===iso;});
+        var colspan=1;
+        if(startItems.length>0){
+          var maxDias=Math.max.apply(null,startItems.map(function(i){return i.dias;}));
+          if(maxDias>1){
+            var datas2=computeDatas(startItems[0].dataInicio,maxDias);
+            var lastIso=datas2[datas2.length-1];
+            for(var k=di+1;k<days.length;k++){
+              var kiso=fISO(days[k].date);
+              colspan++;
+              if(kiso===lastIso||kiso>lastIso) break;
+            }
+          }
         }
-      }
+        var cs=colspan>1?' colspan="'+colspan+'"':'';
+        tbody+='<td class="'+cls+(hasChips?' has-chips':'')+'"'+cs
+          +' ondragover="onDragOver(event)"'
+          +' ondrop="onDrop(event,\''+arqNome+'\',\''+iso+'\')"'
+          +' ondragleave="onDragLeave(event)"'
+          +' onclick="cellClick(\''+arqNome+'\',\''+iso+'\',event)">';
 
-      var cs=colspan>1?' colspan="'+colspan+'"':'';
-      tbody+='<td class="'+cls+(hasChips?' has-chips':'')+'"'+cs
-        +' ondragover="onDragOver(event)"'
-        +' ondrop="onDrop(event,\''+arqNome+'\',\''+iso+'\')"'
-        +' ondragleave="onDragLeave(event)"'
-        +' onclick="cellClick(\''+arqNome+'\',\''+iso+'\',event)">';
-
-      if(hasChips){
-        tbody+='<div class="chips-wrap">';
-                if(_kitMode){
-          // Agrupar por tipo — ALL quando 2+ itens do mesmo tipo
+        if(hasChips){
+          tbody+='<div class="chips-wrap">';
+          // Agrupar por tipo os itens que COMEÇAM hoje
           var byTipo={};
-          cellItems.forEach(function(item){
+          startItems.forEach(function(item){
             if(!byTipo[item.tipo])byTipo[item.tipo]=[];
             byTipo[item.tipo].push(item);
           });
@@ -745,37 +749,48 @@ function renderCal(){
             var grp=byTipo[tipo];
             if(grp.length>=2){
               var ids=grp.map(function(i){return i.id;}).join('~');
-              tbody+='<div class="achip all-mode" onclick="rmAlocGrp(\''+ids+'\',event)" title="'+tipo+' em '+grp.length+' andares">'
+              tbody+='<div class="achip all-mode" onclick="rmAlocGrp(\''+ids+'\',event)"'
+                +' title="Kit: '+tipo+' '+grp.map(function(i){return i.andar;}).join('+')+' — remover">'
                 +'<span class="achip-all-badge">ALL</span>'
                 +'<span class="achip-tipo">'+tipo+'</span>'
-                +'<span class="days-badge">'+grp.length+'×</span>'
+                +(colspan>1?'<span class="chip-days">'+grp[0].dias+'d</span>':'')
                 +'</div>';
             } else {
-              var item=grp[0],fc2=getFloorColor(item.andar);
-              var isFirst=fISO(pD(item.dataInicio))===iso;
-              tbody+='<div class="achip" onclick="rmAloc(\''+item.id+'\',event)">'
-                +'<span class="achip-floor" style="background:'+(isFirst?fc2:'#fff')+';color:'+(isFirst?'#fff':'#9CA3AF')+';border:'+(isFirst?'none':'0.5px solid #E5E7EB')+'">'+item.andar+'</span>'
-                +'<span class="achip-tipo">'+item.tipo+'</span>'
+              var fc2=getFloorColor(grp[0].andar);
+              tbody+='<div class="achip" onclick="rmAloc(\''+grp[0].id+'\',event)">'
+                +'<span class="achip-floor" style="background:'+fc2+'">'+grp[0].andar+'</span>'
+                +'<span class="achip-tipo">'+grp[0].tipo+'</span>'
+                +(colspan>1?'<span class="chip-days">'+grp[0].dias+'d</span>':'')
+                +'<span class="chip-del">✕</span>'
                 +'</div>';
             }
           });
-        } else {
+          tbody+='</div>';
+        }
+        tbody+='<div class="add-cell-btn">+</div></td>';
+
+      } else {
+        // Modo individual: mostra todos os itens em cada dia, sem colspan
+        tbody+='<td class="'+cls+(hasChips?' has-chips':'')+'"'
+          +' ondragover="onDragOver(event)"'
+          +' ondrop="onDrop(event,\''+arqNome+'\',\''+iso+'\')"'
+          +' ondragleave="onDragLeave(event)"'
+          +' onclick="cellClick(\''+arqNome+'\',\''+iso+'\',event)">';
+        if(hasChips){
+          tbody+='<div class="chips-wrap">';
           cellItems.forEach(function(item){
             var fc2=getFloorColor(item.andar);
             var isFirst=fISO(pD(item.dataInicio))===iso;
-            tbody+='<div class="achip" onclick="rmAloc(\''+item.id+'\',event)"'
-              +' title="'+item.tipo+' · '+item.andar+(item.dias>1?' ('+item.dias+' dias)':'')+' — remover">';
-            if(isFirst){tbody+='<span class="achip-floor" style="background:'+fc2+'">'+item.andar+'</span>';}
-            else{tbody+='<span class="achip-floor" style="background:#fff;color:#9CA3AF;border:0.5px solid #E5E7EB">'+item.andar+'</span>';}
-            tbody+='<span class="achip-tipo">'+item.tipo+'</span>';
-            if(colspan>1&&isFirst)tbody+='<span class="chip-days">'+item.dias+'d</span>';
-            if(isFirst)tbody+='<span class="chip-del">✕</span>';
-            tbody+='</div>';
+            tbody+='<div class="achip" onclick="rmAloc(\''+item.id+'\',event)">'
+              +'<span class="achip-floor" style="background:'+(isFirst?fc2:'#fff')+';color:'+(isFirst?'#fff':'#9CA3AF')+';border:'+(isFirst?'none':'0.5px solid #E5E7EB')+'">'+item.andar+'</span>'
+              +'<span class="achip-tipo">'+item.tipo+'</span>'
+              +(isFirst?'<span class="chip-del">✕</span>':'')
+              +'</div>';
           });
+          tbody+='</div>';
         }
-        tbody+='</div>';
+        tbody+='<div class="add-cell-btn">+</div></td>';
       }
-      tbody+='<div class="add-cell-btn">+</div></td>';
     });
     tbody+='</tr>';
   });
@@ -848,7 +863,7 @@ function openGrpPop(grp,arqNome,iso,ev){
     +'<div class="aloc-pop-ent" style="background:'+c+'22;color:'+c+';border-left:3px solid '+c+'">'
     +'<span style="background:'+c+';width:8px;height:8px;border-radius:2px;flex-shrink:0;display:inline-block"></span> '
     +grp.tipo+' &mdash; <strong>'+naoAloc.length+' entrega(s)</strong></div>'
-    +'<div class="aloc-pop-label">Quantos dias cada entrega ocupa?</div>'
+    +'<div class="aloc-pop-label">Quantos dias para executar o kit?</div>'
     +'<div class="aloc-pop-dias"><button class="dias-btn" onclick="adjGrpDias(-1)">&#8722;</button><span class="dias-val" id="grp-dias-val">1</span><span class="dias-label">dia(s)</span><button class="dias-btn" onclick="adjGrpDias(1)">+</button></div>'
     +'<div style="font-size:10px;color:var(--gl);margin-bottom:12px;padding:5px 8px;background:var(--bg);border-radius:5px">Sequencial: '+naoAloc.map(function(it){return it.andar;}).join(' → ')+'</div>'
     +'<div class="aloc-pop-btns"><button class="pop-btn-cancel" onclick="closeGrpPop()">Cancelar</button>'
@@ -866,14 +881,9 @@ function confirmGrpAloc(){
   if(!_grpData||!_grpArq||!_grpIso){closeGrpPop();return;}
   if(!plano[curEt])plano[curEt]=[];
   var naoAloc=_grpData.items.filter(function(it){return!isAloc(curEt,it.id);});
-  var curIso=_grpIso,added=0;
+  // Todas as entregas do kit: mesma data de início, mesma duração (simultâneas)
   naoAloc.forEach(function(it){
-    plano[curEt].push({id:'a'+Date.now()+'_'+Math.random().toString(36).slice(2),entId:it.id,tipo:it.tipo,andar:it.andar,arquiteto:_grpArq,dataInicio:curIso,dias:_grpDias});
-    added++;
-    // Sempre sequencial: próxima entrega começa após esta terminar
-    var datas=computeDatas(curIso,_grpDias);
-    if(datas.length)curIso=fISO(nextWork(pD(datas[datas.length-1])));
-    else curIso=fISO(nextWork(pD(curIso)));
+    plano[curEt].push({id:'a'+Date.now()+'_'+Math.random().toString(36).slice(2),entId:it.id,tipo:it.tipo,andar:it.andar,arquiteto:_grpArq,dataInicio:_grpIso,dias:_grpDias});
   });
   closeGrpPop();salvAloc();renderEnt();renderCal();
   toast(added+' entregas alocadas para '+_grpArq);
