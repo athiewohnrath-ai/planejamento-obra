@@ -123,6 +123,20 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .ent-andar{font-size:9px;font-weight:700;color:var(--tf-dk);background:var(--tf-s);padding:1px 5px;border-radius:7px;white-space:nowrap;margin-left:auto;align-self:flex-start;flex-shrink:0}
 .ent-item.sel .ent-andar{background:rgba(0,0,0,.15);color:#111}
 .drag-hint{font-size:9.5px;color:var(--gl);text-align:center;padding:8px 10px;font-style:italic}
+/* Painel recolhível */
+.ep{transition:width .22s ease,min-width .22s ease}
+.ep.collapsed{width:0!important;min-width:0!important;overflow:hidden;border-right:none}
+.ep-toggle-btn{position:absolute;right:-12px;top:50%;transform:translateY(-50%);width:20px;height:36px;background:var(--white);border:1px solid var(--border);border-radius:0 6px 6px 0;display:flex;align-items:center;justify-content:center;font-size:11px;cursor:pointer;z-index:10;color:var(--gl);transition:all .15s}
+.ep-toggle-btn:hover{background:var(--tf-s);color:var(--tf-dk)}
+.ep-wrapper{position:relative;display:flex;flex-shrink:0}
+/* Calendário fundo */
+.cal-body{flex:1;overflow:auto;background:#EAEBEE}
+.at{border-collapse:separate;border-spacing:0;min-width:max-content;background:transparent}
+/* Fontes datas maiores */
+.dh-dow{display:block;font-size:10px;text-transform:uppercase;color:var(--gl);font-weight:700;font-family:var(--font)}
+.dh-date{display:block;font-size:16px;font-weight:800;color:var(--ink);font-family:var(--font)}
+.dcol.out .dh-date,.dcol.out .dh-dow{color:#bbb}
+.dcol.today-col .dh-date{color:var(--tf-dk)}
 .ep-grp-toggle{display:flex;gap:0;padding:5px 8px 4px;border-bottom:1px solid var(--border);flex-shrink:0}
 .ep-grp-btn{flex:1;height:24px;border:1px solid var(--border);background:var(--white);font-family:var(--font);font-size:10px;font-weight:700;color:var(--gl);cursor:pointer;transition:all .13s}
 .ep-grp-btn:first-child{border-radius:5px 0 0 5px}
@@ -290,7 +304,9 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
   <div class="scr" id="scr2">
     <div class="s2-topbar" id="etapa-tabs"></div>
     <div class="s2-main">
-      <div class="ep">
+      <div class="ep-wrapper">
+        <div class="ep" id="ep-panel">
+        <button class="ep-toggle-btn" id="ep-toggle" onclick="togEpanel()" title="Recolher/expandir">‹</button>
         <div class="ep-hdr">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px">
             <div class="ep-hdr-title">Entregas a alocar</div>
@@ -308,6 +324,7 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
         </div>
         <div class="ep-body" id="ep-body"></div>
         <div class="drag-hint">💡 Clique ou arraste para o calendário</div>
+        </div>
       </div>
       <div class="cal-wrap">
         <div class="cal-hdr"><span class="cal-badge" id="cal-badge">—</span><div class="cal-prog" id="cal-prog"></div><div class="kit-toggle"><span style="font-size:10px;color:var(--gl);font-family:var(--font)">Vista:</span><button class="kit-btn" id="kit-btn-ind" onclick="setKitMode(false)">Individual</button><button class="kit-btn active" id="kit-btn-kit" onclick="setKitMode(true)">Kit ALL</button></div></div>
@@ -652,7 +669,7 @@ function renderEntByTema(items){
   tipos.forEach(function(tipo){
     var group=items.filter(function(it){return it.tipo===tipo;});
     var naoAloc=group.filter(function(it){return!isAloc(curEt,it.id);});
-    var c=COLORS[group[0]?group[0].colorIdx:0];
+    var c='#4B5563'; // neutro por tema
     var grpData={tipo:tipo,items:naoAloc,colorIdx:group[0]?group[0].colorIdx:0};
     var grpJson=JSON.stringify(grpData).replace(/'/g,"&#39;");
     h+='<div class="ent-grp-hdr" draggable="'+(naoAloc.length>0?'true':'false')+'" ';
@@ -745,10 +762,10 @@ function renderCal(){
     // Uma única célula cobrindo todos os dias
     tbody+='<td colspan="'+days.length+'" style="position:relative;height:'+rowH+'px;padding:0;vertical-align:top;overflow:visible;border-bottom:1px solid var(--border);">';
 
-    // Faixas de fundo (out, today)
+    // Faixas de fundo (out=cinza escuro, today=tiffany suave, ativo=branco)
     days.forEach(function(d,di){
       var iso=fISO(d.date);
-      var bg=d.out?'#F2F3F5':iso===todayISO?'rgba(63,191,176,.04)':'';
+      var bg=d.out?'#D8D9DE':iso===todayISO?'rgba(63,191,176,.08)':'#fff';
       if(bg)tbody+='<div style="position:absolute;left:'+(di*COL_W)+'px;top:0;width:'+COL_W+'px;height:100%;background:'+bg+';pointer-events:none;z-index:0"></div>';
       if(!d.out){
         // Linhas verticais entre colunas
@@ -915,6 +932,14 @@ function renderRptArq(){var el=document.getElementById('rpt-body'),arqs=eq.arqui
 function imprimirRpt(){var etapas=CTX&&CTX.etapas||[],ativas=CTX&&CTX.etapasAtivas||{},meta=ESTADO&&ESTADO.meta||{};var proj=(meta.codigo?meta.codigo+' — ':'')+( meta.nome||'Planejamento');var arqs=eq.arquitetos,agenda={};arqs.forEach(function(a){agenda[a]={};});Object.keys(plano).forEach(function(etId){(plano[etId]||[]).forEach(function(item){if(!agenda[item.arquiteto])return;computeDatas(item.dataInicio,item.dias).forEach(function(iso){if(!agenda[item.arquiteto][iso])agenda[item.arquiteto][iso]=[];agenda[item.arquiteto][iso].push(item);});});});var rows='';etapas.forEach(function(et){if(ativas[et.id]===false)return;var list=plano[et.id]||[];if(!list.length)return;rows+='<tr><td colspan="6" style="padding:6px 10px;background:#1A5294;color:#fff;font-family:Oswald,sans-serif;font-size:10px;font-weight:700;text-transform:uppercase">'+(et.label||et.id)+'</td></tr>';list.forEach(function(item,i){var datas=computeDatas(item.dataInicio,item.dias),c=COLORS[i%COLORS.length];rows+='<tr style="border-bottom:1px solid #eee"><td style="padding:5px 10px"><span style="display:inline-block;padding:2px 7px;border-radius:8px;font-size:10px;font-weight:700;background:'+c+'22;color:'+c+'">'+item.tipo+'</span></td><td style="padding:5px 10px;font-weight:700">'+item.andar+'</td><td style="padding:5px 10px">'+item.arquiteto+'</td><td style="padding:5px 10px;font-family:monospace">'+fBR2(datas[0]||item.dataInicio)+'</td><td style="padding:5px 10px;font-family:monospace">'+fBR2(datas[datas.length-1]||item.dataInicio)+'</td><td style="padding:5px 10px;font-weight:700;color:#2A9D8F">'+item.dias+'d</td></tr>';});});var agHtml='';arqs.forEach(function(arqNome){var dias=Object.keys(agenda[arqNome]||{}).sort();if(!dias.length)return;var init=arqNome.split(' ').map(function(w){return w[0];}).slice(0,2).join('');agHtml+='<div style="margin-bottom:16px;break-inside:avoid"><div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;padding:6px 10px;background:#f0faf9;border-radius:6px"><div style="width:28px;height:28px;border-radius:7px;background:#3FBFB0;display:flex;align-items:center;justify-content:center;font-family:Oswald,sans-serif;font-size:11px;font-weight:800;color:#111">'+init+'</div><div style="font-family:Oswald,sans-serif;font-size:13px;font-weight:800;color:#1F2326">'+arqNome+'</div><div style="font-size:10px;color:#9CA3AF;margin-left:auto">'+dias.length+' dia(s)</div></div>';dias.forEach(function(iso){var items=agenda[arqNome][iso];agHtml+='<div style="display:flex;align-items:flex-start;padding:4px 10px;gap:10px;border-bottom:1px solid #f3f4f6"><div style="font-family:monospace;font-size:11px;color:#6B7280;min-width:50px;padding-top:2px">'+fBR2(iso)+'</div><div style="display:flex;flex-wrap:wrap;gap:4px">';items.forEach(function(item,i){var c=COLORS[i%COLORS.length];agHtml+='<span style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;background:'+c+';color:#fff;font-size:10px;font-weight:700;font-family:Oswald,sans-serif">'+item.tipo+' <span style="opacity:.8;font-size:9px">'+item.andar+'</span></span>';});agHtml+='</div></div>';});agHtml+='</div>';});var html='<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Plano ARQ</title><style>@page{size:A4 portrait;margin:14mm 12mm}*{box-sizing:border-box}body{font-family:Segoe UI,Arial,sans-serif;font-size:9pt;color:#1F2326;margin:0}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style></head><body>'+'<div style="border-bottom:3px solid #1A5294;padding-bottom:10px;margin-bottom:14px;display:flex;align-items:flex-end;justify-content:space-between"><div><div style="font-size:18pt;font-weight:800;color:#1A2535;text-transform:uppercase">Plano de Arquitetura</div><div style="font-size:10pt;color:#6B7280;margin-top:3px"><strong>'+proj+'</strong></div></div><div style="text-align:right;font-size:8pt;color:#9CA3AF;line-height:1.7"><div>Diretor: <strong>'+eq.diretor+'</strong></div><div>Emitido: <strong>'+new Date().toLocaleDateString('pt-BR')+'</strong></div></div></div>'+'<div style="font-size:10px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Alocação por etapa</div>'+'<table style="width:100%;border-collapse:collapse;font-size:8.5pt;margin-bottom:20px"><thead><tr style="background:#F8F9FA"><th style="text-align:left;padding:6px 10px;border-bottom:2px solid #E5E7EB;font-size:9px;font-weight:700;text-transform:uppercase;color:#9CA3AF">Entrega</th><th style="text-align:left;padding:6px 10px;border-bottom:2px solid #E5E7EB;font-size:9px;font-weight:700;text-transform:uppercase;color:#9CA3AF">Andar</th><th style="text-align:left;padding:6px 10px;border-bottom:2px solid #E5E7EB;font-size:9px;font-weight:700;text-transform:uppercase;color:#9CA3AF">Arquiteto</th><th style="text-align:left;padding:6px 10px;border-bottom:2px solid #E5E7EB;font-size:9px;font-weight:700;text-transform:uppercase;color:#9CA3AF">Início</th><th style="text-align:left;padding:6px 10px;border-bottom:2px solid #E5E7EB;font-size:9px;font-weight:700;text-transform:uppercase;color:#9CA3AF">Fim</th><th style="text-align:left;padding:6px 10px;border-bottom:2px solid #E5E7EB;font-size:9px;font-weight:700;text-transform:uppercase;color:#9CA3AF">Dias</th></tr></thead><tbody>'+rows+'</tbody></table>'+'<div style="font-size:10px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;padding-top:12px;border-top:2px solid #E5E7EB">Agenda por arquiteto</div>'+agHtml+'<scr'+'ipt>window.onload=function(){setTimeout(function(){window.print();},400);}<'+'/scr'+'ipt></body></html>';var w=window.open('','_blank');if(w){w.document.write(html);w.document.close();}}
 function confirmar(){if(!ESTADO)return;if(!ESTADO.cfg)ESTADO.cfg={};if(!ESTADO.cfg.equipeARQ)ESTADO.cfg.equipeARQ={};ESTADO.cfg.equipeARQ.gerentes=eq.gerentes.slice();ESTADO.cfg.equipeARQ.arquitetos=eq.arquitetos.slice();ESTADO.cfg.equipeARQ.planoAloc=plano;try{sessionStorage.setItem('aw_estado_atual',JSON.stringify({ts:Date.now(),estado:ESTADO}));}catch(e){}toast('Equipe e alocação confirmadas ✓');setTimeout(function(){if(window.parent&&window.parent.fecharGestaoArq)window.parent.fecharGestaoArq(true);else window.location.href='app.html';},700);}
 function sair(){if(window.parent&&window.parent.fecharGestaoArq)window.parent.fecharGestaoArq(false);else window.location.href='app.html';}
+function togEpanel(){
+  var ep=document.getElementById('ep-panel');
+  var btn=document.getElementById('ep-toggle');
+  var collapsed=ep.classList.toggle('collapsed');
+  btn.textContent=collapsed?'›':'‹';
+  btn.style.right=collapsed?'-20px':'-12px';
+}
+
 function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2600);}
 </script>
 </body>
