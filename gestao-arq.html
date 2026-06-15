@@ -872,8 +872,8 @@ function confirmGrpAloc(){
     added++;
     // Sempre sequencial: próxima entrega começa após esta terminar
     var datas=computeDatas(curIso,_grpDias);
-    if(datas.length)curIso=nextWork(pD(datas[datas.length-1]));
-    else curIso=nextWork(pD(curIso));
+    if(datas.length)curIso=fISO(nextWork(pD(datas[datas.length-1])));
+    else curIso=fISO(nextWork(pD(curIso)));
   });
   closeGrpPop();salvAloc();renderEnt();renderCal();
   toast(added+' entregas alocadas para '+_grpArq);
