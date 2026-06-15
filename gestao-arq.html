@@ -306,7 +306,7 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
         <div class="drag-hint">💡 Clique ou arraste para o calendário</div>
       </div>
       <div class="cal-wrap">
-        <div class="cal-hdr"><span class="cal-badge" id="cal-badge">—</span><div class="cal-prog" id="cal-prog"></div></div>
+        <div class="cal-hdr"><span class="cal-badge" id="cal-badge">—</span><div class="cal-prog" id="cal-prog"></div><div class="kit-toggle"><span style="font-size:10px;color:var(--gl);font-family:var(--font)">Vista:</span><button class="kit-btn active" id="kit-btn-ind" onclick="setKitMode(false)">Individual</button><button class="kit-btn" id="kit-btn-kit" onclick="setKitMode(true)">Kit ALL</button></div></div>
         <div class="cal-body"><table class="at" id="at"></table></div>
       </div>
     </div>
@@ -665,6 +665,13 @@ function renderEntByTema(items){
 function selItem(entId){var items=getEnt(curEt),it=items.find(function(x){return x.id===entId;});selEnt=(selEnt&&selEnt.id===entId)?null:it;renderEnt();renderCal();if(selEnt)toast('Clique em um dia para alocar: '+selEnt.tipo+' · '+selEnt.andar);}
 function buildCalDays(etId){var et=CTX&&CTX.etapas.find(function(e){return e.id===etId;});if(!et)return[];var start=pD(et.start),end=pD(et.end),before=prevWork(start),after=nextWork(end),days=[{date:before,out:true}],cur=new Date(start);while(cur<=end){if(isWork(cur))days.push({date:new Date(cur),out:false});cur=addD(cur,1);}days.push({date:after,out:true});return days;}
 function getItemsOnDay(etId,arqNome,iso){if(!plano[etId])return[];return plano[etId].filter(function(item){if(item.arquiteto!==arqNome)return false;return computeDatas(item.dataInicio,item.dias).indexOf(iso)>=0;});}
+function setKitMode(v){
+  _kitMode=v;
+  document.getElementById('kit-btn-ind').className='kit-btn'+(v?'':' active');
+  document.getElementById('kit-btn-kit').className='kit-btn'+(v?' active':'');
+  renderCal();
+}
+
 function renderCal(){
   var days=buildCalDays(curEt),arqs=eq.arquitetos,today=new Date();
   today.setHours(12,0,0,0);var todayISO=fISO(today),entAll=getEnt(curEt);
@@ -727,8 +734,8 @@ function renderCal(){
 
       if(hasChips){
         tbody+='<div class="chips-wrap">';
-        {
-          // ALL automático quando 2+ itens do mesmo tipo na mesma célula
+                if(_kitMode){
+          // Agrupar por tipo — ALL quando 2+ itens do mesmo tipo
           var byTipo={};
           cellItems.forEach(function(item){
             if(!byTipo[item.tipo])byTipo[item.tipo]=[];
@@ -751,6 +758,19 @@ function renderCal(){
                 +'<span class="achip-tipo">'+item.tipo+'</span>'
                 +'</div>';
             }
+          });
+        } else {
+          cellItems.forEach(function(item){
+            var fc2=getFloorColor(item.andar);
+            var isFirst=fISO(pD(item.dataInicio))===iso;
+            tbody+='<div class="achip" onclick="rmAloc(\''+item.id+'\',event)"'
+              +' title="'+item.tipo+' · '+item.andar+(item.dias>1?' ('+item.dias+' dias)':'')+' — remover">';
+            if(isFirst){tbody+='<span class="achip-floor" style="background:'+fc2+'">'+item.andar+'</span>';}
+            else{tbody+='<span class="achip-floor" style="background:#fff;color:#9CA3AF;border:0.5px solid #E5E7EB">'+item.andar+'</span>';}
+            tbody+='<span class="achip-tipo">'+item.tipo+'</span>';
+            if(colspan>1&&isFirst)tbody+='<span class="chip-days">'+item.dias+'d</span>';
+            if(isFirst)tbody+='<span class="chip-del">✕</span>';
+            tbody+='</div>';
           });
         }
         tbody+='</div>';
@@ -816,31 +836,23 @@ function onGrpDragEnd(){
 }
 
 // ── Popup para grupo ─────────────────────────────────────────────────────────
-var _grpPop=null,_grpData=null,_grpArq=null,_grpIso=null,_grpDias=1,_grpModo='seq';
+var _grpPop=null,_grpData=null,_grpArq=null,_grpIso=null,_grpDias=1;
 function openGrpPop(grp,arqNome,iso,ev){
   closeGrpPop();
   _grpData=grp;_grpArq=arqNome;_grpIso=iso;_grpDias=1;_grpModo='seq';
   var c=COLORS[grp.colorIdx]||COLORS[0];
   var naoAloc=grp.items.filter(function(it){return!isAloc(curEt,it.id);});
   var p=document.createElement('div');p.className='aloc-pop';p.style.width='280px';
-  p.innerHTML='<div class="aloc-pop-hdr">Alocar grupo: '+grp.tipo+'</div>'
+  p.innerHTML='<div class="aloc-pop-hdr">Kit: '+grp.tipo+'</div>'
     +'<div class="aloc-pop-body">'
-    +'<div class="aloc-pop-ent" style="background:'+c+'22;color:'+c+';border-left:3px solid '+c+'"><span style="background:'+c+';width:8px;height:8px;border-radius:2px;flex-shrink:0;display:inline-block"></span>'
-    +grp.tipo+' — <strong>'+naoAloc.length+' andares</strong></div>'
-    +'<div class="aloc-pop-label">Dias por entrega:</div>'
-    +'<div class="aloc-pop-dias"><button class="dias-btn" onclick="adjGrpDias(-1)">−</button>'
-    +'<span class="dias-val" id="grp-dias-val">1</span>'
-    +'<span class="dias-label">dia(s)</span>'
-    +'<button class="dias-btn" onclick="adjGrpDias(1)">+</button></div>'
-    +'<div style="margin-bottom:12px"><div class="aloc-pop-label" style="margin-bottom:6px">Modo de alocação:</div>'
-    +'<div style="display:flex;gap:6px">'
-    +'<button id="grp-modo-seq" onclick="setGrpModoAloc(&quot;seq&quot;)" style="flex:1;height:28px;border-radius:5px;border:1.5px solid var(--tf);background:var(--tf);font-family:var(--font);font-size:11px;font-weight:700;color:#111;cursor:pointer">Sequencial</button>'
-    +'<button id="grp-modo-dia" onclick="setGrpModoAloc(&quot;dia&quot;)" style="flex:1;height:28px;border-radius:5px;border:1.5px solid var(--border);background:var(--white);font-family:var(--font);font-size:11px;font-weight:700;color:var(--gray);cursor:pointer">Mesmo dia</button>'
-    +'</div>'
-    +'<div style="font-size:10px;color:var(--gl);margin-top:5px" id="grp-modo-desc">Sequencial: cada andar inicia após o anterior terminar</div>'
-    +'</div>'
+    +'<div class="aloc-pop-ent" style="background:'+c+'22;color:'+c+';border-left:3px solid '+c+'">'
+    +'<span style="background:'+c+';width:8px;height:8px;border-radius:2px;flex-shrink:0;display:inline-block"></span> '
+    +grp.tipo+' &mdash; <strong>'+naoAloc.length+' entrega(s)</strong></div>'
+    +'<div class="aloc-pop-label">Quantos dias cada entrega ocupa?</div>'
+    +'<div class="aloc-pop-dias"><button class="dias-btn" onclick="adjGrpDias(-1)">&#8722;</button><span class="dias-val" id="grp-dias-val">1</span><span class="dias-label">dia(s)</span><button class="dias-btn" onclick="adjGrpDias(1)">+</button></div>'
+    +'<div style="font-size:10px;color:var(--gl);margin-bottom:12px;padding:5px 8px;background:var(--bg);border-radius:5px">Sequencial: '+naoAloc.map(function(it){return it.andar;}).join(' → ')+'</div>'
     +'<div class="aloc-pop-btns"><button class="pop-btn-cancel" onclick="closeGrpPop()">Cancelar</button>'
-    +'<button class="pop-btn-ok" onclick="confirmGrpAloc()">Alocar '+naoAloc.length+' entregas</button></div>'
+    +'<button class="pop-btn-ok" onclick="confirmGrpAloc()">Confirmar kit</button></div>'
     +'</div>';
   document.body.appendChild(p);_grpPop=p;
   positionPop(p,ev);
@@ -849,13 +861,7 @@ function adjGrpDias(d){
   _grpDias=Math.max(1,Math.min(20,_grpDias+d));
   if(document.getElementById('grp-dias-val'))document.getElementById('grp-dias-val').textContent=_grpDias;
 }
-function setGrpModoAloc(m){
-  _grpModo=m;
-  var seq=document.getElementById('grp-modo-seq'),dia=document.getElementById('grp-modo-dia'),desc=document.getElementById('grp-modo-desc');
-  if(seq){seq.style.background=m==='seq'?'var(--tf)':'var(--white)';seq.style.borderColor=m==='seq'?'var(--tf)':'var(--border)';seq.style.color=m==='seq'?'#111':'var(--gray)';}
-  if(dia){dia.style.background=m==='dia'?'var(--tf)':'var(--white)';dia.style.borderColor=m==='dia'?'var(--tf)':'var(--border)';dia.style.color=m==='dia'?'#111':'var(--gray)';}
-  if(desc)desc.textContent=m==='seq'?'Sequencial: cada andar inicia após o anterior terminar':'Mesmo dia: todos os andares no mesmo dia';
-}
+
 function confirmGrpAloc(){
   if(!_grpData||!_grpArq||!_grpIso){closeGrpPop();return;}
   if(!plano[curEt])plano[curEt]=[];
@@ -864,11 +870,10 @@ function confirmGrpAloc(){
   naoAloc.forEach(function(it){
     plano[curEt].push({id:'a'+Date.now()+'_'+Math.random().toString(36).slice(2),entId:it.id,tipo:it.tipo,andar:it.andar,arquiteto:_grpArq,dataInicio:curIso,dias:_grpDias});
     added++;
-    if(_grpModo==='seq'){
-      var datas=computeDatas(curIso,_grpDias);
-      if(datas.length)curIso=nextWork(pD(datas[datas.length-1]));
-      else curIso=nextWork(pD(curIso));
-    }
+    // Sempre sequencial: próxima entrega começa após esta terminar
+    var datas=computeDatas(curIso,_grpDias);
+    if(datas.length)curIso=nextWork(pD(datas[datas.length-1]));
+    else curIso=nextWork(pD(curIso));
   });
   closeGrpPop();salvAloc();renderEnt();renderCal();
   toast(added+' entregas alocadas para '+_grpArq);
