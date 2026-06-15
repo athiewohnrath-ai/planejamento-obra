@@ -12,6 +12,8 @@ body{font-family:var(--body);background:var(--bg);color:var(--ink);display:flex;
 button{font-family:inherit;cursor:pointer}input,select{font-family:inherit}
 aside{width:240px;background:var(--black);color:#fff;display:flex;flex-direction:column;padding:16px 13px;flex-shrink:0;transition:width .22s ease,padding .22s ease;overflow:hidden;position:relative}
 aside.collapsed{width:48px;padding:12px 6px}
+/* Botão collapse: modo mini mostra ›, expandido mostra ‹ */
+aside.collapsed #aside-collapse-btn{align-self:center;margin:0 auto 8px}
 /* Itens que somem na versão mini */
 aside.collapsed .logo-title,aside.collapsed .logo-sub,
 aside.collapsed .ctx,aside.collapsed .divider,aside.collapsed .nav-label,
@@ -25,9 +27,7 @@ aside.collapsed .step-btn{justify-content:center;padding:9px 4px}
 aside.collapsed .step-dot{margin:0}
 aside.collapsed .font-ctrl{flex-direction:column;align-items:center;gap:4px;border-top:1px solid rgba(255,255,255,.08);padding-top:8px}
 aside.collapsed .back-btn{justify-content:center;padding:7px 4px}
-.aside-toggle{position:fixed;left:240px;top:50%;transform:translateY(-50%);width:16px;height:56px;background:#111213;border:1px solid rgba(255,255,255,.15);border-left:none;border-radius:0 5px 5px 0;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:200;color:rgba(255,255,255,.5);transition:left .22s ease,background .15s;font-size:11px}
-aside.collapsed+.aside-toggle,.aside-toggle.mini{left:48px}
-.aside-toggle:hover{background:#1a1a1a;color:#fff}
+
 .logo-row{display:flex;align-items:center;gap:9px;margin-bottom:16px}
 .logo{width:34px;height:34px;border-radius:8px;background:var(--tf);display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .logo svg{width:17px;height:17px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round}
@@ -270,6 +270,9 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 </head>
 <body>
 <aside id="sidebar" class="collapsed">
+  <div style="display:flex;justify-content:flex-end;margin-bottom:4px;flex-shrink:0">
+    <button onclick="togSidebar()" title="Recolher/expandir menu" style="width:24px;height:24px;border-radius:5px;border:none;background:rgba(255,255,255,.08);color:rgba(255,255,255,.5);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .15s" id="aside-collapse-btn" onmouseover="this.style.background='rgba(255,255,255,.15)'" onmouseout="this.style.background='rgba(255,255,255,.08)'">‹</button>
+  </div>
   <div class="logo-row">
     <div class="logo"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
     <div><div class="logo-title">Gestão de Arquitetura</div><div class="logo-sub">Athié Wohnrath</div></div>
@@ -292,7 +295,7 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
   </div>
   <button class="back-btn" onclick="sair()" title="Voltar ao planejamento"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg><span class="back-btn-label">Voltar ao planejamento</span></button>
 </aside>
-<button class="aside-toggle" id="aside-toggle" onclick="togSidebar()" title="Expandir/recolher menu"><span id="aside-toggle-lbl">›</span></button>
+
 <main id="main-area">
   <div class="scr active" id="scr1">
     <div class="s1-hdr"><h1>Equipe de Arquitetura</h1><p class="s1-sub">Selecione a diretoria, os gerentes e os arquitetos para este projeto</p></div>
@@ -1101,17 +1104,10 @@ function confirmar(){if(!ESTADO)return;if(!ESTADO.cfg)ESTADO.cfg={};if(!ESTADO.c
 function sair(){if(window.parent&&window.parent.fecharGestaoArq)window.parent.fecharGestaoArq(false);else window.location.href='app.html';}
 function togSidebar(){
   var sb=document.getElementById('sidebar');
-  var btn=document.getElementById('aside-toggle');
-  var lbl=document.getElementById('aside-toggle-lbl');
+  var btn=document.getElementById('aside-collapse-btn');
   var collapsed=sb.classList.toggle('collapsed');
-  if(btn){btn.style.left=collapsed?'48px':'240px';btn.classList.toggle('mini',collapsed);}
-  if(lbl)lbl.textContent=collapsed?'›':'‹';
+  if(btn)btn.textContent=collapsed?'›':'‹';
 }
-// Sidebar começa recolhida
-(function(){
-  var btn=document.getElementById('aside-toggle');
-  if(btn){btn.style.left='48px';btn.classList.add('mini');}
-})();
 
 function togEpanel(){
   var ep=document.getElementById('ep-panel');
