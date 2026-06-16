@@ -1317,45 +1317,75 @@ function renderRptNova(){
   var meta=ESTADO&&ESTADO.meta||{};
   var proj=(meta.codigo?meta.codigo+' \u2014 ':'')+( meta.nome||'Projeto');
 
-  // Coletar todas as alocações
   var todas=[];
   Object.keys(plano).forEach(function(etId){
     var et=CTX&&CTX.etapas.find(function(e){return e.id===etId;});
     (plano[etId]||[]).forEach(function(item){
       var datas=computeDatas(item.dataInicio,item.dias);
-      todas.push({
-        et:et?et.label||etId:etId,
+      todas.push({et:et?et.label||etId:etId,etId:etId,
         tipo:item.tipo,andar:item.andar,arquiteto:item.arquiteto,
-        ini:datas[0]||item.dataInicio,
-        fim:datas[datas.length-1]||item.dataInicio,
-        dias:item.dias,notas:item.notas||''
-      });
+        ini:datas[0]||item.dataInicio,fim:datas[datas.length-1]||item.dataInicio,
+        dias:item.dias,notas:item.notas||''});
     });
   });
 
   if(!todas.length){
     el.innerHTML='<div class="rpt-doc"><div style="text-align:center;padding:48px;color:var(--gl)">Nenhuma entrega alocada ainda.</div></div>';
-    document.getElementById('cta3-info').textContent='Nenhuma entrega alocada';
-    return;
+    document.getElementById('cta3-info').textContent='Nenhuma entrega alocada';return;
   }
 
-  // Data range do projeto inteiro
-  var projIni=todas.reduce(function(m,r){return r.ini<m?r.ini:m;},todas[0].ini);
-  var projFim=todas.reduce(function(m,r){return r.fim>m?r.fim:m;},todas[0].fim);
-  // Dias úteis do projeto
-  var projDias=[],cur=pD(projIni);
-  var projFimD=pD(projFim);
-  while(cur<=projFimD){if(isWork(cur))projDias.push(fISO(cur));cur=addD(cur,1);}
+  // Paleta de etapas
+  var etPal=[
+    {bg:'#E6F1FB',txt:'#185FA5',border:'#378ADD',light:'#E6F1FB33'},
+    {bg:'#E1F5EE',txt:'#0F6E56',border:'#1D9E75',light:'#E1F5EE33'},
+    {bg:'#EEEDFE',txt:'#534AB7',border:'#7F77DD',light:'#EEEDFE33'},
+    {bg:'#FAEEDA',txt:'#854F0B',border:'#BA7517',light:'#FAEEDA33'},
+    {bg:'#FAECE7',txt:'#993C1D',border:'#D85A30',light:'#FAECE733'},
+    {bg:'#FBEAF0',txt:'#993556',border:'#D4537E',light:'#FBEAF033'},
+    {bg:'#EAF3DE',txt:'#3B6D11',border:'#639922',light:'#EAF3DE33'}
+  ];
+  var etIds=[],etMap={};
+  if(CTX&&CTX.etapas){
+    CTX.etapas.forEach(function(et,ei){
+      if(CTX.etapasAtivas&&CTX.etapasAtivas[et.id]===false)return;
+      etIds.push(et.id);etMap[et.id]={et:et,pal:etPal[ei%etPal.length]};
+    });
+  }
 
-  // Cabeçalho do documento
+  // Todos os dias úteis do projeto (todas as etapas)
+  var projDias=[],projDiaMap={};
+  etIds.forEach(function(etId){
+    var et=etMap[etId]?etMap[etId].et:null;if(!et)return;
+    var cur=pD(et.start),fim=pD(et.end);
+    while(cur<=fim){if(isWork(cur)){var iso=fISO(cur);if(!projDiaMap[iso]){projDiaMap[iso]={etId:etId};projDias.push(iso);}}cur=addD(cur,1);}
+  });
+  projDias.sort();
+
+  // Marcadores de fim de etapa (último dia de cada etapa)
+  var etapeFimSet={};
+  etIds.forEach(function(etId){
+    var et=etMap[etId]?etMap[etId].et:null;if(!et)return;
+    // Último dia útil da etapa
+    var fim=pD(et.end);
+    var last=fim;while(!isWork(last))last=addD(last,-1);
+    etapeFimSet[fISO(last)]=etId;
+  });
+
+  // Cabeçalho do doc
   var h='<div class="rpt-doc">';
-  h+='<div class="rpt-doc-hdr">'
-    +'<div><div class="rpt-doc-title">Plano de Arquitetura</div>'
+  h+='<div class="rpt-doc-hdr"><div><div class="rpt-doc-title">Plano de Arquitetura</div>'
     +'<div class="rpt-doc-sub">'+proj+'</div></div>'
-    +'<div class="rpt-doc-meta">'
-    +'<div>Diretor: <strong>'+eq.diretor+'</strong></div>'
-    +'<div>Emitido em: <strong>'+new Date().toLocaleDateString('pt-BR')+'</strong></div>'
-    +'</div></div>';
+    +'<div class="rpt-doc-meta"><div>Diretor: <strong>'+eq.diretor+'</strong></div>'
+    +'<div>Emitido em: <strong>'+new Date().toLocaleDateString('pt-BR')+'</strong></div></div></div>';
+
+  // Legenda de etapas
+  h+='<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px">';
+  etIds.forEach(function(etId){
+    var info=etMap[etId];if(!info)return;
+    var p=info.pal;
+    h+='<span style="font-size:10px;padding:2px 8px;border-radius:4px;background:'+p.bg+';color:'+p.txt+';border-left:3px solid '+p.border+';font-family:var(--font);font-weight:600">'+(info.et.label||etId)+'</span>';
+  });
+  h+='</div>';
 
   // Ordem dos profissionais
   var collabOrdem=[];
@@ -1364,95 +1394,103 @@ function renderRptNova(){
   eq.colaboradores.forEach(function(n){if(collabOrdem.indexOf(n)<0)collabOrdem.push(n);});
   var todasPessoas=collabOrdem.concat(eq.arquitetos);
 
-  // ── SEÇÃO 1: Por profissional ─────────────────────────────────────────────
-  h+='<div class="rpt-sec"><div class="rpt-sec-title">Sequência por profissional</div>';
-
+  // CSS inline reutilizável
   var TH='padding:3px 4px;font-family:var(--font);font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--gl);border-bottom:1px solid var(--border);white-space:nowrap;text-align:left';
   var TD='padding:3px 8px;font-size:11px;border-bottom:1px solid #F2F3F4;vertical-align:middle';
 
+  // ── SEÇÃO 1: Por profissional ─────────────────────────────────────────────
+  h+='<div class="rpt-sec"><div class="rpt-sec-title">Sequência por profissional</div>';
+
+  // Construir grupos de colunas por etapa (para o colspan do header)
+  var etGroups=[];
+  etIds.forEach(function(etId){
+    var cols=projDias.filter(function(d){return projDiaMap[d]&&projDiaMap[d].etId===etId;});
+    if(cols.length)etGroups.push({etId:etId,cols:cols,pal:etMap[etId].pal,label:(etMap[etId].et.label||etId)});
+  });
+  var nCols=projDias.length;
+  var pct=(100/Math.max(nCols,1)).toFixed(3)+'%';
+
   todasPessoas.forEach(function(nome){
     var itens=todas.filter(function(r){return r.arquiteto===nome;});
-    if(!itens.length)return;
     itens.sort(function(a,b){return a.ini<b.ini?-1:1;});
 
-    // Numerar: mesmo dia → mesmo número
-    var numMap={},numSeq=0,lastDate='';
+    // Numeração: mesmo dia = mesmo número
+    var numMap={},numSeq=0,lastIni='';
     itens.forEach(function(r){
-      if(r.ini!==lastDate){numSeq++;lastDate=r.ini;}
-      numMap[r.ini]=numSeq;
-      r._num=numSeq;
+      if(r.ini!==lastIni){numSeq++;lastIni=r.ini;}
+      r._num=numSeq;numMap[r.ini]=numSeq;
     });
-    var totalNums=numSeq;
 
     var init=nome.split(' ').map(function(w){return w[0];}).slice(0,2).join('');
     var role=_getRoleLabel(nome);
 
-    h+='<div class="rpt-prof-block">'
-      +'<div class="rpt-prof-hdr">'
+    h+='<div class="rpt-prof-block"><div class="rpt-prof-hdr">'
       +'<div class="rpt-prof-av">'+init+'</div>'
-      +'<div><div class="rpt-prof-name">'+nome+'</div>'
-      +'<div class="rpt-prof-role">'+role+'</div></div>'
+      +'<div><div class="rpt-prof-name">'+nome+'</div><div class="rpt-prof-role">'+role+'</div></div>'
       +'<div style="margin-left:auto;font-family:var(--font);font-size:10px;color:var(--gl)">'+itens.length+' entrega(s)</div>'
       +'</div>';
 
-    // ── Mini cronograma ──────────────────────────────────────────────────────
-    // Usar apenas as datas do intervalo deste profissional
-    var profIni=itens[0].ini;
-    var profFim=itens[itens.length-1].fim;
-    var profDias=projDias.filter(function(d){return d>=profIni&&d<=profFim;});
-    var nCols=profDias.length;
-    if(nCols>0){
-      var pct=(100/nCols).toFixed(3)+'%';
-      // Meses para cabeçalho agrupado
-      var meses=[],lastM='';
-      profDias.forEach(function(d){var m=d.slice(0,7);if(m!==lastM){meses.push({m:m,count:0});lastM=m;}meses[meses.length-1].count++;});
-      h+='<div style="overflow-x:auto;margin:0">'
-        +'<table style="width:100%;table-layout:fixed;border-collapse:collapse;font-size:8px">'
-        +'<colgroup>';
-      profDias.forEach(function(){h+='<col style="width:'+pct+'">';});
-      h+='</colgroup>'
-        // Linha de meses
-        +'<thead><tr>';
-      meses.forEach(function(mb){
-        var mLabel=mb.m.slice(5)+'/'+mb.m.slice(2,4);
-        h+='<th colspan="'+mb.count+'" style="padding:2px 3px;background:#F0F1F2;font-family:var(--font);font-size:8px;font-weight:700;color:var(--gl);text-align:left;border-bottom:1px solid var(--border);border-right:1px solid var(--border)">'+mLabel+'</th>';
-      });
-      h+='</tr>'
-        // Linha de dias
-        +'<tr>';
-      profDias.forEach(function(d,di){
-        var day=d.slice(8);
-        var hasMark=numMap[d]!==undefined;
-        h+='<td style="padding:1px 0;text-align:center;font-family:var(--font);font-size:7px;color:'+(hasMark?'var(--ink)':'#ccc')+';border-right:1px solid #F0F1F2;border-bottom:1px solid var(--border)">'+day+'</td>';
-      });
-      h+='</tr>'
-        // Linha de marcações
-        +'<tr>';
-      profDias.forEach(function(d){
-        var num=numMap[d];
-        var fc=num!==undefined?getFloorColor(itens.find(function(r){return r.ini===d;}).andar):'';
-        h+='<td style="padding:1px 0;text-align:center;font-family:var(--font);font-size:8px;font-weight:700;background:'+(num!==undefined?fc+'22':'')
-          +';color:'+(num!==undefined?fc:'transparent')+';border-right:1px solid #F0F1F2">'
-          +(num!==undefined?num:'·')+'</td>';
-      });
-      h+='</tr></thead></table></div>';
-    }
+    // Label do calendário
+    h+='<div style="padding:8px 12px 4px;font-size:10px;color:var(--gl);font-family:var(--font);font-weight:700;text-transform:uppercase;letter-spacing:.07em;display:flex;align-items:center;gap:5px">'
+      +'<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>'
+      +'Calend\xe1rio &middot; datas de entrega</div>';
 
-    // ── Tabela de entregáveis com numeração ──────────────────────────────────
-    h+='<table style="width:100%;border-collapse:collapse">'
-      +'<thead><tr style="background:#F8F9FA">'
+    // Mini calendário
+    h+='<div style="padding:0 12px 8px;overflow:hidden">'
+      +'<table style="width:100%;table-layout:fixed;border-collapse:collapse;font-size:8px"><colgroup>';
+    projDias.forEach(function(){h+='<col style="width:'+pct+'">';});
+    h+='</colgroup><thead>';
+
+    // Linha 1: etapas (colspan)
+    h+='<tr>';
+    etGroups.forEach(function(g){
+      var isFim=etapeFimSet[g.cols[g.cols.length-1]]===g.etId;
+      h+='<th colspan="'+g.cols.length+'" style="padding:2px 3px;background:'+g.pal.bg+';color:'+g.pal.txt+';font-size:7.5px;font-weight:600;text-align:center;border-right:2px solid '+g.pal.border+'">'
+        +g.label+'</th>';
+    });
+    h+='</tr>';
+
+    // Linha 2: dias (número, colorido por etapa)
+    h+='<tr>';
+    projDias.forEach(function(d,di){
+      var etId=projDiaMap[d]?projDiaMap[d].etId:'';
+      var pal=etMap[etId]?etMap[etId].pal:{txt:'#999',border:'#ccc'};
+      var isFimEt=etapeFimSet[d]!==undefined;
+      var hasItem=numMap[d]!==undefined;
+      h+='<td style="padding:2px 0;text-align:center;font-size:7px;color:'+(hasItem?pal.txt:'#bbb')+';'+(isFimEt?'border-right:2px solid '+pal.border+';':'')+'">'
+        +d.slice(8)+'</td>';
+    });
+    h+='</tr>';
+
+    // Linha 3: marcações
+    h+='<tr style="height:28px">';
+    projDias.forEach(function(d){
+      var etId=projDiaMap[d]?projDiaMap[d].etId:'';
+      var pal=etMap[etId]?etMap[etId].pal:{border:'#ccc',light:'transparent'};
+      var num=numMap[d];
+      var isFimEt=etapeFimSet[d]!==undefined;
+      var andarColor='';
+      if(num!==undefined){var ri=itens.find(function(r){return r.ini===d;});if(ri)andarColor=getFloorColor(ri.andar);}
+      h+='<td style="text-align:center;border-top:1px solid #eee;border-bottom:1px solid #eee;border-right:'+(isFimEt?'2px solid '+pal.border:'0.5px solid #eee')+';background:'+(num!==undefined?andarColor+'18':'')+';">'
+        +(num!==undefined?'<span style="font-size:9px;font-weight:700;color:'+andarColor+'">'+num+'</span>':'')
+        +'</td>';
+    });
+    h+='</tr></thead></table></div>';
+
+    // Tabela de entregáveis
+    h+='<table style="width:100%;border-collapse:collapse"><thead><tr style="background:#F8F9FA">'
       +'<th style="'+TH+';width:28px;text-align:center">#</th>'
       +'<th style="'+TH+'">Entregável</th>'
       +'<th style="'+TH+'">Andar</th>'
       +'<th style="'+TH+'">Período</th>'
-      +'<th style="'+TH+';text-align:center">Dias</th>'
+      +'<th style="'+TH+';text-align:center;width:36px">Dias</th>'
       +'<th style="'+TH+'">Observação</th>'
       +'</tr></thead><tbody>';
     itens.forEach(function(r,ri){
       var fc=getFloorColor(r.andar);
       var bg=ri%2===1?'#FAFBFC':'#fff';
       h+='<tr style="background:'+bg+'">'
-        +'<td style="'+TD+';text-align:center;font-family:var(--font);font-weight:800;font-size:12px;color:var(--ink)">'+r._num+'</td>'
+        +'<td style="'+TD+';text-align:center;font-family:var(--font);font-weight:800;font-size:12px;color:'+fc+'">'+r._num+'</td>'
         +'<td style="'+TD+';font-family:var(--font);font-weight:700">'+r.tipo+'</td>'
         +'<td style="'+TD+'"><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:'+fc+';margin-right:4px;vertical-align:middle"></span>'+r.andar+'</td>'
         +'<td style="'+TD+';color:var(--gl);font-size:11px;white-space:nowrap">'+fBR2(r.ini)+(r.dias>1?' &rarr; '+fBR2(r.fim):'')+'</td>'
@@ -1471,11 +1509,11 @@ function renderRptNova(){
   ordenados.forEach(function(r){if(!porFim[r.fim]){porFim[r.fim]=[];fimsOrdem.push(r.fim);}porFim[r.fim].push(r);});
 
   h+='<table style="width:100%;border-collapse:collapse"><thead><tr style="background:#F8F9FA">'
-    +'<th style="'+TH+';width:90px">Término</th>'
+    +'<th style="'+TH+';width:80px">Término</th>'
     +'<th style="'+TH+'">Entregável</th>'
-    +'<th style="'+TH+';width:50px">Andar</th>'
+    +'<th style="'+TH+';width:48px">Andar</th>'
     +'<th style="'+TH+'">Profissional</th>'
-    +'<th style="'+TH+';width:70px">Início</th>'
+    +'<th style="'+TH+';width:68px">Início</th>'
     +'<th style="'+TH+';width:34px;text-align:center">Dias</th>'
     +'<th style="'+TH+'">Obs.</th>'
     +'</tr></thead><tbody>';
@@ -1484,12 +1522,10 @@ function renderRptNova(){
     var grupo=porFim[fim];
     grupo.forEach(function(r,ri){
       var fc=getFloorColor(r.andar);
-      var isFirst=ri===0;
       var bg=fi%2===1?'#FAFBFC':'#fff';
       h+='<tr style="background:'+bg+'">'
-        +'<td style="'+TD+';font-family:var(--font);font-size:11px;white-space:nowrap">'+(isFirst?'<strong>'+fBR2(fim)+'</strong>':'&nbsp;')+'</td>'
-        +'<td style="'+TD+';font-family:var(--font);font-weight:600">'
-        +'<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:'+fc+';margin-right:5px;vertical-align:middle"></span>'+r.tipo+'</td>'
+        +'<td style="'+TD+';font-family:var(--font);font-size:11px;white-space:nowrap">'+(ri===0?'<strong>'+fBR2(fim)+'</strong>':'')+'</td>'
+        +'<td style="'+TD+';font-family:var(--font);font-weight:600"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:'+fc+';margin-right:5px;vertical-align:middle"></span>'+r.tipo+'</td>'
         +'<td style="'+TD+';font-size:10.5px;color:var(--gl)">'+r.andar+'</td>'
         +'<td style="'+TD+';font-size:11px">'+r.arquiteto+'</td>'
         +'<td style="'+TD+';color:var(--gl);font-size:10.5px;white-space:nowrap">'+fBR2(r.ini)+'</td>'
@@ -1498,7 +1534,7 @@ function renderRptNova(){
         +'</tr>';
     });
   });
-  h+='</tbody></table></div>'; // seção 2
+  h+='</tbody></table></div>';
   h+='</div>'; // rpt-doc
   el.innerHTML=h;
   document.getElementById('cta3-info').innerHTML='<strong>'+todas.length+'</strong> entrega(s) · <strong>'+(eq.colaboradores.length+eq.arquitetos.length)+'</strong> profissional(is)';
