@@ -985,8 +985,20 @@ function openBarEdit(ev,el){
   closeBarEdit();
   _barEditData=bar;_barEditDias=bar.dias;
   var et=CTX&&CTX.etapas.find(function(e){return e.id===curEt;});
-  var arqs=eq.arquitetos;
-  var arqOpts=arqs.map(function(a){return'<option value="'+a+'"'+(a===bar.arquiteto?' selected':'')+'>'+a+'</option>';}).join('');
+  // Combinar todos: colaboradores (diretor+GAs) + arquitetos
+  var todasOpcoes=[];
+  var collabOrdem=[];
+  if(eq.diretor&&eq.colaboradores.indexOf(eq.diretor)>=0)collabOrdem.push(eq.diretor);
+  eq.gerentes.forEach(function(g){if(eq.colaboradores.indexOf(g)>=0)collabOrdem.push(g);});
+  eq.colaboradores.forEach(function(n){if(collabOrdem.indexOf(n)<0)collabOrdem.push(n);});
+  collabOrdem.forEach(function(n){todasOpcoes.push({nome:n,grupo:'Colaboradores'});});
+  eq.arquitetos.forEach(function(n){todasOpcoes.push({nome:n,grupo:'Arquitetos'});});
+  // Gerar options com optgroups
+  var arqOpts='<optgroup label="Colaboradores">';
+  collabOrdem.forEach(function(n){arqOpts+='<option value="'+n+'"'+(n===bar.arquiteto?' selected':'')+'>'+n+'</option>';});
+  arqOpts+='</optgroup><optgroup label="Arquitetos">';
+  eq.arquitetos.forEach(function(n){arqOpts+='<option value="'+n+'"'+(n===bar.arquiteto?' selected':'')+'>'+n+'</option>';});
+  arqOpts+='</optgroup>';
   var fc=bar.isAll?'#111':getFloorColor(bar.andar);
   var p=document.createElement('div');p.className='aloc-pop';p.style.width='270px';
   _barEditIso=bar.dataInicio;
