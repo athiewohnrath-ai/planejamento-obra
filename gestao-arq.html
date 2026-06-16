@@ -140,6 +140,10 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .ent-andar{font-size:9px;font-weight:700;color:var(--tf-dk);background:var(--tf-s);padding:1px 5px;border-radius:7px;white-space:nowrap;margin-left:auto;align-self:flex-start;flex-shrink:0}
 .ent-item.sel .ent-andar{background:rgba(0,0,0,.15);color:#111}
 .drag-hint{font-size:9.5px;color:var(--gl);text-align:center;padding:8px 10px;font-style:italic}
+.collab-toggle{font-size:9.5px;font-weight:700;font-family:var(--font);padding:2px 8px;border-radius:10px;border:1.5px solid var(--border);background:transparent;cursor:pointer;transition:all .13s;color:var(--gl)}
+.collab-toggle.active{background:rgba(63,191,176,.1);border-color:var(--tf);color:var(--tf-dk)}
+.arq-lbl-collab{background:rgba(63,191,176,.04);border-left:3px solid var(--tf)}
+.collab-sep{height:2px;background:var(--tf);opacity:.25;margin:2px 0}
 .pick-item{padding:5px 8px;border-radius:5px;font-size:12px;font-family:var(--font);font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px;margin-bottom:2px;border:0.5px solid transparent}
 .pick-item:hover{background:var(--bg);border-color:var(--border)}
 /* Painel recolhível */
@@ -418,7 +422,7 @@ var EDB={"Pedro Coivo":{gerentes:[{nome:"Paula Torres",cargo:"GA",arquitetos:[{n
 var EDEF={lev:["Levantamento físico"],ep1:["Layout","Kit de mobiliário","Ampliação áreas técnicas"],ep2:["Layout","Forro","Indicação de pontos","Def. acabamentos","Especificações","Maquetes"],ap:["Layout","Mobiliário","Arquitetura","Forro","Piso","Indicação de pontos","Marcenaria","Detalhamento"],ex:["Layout","Mobiliário","Arquitetura","Forro","Piso","Indicação de pontos","Marcenaria","Detalhamento"],baseAP:["Base AP"],baseEX:["Base EX"],compatAP:["Compat. AP"],compatEX:["Compat. EX"],aprovCond:["Aprov. Condômino"]};
 var COLORS=["#3FBFB0","#2563EB","#7C3AED","#D97706","#059669","#DC4C2E","#0891B2","#65A30D","#9333EA","#CA8A04","#1D4ED8","#B45309","#0F766E","#9F1239"];
 var ESTADO=null,CTX=null;
-var eq={diretor:'',gerentes:[],arquitetos:[]};
+var eq={diretor:'',gerentes:[],arquitetos:[],colaboradores:[]};
 var plano={};var customEnts={};
 var selEnt=null,curEt=null,dragItem=null;window._outrasOpen=false;
 var notNeeded={};var _kitMode=true;
@@ -450,7 +454,7 @@ function computeDatas(isoStart,dias){var r=[],cur=pD(isoStart),cnt=0;while(cnt<d
   document.getElementById('ctx-nome').textContent=meta.nome||'Sem título';
   var ea=(ESTADO.cfg&&ESTADO.cfg.equipeARQ)||{};
   document.getElementById('ctx-dir').textContent=ea.diretor||'—';
-  eq.diretor=ea.diretor||'';eq.gerentes=(ea.gerentes||[]).slice();
+  eq.diretor=ea.diretor||'';eq.gerentes=(ea.gerentes||[]).slice();eq.colaboradores=(ea.colaboradores||[]).slice();
   // Só restaurar arquitetos se houver alocações salvas (evita manter seleção automática antiga)
   var temAloc=ea.planoAloc&&Object.keys(ea.planoAloc).length>0;
   eq.arquitetos=temAloc?(ea.arquitetos||[]).slice():[];
@@ -495,10 +499,18 @@ function renderColDir(){
     var init=dNome.split(' ').map(function(w){return w[0];}).slice(0,2).join('');
     var bg=s?'rgba(63,191,176,.2)':'var(--bg)';
     var cl=s?'var(--tf-dk)':'var(--gl)';
+    var dirCollab=eq.colaboradores.indexOf(dNome)>=0;
     h+='<div class="dir-card'+(s?' active':'')+'" onclick="setDiretor(\''+dNome+'\')">';
     h+='<div class="dir-av" style="background:'+bg+';color:'+cl+'">'+init+'</div>';
     h+='<div class="dir-info"><div class="dir-name2">'+dNome+'</div><div class="dir-role2">Diretoria ARQ</div></div>';
     h+='<div class="dir-ck">'+(s?'&#10003;':'')+'</div></div>';
+    if(s){
+      h+='<div style="padding:2px 6px 8px">'
+        +'<button class="collab-toggle'+(dirCollab?' active':'')+'" onclick="togCollab(\''+dNome+'\',event)">'
+        +(dirCollab?'&#10003; ':'+ ')+'Incluir no calendário'
+        +'</button>'
+        +'</div>';
+    }
   });
   // Aviso outras equipes
   h+='<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">';
@@ -509,7 +521,7 @@ function renderColDir(){
 }
 
 function renderColGA(){
-  var dir=eq.diretor, db=EDB[dir];
+  var dir=eq.diretor,db=EDB[dir];
   if(!dir||!db){
     document.getElementById('col-ga').innerHTML='<div class="empty fi" style="padding:20px 8px"><div class="empty-txt">Selecione uma diretoria</div></div>';
     return;
@@ -517,14 +529,23 @@ function renderColGA(){
   var h='';
   db.gerentes.forEach(function(g){
     var s=eq.gerentes.indexOf(g.nome)>=0;
+    var gaCollab=eq.colaboradores.indexOf(g.nome)>=0;
     var preview=g.arquitetos.slice(0,3).map(function(a){return a.nome.split(' ')[0];});
-    if(g.arquitetos.length>3) preview.push('+'+(g.arquitetos.length-3));
+    if(g.arquitetos.length>3)preview.push('+'+(g.arquitetos.length-3));
     h+='<div class="ga2-card'+(s?' active':'')+'" onclick="togG(\''+g.nome+'\')">';
     h+='<div class="ga2-hdr"><div class="ga2-dot"></div><div class="ga2-name">'+g.nome+'</div>';
     h+='<div class="ga2-count">'+g.arquitetos.length+' arq</div></div>';
     h+='<div class="ga2-pills">';
     preview.forEach(function(p){h+='<span class="ga2-pill">'+p+'</span>';});
-    h+='</div></div>';
+    h+='</div>';
+    if(s){
+      h+='<div style="padding:4px 6px 6px;border-top:1px solid rgba(63,191,176,.15);margin-top:4px">'
+        +'<button class="collab-toggle'+(gaCollab?' active':'')+'" onclick="togCollab(\''+g.nome+'\',event)">'
+        +(gaCollab?'&#10003; ':'+ ')+'No calendário'
+        +'</button>'
+        +'</div>';
+    }
+    h+='</div>';
   });
   document.getElementById('col-ga').innerHTML=h;
 }
@@ -607,6 +628,14 @@ function togG(nome){
   renderColGA();renderColArq();renderFooter();updCTA1();
 }
 
+function togCollab(nome,ev){
+  if(ev)ev.stopPropagation();
+  var idx=eq.colaboradores.indexOf(nome);
+  if(idx>=0)eq.colaboradores.splice(idx,1);
+  else eq.colaboradores.push(nome);
+  renderColDir();renderColGA();renderFooter();updCTA1();
+}
+
 function togOutras(){window._outrasOpen=!window._outrasOpen;renderColArq();}
 function addTodosGA(gNome){var db=EDB[eq.diretor];if(!db)return;var gd=db.gerentes.find(function(g){return g.nome===gNome;});if(!gd)return;gd.arquitetos.forEach(function(a){if(eq.arquitetos.indexOf(a.nome)<0)eq.arquitetos.push(a.nome);});renderColArq();renderFooter();updCTA1();}
 
@@ -625,7 +654,7 @@ function initS2(){
 }
 function setEt(id){curEt=id;selEnt=null;document.querySelectorAll('.etapa-tab').forEach(function(t){t.classList.toggle('active',t.id==='et-'+id);});var et=CTX&&CTX.etapas.find(function(e){return e.id===id;});if(et)document.getElementById('cal-badge').textContent=(et.label||id)+' · '+fBR(pD(et.start))+'–'+fBR(pD(et.end));populateFilt();renderEnt();renderCal();updCTA2();}
 function populateFilt(){var items=getEnt(curEt),andares=[],tipos=[];items.forEach(function(it){if(andares.indexOf(it.andar)<0)andares.push(it.andar);if(tipos.indexOf(it.tipo)<0)tipos.push(it.tipo);});var sa=document.getElementById('filt-andar'),ca=sa.value;sa.innerHTML='<option value="">Todos os andares</option>';andares.forEach(function(a){sa.innerHTML+='<option value="'+a+'"'+(a===ca?' selected':'')+'>'+a+'</option>';});var st=document.getElementById('filt-tipo'),ct=st.value;st.innerHTML='<option value="">Todos os tipos</option>';tipos.forEach(function(t){st.innerHTML+='<option value="'+t+'"'+(t===ct?' selected':'')+'>'+t+'</option>';});}
-var _grpMode='andar';
+var _grpMode='tema';
 function setGrpMode(m){
   _grpMode=m;
   document.getElementById('grp-btn-andar').className='ep-grp-btn'+(m==='andar'?' active':'');
@@ -757,8 +786,17 @@ function renderCal(){
   });
   thead+='</tr></thead>';
 
+  // Combinar arquitetos + colaboradores (com separador entre eles)
+  var todasPessoas=[];
+  eq.arquitetos.forEach(function(n){todasPessoas.push({nome:n,tipo:'arq'});});
+  eq.colaboradores.forEach(function(n){todasPessoas.push({nome:n,tipo:'collab'});});
+
   var tbody='<tbody>';
-  arqs.forEach(function(arqNome){
+  // Linha separadora antes dos colaboradores
+  var collabSepAdded=false;
+  todasPessoas.forEach(function(pessoa){
+    var arqNome=pessoa.nome;
+    var isCollab=pessoa.tipo==='collab';
     var allItems=(plano[curEt]||[]).filter(function(i){return i.arquiteto===arqNome;});
 
     // Montar lista de itens renderizáveis (agrupando em ALL se kitMode)
@@ -801,9 +839,15 @@ function renderCal(){
     var rowH=Math.max(52,(maxSlot+1)*(CHIP_H+CHIP_GAP)+PAD*2)+PLUS_H;
 
     tbody+='<tr>';
-    tbody+='<td class="arq-lbl" style="height:'+rowH+'px">'
+    if(isCollab&&!collabSepAdded&&eq.arquitetos.length>0){
+      collabSepAdded=true;
+      tbody+='<tr><td colspan="'+(days.length+1)+'" style="height:3px;padding:0;background:rgba(63,191,176,.35)"></td></tr>';
+    }
+    var roleLabel=isCollab?'Colaborador':'Arquiteto';
+    var cStyle=isCollab?'background:rgba(63,191,176,.06);border-left:3px solid rgba(63,191,176,.6)':'';
+    tbody+='<tr><td class="arq-lbl" style="height:'+rowH+'px;'+cStyle+'">'
       +'<div class="arq-name">'+arqNome+'</div>'
-      +'<div class="arq-role">Arquiteto</div></td>';
+      +'<div class="arq-role">'+roleLabel+'</div></td>';
 
     // Uma única célula cobrindo todos os dias
     tbody+='<td colspan="'+days.length+'" style="position:relative;height:'+rowH+'px;padding:0;vertical-align:top;overflow:visible;border-bottom:2px solid #B0B2B8;">';
