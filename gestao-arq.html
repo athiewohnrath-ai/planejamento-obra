@@ -885,7 +885,13 @@ function renderCal(){
         :'rmAloc(\''+item.ids[0]+'\',event)';
       var bg=item.isAll?'#111':fc;
       var bdColor=item.isAll?'#333':getFloorColorDk(item.andar);
-      var barData=JSON.stringify({ids:item.ids,tipo:item.tipo,andar:item.andar,dataInicio:item.dataInicio,dias:item.dias,isAll:item.isAll,arquiteto:arqNome,andares:item.andares}).replace(/'/g,"&#39;");
+      // Pegar notas do primeiro item do grupo
+      var firstItemNotas='';
+      if(item.ids&&item.ids.length&&plano[curEt]){
+        var fi=plano[curEt].find(function(a){return a.id===item.ids[0];});
+        if(fi&&fi.notas)firstItemNotas=fi.notas;
+      }
+      var barData=JSON.stringify({ids:item.ids,tipo:item.tipo,andar:item.andar,dataInicio:item.dataInicio,dias:item.dias,isAll:item.isAll,arquiteto:arqNome,andares:item.andares,notas:firstItemNotas}).replace(/'/g,"&#39;");
       tbody+='<div class="cal-bar" draggable="true" '
         +'ondragstart="onBarDragStart(event,this)" ondragend="onBarDragEnd(event)" '
         +'onclick="openBarEdit(event,this)" '
@@ -896,6 +902,12 @@ function renderCal(){
         +'<div class="bar-inner">'
         +'<span class="bar-andar">'+item.andar+'</span>'
         +'<span class="bar-tipo">'+item.tipo+'</span>'
+        +(item.isAll?'':
+          // Verificar se algum item do grupo tem notas
+          (item.ids&&item.ids.length?
+            (plano[curEt]||[]).some(function(a){return item.ids.indexOf(a.id)>=0&&a.notas&&a.notas.trim();})?
+            '<span title="Tem anotações" style="width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.8);flex-shrink:0;margin-left:2px"></span>':''
+          :''))
         +(item.dias>1?'<span class="bar-days">'+item.dias+'d</span>':'')
         +'</div>'
         +'</div>';
@@ -999,7 +1011,10 @@ function openBarEdit(ev,el){
     +'<span class="dias-val" id="bar-edit-dias">'+bar.dias+'</span>'
     +'<span class="dias-label">dia(s)</span>'
     +'<button class="dias-btn" onclick="adjBarDias(1)">+</button></div>'
-    +'<div class="aloc-pop-btns" style="margin-top:12px">'
+    +'<div style="margin-bottom:10px"><div class="aloc-pop-label" style="margin-bottom:4px">Anotações:</div>'
+    +'<textarea id="bar-edit-notas" rows="3" placeholder="Observações livres…" '
+    +'style="width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:5px;font-size:11.5px;font-family:var(--body);resize:vertical;outline:none;line-height:1.5">'+(_barEditData&&_barEditData.notas?_barEditData.notas:'')+'</textarea></div>'
+    +'<div class="aloc-pop-btns" style="margin-top:8px">'
     +'<button onclick="barDelete2()" style="height:30px;padding:0 10px;background:rgba(220,76,46,.1);border:1px solid rgba(220,76,46,.3);border-radius:6px;font-family:var(--font);font-size:10.5px;font-weight:700;color:#DC4C2E;cursor:pointer">Remover</button>'
     +'<button class="pop-btn-cancel" onclick="closeBarEdit()">Cancelar</button>'
     +'<button class="pop-btn-ok" onclick="confirmBarEdit()">Salvar</button>'
@@ -1032,9 +1047,10 @@ function adjBarDias(d){
 function confirmBarEdit(){
   if(!_barEditData||!plano[curEt]){closeBarEdit();return;}
   var novoArq=document.getElementById('bar-edit-arq').value;
+  var novaNotas=document.getElementById('bar-edit-notas')?document.getElementById('bar-edit-notas').value:'';
   _barEditData.ids.forEach(function(id){
     var item=plano[curEt].find(function(a){return a.id===id;});
-    if(item){item.dias=_barEditDias;item.arquiteto=novoArq;if(_barEditIso)item.dataInicio=_barEditIso;}
+    if(item){item.dias=_barEditDias;item.arquiteto=novoArq;if(_barEditIso)item.dataInicio=_barEditIso;item.notas=novaNotas;}
   });
   closeBarEdit();salvAloc();renderEnt();renderCal();
   toast('Alocação atualizada');
