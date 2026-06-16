@@ -1303,9 +1303,9 @@ function fecharAddEnt(){document.getElementById('modal-add-ent').style.display='
 function updAndOpt(){var opt=document.querySelector('input[name="opt-andar"]:checked');document.getElementById('and-chks-wrap').style.display=(opt&&opt.value==='andar')?'block':'none';}
 function confirmarAddEnt(){var nome=document.getElementById('new-ent-nome').value.trim();if(!nome){toast('Digite um nome para a entrega');return;}var opt=document.querySelector('input[name="opt-andar"]:checked'),andares=[];if(opt&&opt.value==='andar'){document.querySelectorAll('#and-chks input:checked').forEach(function(cb){andares.push(cb.value);});if(!andares.length){toast('Selecione pelo menos um andar');return;}}else{andares=['Geral'];}if(!customEnts[curEt])customEnts[curEt]=[];andares.forEach(function(andar){customEnts[curEt].push({id:'cust_'+Date.now()+'_'+Math.random().toString(36).slice(2),tipo:nome,andar:andar});});fecharAddEnt();populateFilt();renderEnt();renderCal();toast('Entrega "'+nome+'" adicionada');}
 function renderRpt(){renderRptNova();}
-function setRTab(n){curRTab=n;renderRptNova();}
-function fBR2(iso){var p=iso.split('-');return p[2]+'/'+p[1];}
+function setRTab(n){renderRptNova();}
 
+function fBR2(iso){var p=iso.split('-');return p[2]+'/'+p[1];}
 function _getRoleLabel(nome){
   if(nome===eq.diretor)return'Diretor de Arquitetura';
   if(eq.gerentes.indexOf(nome)>=0)return'Gerente de Arquitetura';
@@ -1316,13 +1316,15 @@ function renderRptNova(){
   var el=document.getElementById('rpt-body');
   var meta=ESTADO&&ESTADO.meta||{};
   var proj=(meta.codigo?meta.codigo+' \u2014 ':'')+( meta.nome||'Projeto');
+
+  // Coletar todas as alocações
   var todas=[];
   Object.keys(plano).forEach(function(etId){
     var et=CTX&&CTX.etapas.find(function(e){return e.id===etId;});
     (plano[etId]||[]).forEach(function(item){
       var datas=computeDatas(item.dataInicio,item.dias);
       todas.push({
-        et:et?et.label||etId:etId,etId:etId,
+        et:et?et.label||etId:etId,
         tipo:item.tipo,andar:item.andar,arquiteto:item.arquiteto,
         ini:datas[0]||item.dataInicio,
         fim:datas[datas.length-1]||item.dataInicio,
@@ -1337,9 +1339,16 @@ function renderRptNova(){
     return;
   }
 
-  var h='<div class="rpt-doc">';
+  // Data range do projeto inteiro
+  var projIni=todas.reduce(function(m,r){return r.ini<m?r.ini:m;},todas[0].ini);
+  var projFim=todas.reduce(function(m,r){return r.fim>m?r.fim:m;},todas[0].fim);
+  // Dias úteis do projeto
+  var projDias=[],cur=pD(projIni);
+  var projFimD=pD(projFim);
+  while(cur<=projFimD){if(isWork(cur))projDias.push(fISO(cur));cur=addD(cur,1);}
 
-  // Cabeçalho
+  // Cabeçalho do documento
+  var h='<div class="rpt-doc">';
   h+='<div class="rpt-doc-hdr">'
     +'<div><div class="rpt-doc-title">Plano de Arquitetura</div>'
     +'<div class="rpt-doc-sub">'+proj+'</div></div>'
@@ -1348,93 +1357,149 @@ function renderRptNova(){
     +'<div>Emitido em: <strong>'+new Date().toLocaleDateString('pt-BR')+'</strong></div>'
     +'</div></div>';
 
-  // ── SEÇÃO 1: Por profissional (tabela compacta) ───────────────────────────
-  h+='<div class="rpt-sec"><div class="rpt-sec-title">Sequência por profissional</div>';
+  // Ordem dos profissionais
   var collabOrdem=[];
   if(eq.diretor&&eq.colaboradores.indexOf(eq.diretor)>=0)collabOrdem.push(eq.diretor);
   eq.gerentes.forEach(function(g){if(eq.colaboradores.indexOf(g)>=0)collabOrdem.push(g);});
   eq.colaboradores.forEach(function(n){if(collabOrdem.indexOf(n)<0)collabOrdem.push(n);});
   var todasPessoas=collabOrdem.concat(eq.arquitetos);
 
+  // ── SEÇÃO 1: Por profissional ─────────────────────────────────────────────
+  h+='<div class="rpt-sec"><div class="rpt-sec-title">Sequência por profissional</div>';
+
+  var TH='padding:3px 4px;font-family:var(--font);font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--gl);border-bottom:1px solid var(--border);white-space:nowrap;text-align:left';
+  var TD='padding:3px 8px;font-size:11px;border-bottom:1px solid #F2F3F4;vertical-align:middle';
+
   todasPessoas.forEach(function(nome){
     var itens=todas.filter(function(r){return r.arquiteto===nome;});
     if(!itens.length)return;
     itens.sort(function(a,b){return a.ini<b.ini?-1:1;});
+
+    // Numerar: mesmo dia → mesmo número
+    var numMap={},numSeq=0,lastDate='';
+    itens.forEach(function(r){
+      if(r.ini!==lastDate){numSeq++;lastDate=r.ini;}
+      numMap[r.ini]=numSeq;
+      r._num=numSeq;
+    });
+    var totalNums=numSeq;
+
     var init=nome.split(' ').map(function(w){return w[0];}).slice(0,2).join('');
     var role=_getRoleLabel(nome);
+
     h+='<div class="rpt-prof-block">'
       +'<div class="rpt-prof-hdr">'
       +'<div class="rpt-prof-av">'+init+'</div>'
       +'<div><div class="rpt-prof-name">'+nome+'</div>'
       +'<div class="rpt-prof-role">'+role+'</div></div>'
       +'<div style="margin-left:auto;font-family:var(--font);font-size:10px;color:var(--gl)">'+itens.length+' entrega(s)</div>'
-      +'</div>'
-      +'<table style="width:100%;border-collapse:collapse;font-size:11px">'
+      +'</div>';
+
+    // ── Mini cronograma ──────────────────────────────────────────────────────
+    // Usar apenas as datas do intervalo deste profissional
+    var profIni=itens[0].ini;
+    var profFim=itens[itens.length-1].fim;
+    var profDias=projDias.filter(function(d){return d>=profIni&&d<=profFim;});
+    var nCols=profDias.length;
+    if(nCols>0){
+      var pct=(100/nCols).toFixed(3)+'%';
+      // Meses para cabeçalho agrupado
+      var meses=[],lastM='';
+      profDias.forEach(function(d){var m=d.slice(0,7);if(m!==lastM){meses.push({m:m,count:0});lastM=m;}meses[meses.length-1].count++;});
+      h+='<div style="overflow-x:auto;margin:0">'
+        +'<table style="width:100%;table-layout:fixed;border-collapse:collapse;font-size:8px">'
+        +'<colgroup>';
+      profDias.forEach(function(){h+='<col style="width:'+pct+'">';});
+      h+='</colgroup>'
+        // Linha de meses
+        +'<thead><tr>';
+      meses.forEach(function(mb){
+        var mLabel=mb.m.slice(5)+'/'+mb.m.slice(2,4);
+        h+='<th colspan="'+mb.count+'" style="padding:2px 3px;background:#F0F1F2;font-family:var(--font);font-size:8px;font-weight:700;color:var(--gl);text-align:left;border-bottom:1px solid var(--border);border-right:1px solid var(--border)">'+mLabel+'</th>';
+      });
+      h+='</tr>'
+        // Linha de dias
+        +'<tr>';
+      profDias.forEach(function(d,di){
+        var day=d.slice(8);
+        var hasMark=numMap[d]!==undefined;
+        h+='<td style="padding:1px 0;text-align:center;font-family:var(--font);font-size:7px;color:'+(hasMark?'var(--ink)':'#ccc')+';border-right:1px solid #F0F1F2;border-bottom:1px solid var(--border)">'+day+'</td>';
+      });
+      h+='</tr>'
+        // Linha de marcações
+        +'<tr>';
+      profDias.forEach(function(d){
+        var num=numMap[d];
+        var fc=num!==undefined?getFloorColor(itens.find(function(r){return r.ini===d;}).andar):'';
+        h+='<td style="padding:1px 0;text-align:center;font-family:var(--font);font-size:8px;font-weight:700;background:'+(num!==undefined?fc+'22':'')
+          +';color:'+(num!==undefined?fc:'transparent')+';border-right:1px solid #F0F1F2">'
+          +(num!==undefined?num:'·')+'</td>';
+      });
+      h+='</tr></thead></table></div>';
+    }
+
+    // ── Tabela de entregáveis com numeração ──────────────────────────────────
+    h+='<table style="width:100%;border-collapse:collapse">'
       +'<thead><tr style="background:#F8F9FA">'
-      +'<th style="padding:4px 10px;text-align:left;font-family:var(--font);font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--gl);border-bottom:1px solid var(--border);white-space:nowrap">Período</th>'
-      +'<th style="padding:4px 10px;text-align:left;font-family:var(--font);font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--gl);border-bottom:1px solid var(--border)">Entregável</th>'
-      +'<th style="padding:4px 10px;text-align:center;font-family:var(--font);font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--gl);border-bottom:1px solid var(--border)">Dias</th>'
-      +'<th style="padding:4px 10px;text-align:left;font-family:var(--font);font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--gl);border-bottom:1px solid var(--border)">Obs</th>'
+      +'<th style="'+TH+';width:28px;text-align:center">#</th>'
+      +'<th style="'+TH+'">Entregável</th>'
+      +'<th style="'+TH+'">Andar</th>'
+      +'<th style="'+TH+'">Período</th>'
+      +'<th style="'+TH+';text-align:center">Dias</th>'
+      +'<th style="'+TH+'">Observação</th>'
       +'</tr></thead><tbody>';
     itens.forEach(function(r,ri){
       var fc=getFloorColor(r.andar);
       var bg=ri%2===1?'#FAFBFC':'#fff';
       h+='<tr style="background:'+bg+'">'
-        +'<td style="padding:4px 10px;border-bottom:1px solid #F0F1F2;white-space:nowrap;font-family:var(--font);font-size:11px;color:var(--gl)">'
-        +fBR2(r.ini)+(r.dias>1?'&nbsp;&rarr;&nbsp;'+fBR2(r.fim):'')+'</td>'
-        +'<td style="padding:4px 10px;border-bottom:1px solid #F0F1F2">'
-        +'<span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:'+fc+';margin-right:5px;vertical-align:middle"></span>'
-        +'<strong style="font-family:var(--font);font-size:11px">'+r.tipo+'</strong>'
-        +'<span style="font-size:10px;color:var(--gl);margin-left:5px">'+r.andar+'</span>'
-        +'</td>'
-        +'<td style="padding:4px 10px;border-bottom:1px solid #F0F1F2;text-align:center;font-family:var(--font);font-size:11px;font-weight:700;color:var(--tf-dk)">'+r.dias+'d</td>'
-        +'<td style="padding:4px 10px;border-bottom:1px solid #F0F1F2;font-size:10px;color:var(--gl);font-style:italic">'+r.notas+'</td>'
+        +'<td style="'+TD+';text-align:center;font-family:var(--font);font-weight:800;font-size:12px;color:var(--ink)">'+r._num+'</td>'
+        +'<td style="'+TD+';font-family:var(--font);font-weight:700">'+r.tipo+'</td>'
+        +'<td style="'+TD+'"><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:'+fc+';margin-right:4px;vertical-align:middle"></span>'+r.andar+'</td>'
+        +'<td style="'+TD+';color:var(--gl);font-size:11px;white-space:nowrap">'+fBR2(r.ini)+(r.dias>1?' &rarr; '+fBR2(r.fim):'')+'</td>'
+        +'<td style="'+TD+';text-align:center;font-family:var(--font);font-weight:700;color:var(--tf-dk)">'+r.dias+'d</td>'
+        +'<td style="'+TD+';color:var(--gl);font-style:italic;font-size:10.5px">'+r.notas+'</td>'
         +'</tr>';
     });
-    h+='</tbody></table></div>';
+    h+='</tbody></table></div>'; // rpt-prof-block
   });
-  h+='</div>';
+  h+='</div>'; // seção 1
 
-  // ── SEÇÃO 2: Por data de término (agrupado, sem excesso de cores) ─────────
+  // ── SEÇÃO 2: Por data de término ──────────────────────────────────────────
   h+='<div class="rpt-sec"><div class="rpt-sec-title">Entregáveis por data de t\xe9rmino</div>';
   var ordenados=todas.slice().sort(function(a,b){return a.fim<b.fim?-1:a.fim>b.fim?1:a.tipo<b.tipo?-1:1;});
-
-  // Agrupar por data de término
   var porFim={},fimsOrdem=[];
-  ordenados.forEach(function(r){
-    if(!porFim[r.fim]){porFim[r.fim]=[];fimsOrdem.push(r.fim);}
-    porFim[r.fim].push(r);
-  });
+  ordenados.forEach(function(r){if(!porFim[r.fim]){porFim[r.fim]=[];fimsOrdem.push(r.fim);}porFim[r.fim].push(r);});
 
-  fimsOrdem.forEach(function(fim){
+  h+='<table style="width:100%;border-collapse:collapse"><thead><tr style="background:#F8F9FA">'
+    +'<th style="'+TH+';width:90px">Término</th>'
+    +'<th style="'+TH+'">Entregável</th>'
+    +'<th style="'+TH+';width:50px">Andar</th>'
+    +'<th style="'+TH+'">Profissional</th>'
+    +'<th style="'+TH+';width:70px">Início</th>'
+    +'<th style="'+TH+';width:34px;text-align:center">Dias</th>'
+    +'<th style="'+TH+'">Obs.</th>'
+    +'</tr></thead><tbody>';
+
+  fimsOrdem.forEach(function(fim,fi){
     var grupo=porFim[fim];
-    h+='<div style="margin-bottom:12px">'
-      +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">'
-      +'<div style="font-family:var(--font);font-size:12px;font-weight:800;color:var(--ink)">'+fBR2(fim)+'</div>'
-      +'<div style="font-size:10px;color:var(--gl)">'+grupo.length+' entrega(s)</div>'
-      +'<div style="flex:1;height:1px;background:var(--border)"></div>'
-      +'</div>'
-      +'<table style="width:100%;border-collapse:collapse;font-size:11px">'
-      +'<tbody>';
     grupo.forEach(function(r,ri){
       var fc=getFloorColor(r.andar);
-      h+='<tr>'
-        +'<td style="padding:3px 8px;width:90px;font-family:var(--font);font-size:10px;color:var(--gl);white-space:nowrap">'
-        +fBR2(r.ini)+(r.dias>1?'&rarr;'+fBR2(r.fim):'')+'</td>'
-        +'<td style="padding:3px 8px;width:20px">'
-        +'<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+fc+'"></span>'
-        +'</td>'
-        +'<td style="padding:3px 8px;font-family:var(--font);font-size:11px;font-weight:700;color:var(--ink)">'+r.tipo+'</td>'
-        +'<td style="padding:3px 8px;font-size:10px;color:var(--gl)">'+r.andar+'</td>'
-        +'<td style="padding:3px 8px;font-size:10px;color:var(--gl)">'+r.arquiteto+'</td>'
-        +'<td style="padding:3px 8px;font-size:10px;color:var(--gl);font-style:italic">'+r.notas+'</td>'
+      var isFirst=ri===0;
+      var bg=fi%2===1?'#FAFBFC':'#fff';
+      h+='<tr style="background:'+bg+'">'
+        +'<td style="'+TD+';font-family:var(--font);font-size:11px;white-space:nowrap">'+(isFirst?'<strong>'+fBR2(fim)+'</strong>':'&nbsp;')+'</td>'
+        +'<td style="'+TD+';font-family:var(--font);font-weight:600">'
+        +'<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:'+fc+';margin-right:5px;vertical-align:middle"></span>'+r.tipo+'</td>'
+        +'<td style="'+TD+';font-size:10.5px;color:var(--gl)">'+r.andar+'</td>'
+        +'<td style="'+TD+';font-size:11px">'+r.arquiteto+'</td>'
+        +'<td style="'+TD+';color:var(--gl);font-size:10.5px;white-space:nowrap">'+fBR2(r.ini)+'</td>'
+        +'<td style="'+TD+';text-align:center;font-family:var(--font);font-weight:700;color:var(--tf-dk)">'+r.dias+'d</td>'
+        +'<td style="'+TD+';color:var(--gl);font-style:italic;font-size:10.5px">'+r.notas+'</td>'
         +'</tr>';
     });
-    h+='</tbody></table></div>';
   });
-  h+='</div>';
-
-  h+='</div>';
+  h+='</tbody></table></div>'; // seção 2
+  h+='</div>'; // rpt-doc
   el.innerHTML=h;
   document.getElementById('cta3-info').innerHTML='<strong>'+todas.length+'</strong> entrega(s) · <strong>'+(eq.colaboradores.length+eq.arquitetos.length)+'</strong> profissional(is)';
 }
