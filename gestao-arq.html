@@ -140,6 +140,8 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .ent-andar{font-size:9px;font-weight:700;color:var(--tf-dk);background:var(--tf-s);padding:1px 5px;border-radius:7px;white-space:nowrap;margin-left:auto;align-self:flex-start;flex-shrink:0}
 .ent-item.sel .ent-andar{background:rgba(0,0,0,.15);color:#111}
 .drag-hint{font-size:9.5px;color:var(--gl);text-align:center;padding:8px 10px;font-style:italic}
+.pick-item{padding:5px 8px;border-radius:5px;font-size:12px;font-family:var(--font);font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px;margin-bottom:2px;border:0.5px solid transparent}
+.pick-item:hover{background:var(--bg);border-color:var(--border)}
 /* Painel recolhível */
 .ep{transition:width .22s ease,min-width .22s ease}
 .ep.collapsed{width:0!important;min-width:0!important;overflow:hidden;border-right:none}
@@ -1001,7 +1003,26 @@ function rmAlocGrp(ids,ev){
 
 function cellClick(arqNome,iso,ev){ev.stopPropagation();if(selEnt)openAlocPop(selEnt,arqNome,iso,ev);else openPickPop(arqNome,iso,ev);}
 function openAlocPop(it,arqNome,iso,ev){closePop();_popEnt=it;_popArq=arqNome;_popIso=iso;_popDias=1;var c=COLORS[it.colorIdx];var et=CTX&&CTX.etapas.find(function(e){return e.id===curEt;});var etEnd=et?pD(et.end):null;var maxDias=20;if(etEnd){var cur=pD(iso),cnt=0;while(cur<=etEnd){if(isWork(cur))cnt++;cur=addD(cur,1);}maxDias=cnt;}var p=document.createElement('div');p.className='aloc-pop';p.innerHTML='<div class="aloc-pop-hdr">Alocar entrega</div><div class="aloc-pop-body"><div class="aloc-pop-ent" style="background:'+c+'22;color:'+c+';border-left:3px solid '+c+'"><span style="background:'+c+';width:8px;height:8px;border-radius:2px;flex-shrink:0;display:inline-block"></span>'+it.tipo+' · '+it.andar+'</div><div class="aloc-pop-label">Quantos dias úteis?</div><div class="aloc-pop-dias"><button class="dias-btn" onclick="adjDias(-1)">−</button><span class="dias-val" id="pop-dias">1</span><span class="dias-label">dia(s)</span><button class="dias-btn" onclick="adjDias(1)">+</button></div><div class="aloc-pop-btns"><button class="pop-btn-cancel" onclick="closePop()">Cancelar</button><button class="pop-btn-ok" onclick="confirmAloc()">Confirmar</button></div></div>';document.body.appendChild(p);_pop=p;p.dataset.max=maxDias;positionPop(p,ev);}
-function openPickPop(arqNome,iso,ev){closePop();_popArq=arqNome;_popIso=iso;var avail=getEnt(curEt).filter(function(it){return!isAloc(curEt,it.id);});var p=document.createElement('div');p.className='aloc-pop';var h='<div class="aloc-pop-hdr">'+pd(parseInt(iso.split('-')[2]))+'/'+pd(parseInt(iso.split('-')[1]))+' · '+arqNome+'</div><div class="aloc-pop-body" style="padding:7px">';if(!avail.length)h+='<div style="text-align:center;padding:11px;color:var(--gl);font-size:11.5px">Todas as entregas já alocadas</div>';avail.forEach(function(it){var c=COLORS[it.colorIdx];h+='<div style="padding:6px 8px;border-radius:5px;font-size:11.5px;font-family:var(--font);font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;margin-bottom:3px" onmouseover="this.style.background=\'var(--tf-s)\'" onmouseout="this.style.background=\'\'" onclick="pickItem(\''+it.id+'\')">'+'<div style="width:7px;height:7px;border-radius:2px;background:'+c+';flex-shrink:0"></div>'+it.tipo+' <span style="font-size:9px;font-family:var(--font);padding:1px 5px;background:var(--tf-s);color:var(--tf-dk);border-radius:7px">'+it.andar+'</span></div>';});h+='</div>';p.innerHTML=h;document.body.appendChild(p);_pop=p;positionPop(p,ev);}
+function openPickPop(arqNome,iso,ev){
+  closePop();_popArq=arqNome;_popIso=iso;
+  var avail=getEnt(curEt).filter(function(it){return!isAloc(curEt,it.id)&&!isNN(curEt,it.id);});
+  var p=document.createElement('div');p.className='aloc-pop';p.style.maxHeight='60vh';p.style.overflowY='auto';p.style.width='280px';
+  var h='<div class="aloc-pop-hdr">'+pd(parseInt(iso.split('-')[2]))+'/'+pd(parseInt(iso.split('-')[1]))+' · '+arqNome+'</div>';
+  h+='<div class="aloc-pop-body" style="padding:7px">';
+  if(!avail.length){
+    h+='<div style="text-align:center;padding:11px;color:var(--gl);font-size:11.5px">Todas as entregas já alocadas</div>';
+  }
+  avail.forEach(function(it){
+    var fc=getFloorColor(it.andar);
+    h+='<div class="pick-item" onclick="pickItem(&quot;'+it.id+'&quot;)">'
+      +'<span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;background:'+fc+';color:#fff;flex-shrink:0;min-width:24px;text-align:center">'+it.andar+'</span>'
+      +'<span style="color:var(--ink)">'+it.tipo+'</span>'
+      +'</div>';
+  });
+  h+='</div>';
+  p.innerHTML=h;document.body.appendChild(p);_pop=p;positionPop(p,ev);
+}
+
 function pickItem(entId){var items=getEnt(curEt),it=items.find(function(x){return x.id===entId;});if(!it)return;closePop();openAlocPop(it,_popArq,_popIso,{clientX:window.innerWidth/2,clientY:window.innerHeight/2});}
 function adjDias(delta){if(!_pop)return;var max=parseInt(_pop.dataset.max)||20;_popDias=Math.max(1,Math.min(max,_popDias+delta));document.getElementById('pop-dias').textContent=_popDias;}
 function confirmAloc(){if(!_popEnt||!_popArq||!_popIso){closePop();return;}if(isAloc(curEt,_popEnt.id)){toast('Esta entrega já está alocada');closePop();return;}if(!plano[curEt])plano[curEt]=[];plano[curEt].push({id:'a'+Date.now(),entId:_popEnt.id,tipo:_popEnt.tipo,andar:_popEnt.andar,arquiteto:_popArq,dataInicio:_popIso,dias:_popDias});
