@@ -244,25 +244,38 @@ body.bar-dragging .cal-bar .bar-del{display:none}
 .pop-btn-ok{flex:1;height:30px;background:var(--tf);border:none;border-radius:6px;font-family:var(--font);font-size:11.5px;font-weight:700;color:#111;transition:all .14s}
 .pop-btn-ok:hover{background:var(--tf-dk);color:#fff}
 .pop-btn-cancel{height:30px;padding:0 12px;border:1.5px solid var(--border);border-radius:6px;background:transparent;font-family:var(--font);font-size:11px;font-weight:600;color:var(--gray)}
-.rpt-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);background:#fff;flex-shrink:0;padding:0 20px}
-.rpt-tab{height:40px;padding:0 16px;border:none;background:transparent;font-family:var(--font);font-size:13px;font-weight:700;color:var(--gl);border-bottom:2px solid transparent;cursor:pointer;transition:all .14px}
-.rpt-tab.active{color:var(--tf-dk);border-bottom-color:var(--tf)}
-.rpt-scroll{flex:1;overflow-y:auto;padding:20px 24px}
-.rpt-sec-title{font-family:var(--font);font-size:11px;font-weight:700;color:var(--gl);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.rpt-scroll{flex:1;overflow-y:auto;padding:24px 32px;background:#EAEBEE}
+.rpt-doc{background:#fff;border-radius:8px;box-shadow:0 2px 16px rgba(0,0,0,.12);padding:40px 48px;max-width:900px;margin:0 auto}
+.rpt-doc-hdr{border-bottom:3px solid #1A2535;padding-bottom:14px;margin-bottom:28px;display:flex;align-items:flex-end;justify-content:space-between}
+.rpt-doc-title{font-family:var(--font);font-size:22px;font-weight:800;color:#1A2535;text-transform:uppercase}
+.rpt-doc-sub{font-size:12px;color:var(--gl);margin-top:3px}
+.rpt-doc-meta{text-align:right;font-size:11px;color:var(--gl);line-height:1.9}
+.rpt-sec{margin-bottom:32px}
+.rpt-sec-title{font-family:var(--font);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--gl);margin-bottom:12px;display:flex;align-items:center;gap:10px}
 .rpt-sec-title::after{content:'';flex:1;height:1px;background:var(--border)}
-.rpt-table{width:100%;border-collapse:collapse;font-size:13px}
-.rpt-table th{text-align:left;padding:7px 10px;font-family:var(--font);font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--gl);border-bottom:2px solid var(--border);white-space:nowrap}
-.rpt-table td{padding:7px 10px;border-bottom:1px solid #F3F4F6;vertical-align:middle}
-.rpt-table tr:hover td{background:#FAFBFC}
-.rpt-badge{display:inline-block;padding:2px 7px;border-radius:8px;font-size:10px;font-weight:700;font-family:var(--font)}
-.rpt-arq-block{background:#fff;border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:16px}
-.rpt-arq-hdr{padding:11px 16px;background:#F8F9FA;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
-.rpt-arq-av{width:32px;height:32px;border-radius:8px;background:var(--tf);display:flex;align-items:center;justify-content:center;font-family:var(--font);font-size:12px;font-weight:800;color:#111;flex-shrink:0}
-.rpt-arq-name{font-family:var(--font);font-size:14px;font-weight:700;color:var(--ink)}.rpt-arq-count{font-size:11px;color:var(--gl);margin-top:1px}
-.rpt-day-row{display:flex;align-items:flex-start;padding:8px 16px;border-bottom:1px solid #F3F4F6;gap:12px}
-.rpt-day-label{font-family:var(--font);font-size:11px;font-weight:700;color:var(--ink);min-width:72px;padding-top:2px}
-.rpt-day-chips{display:flex;flex-wrap:wrap;gap:5px}
-.rpt-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:10px;font-size:11px;font-weight:700;font-family:var(--font);color:#fff}
+.rpt-prof-block{margin-bottom:18px;border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.rpt-prof-hdr{padding:10px 16px;background:#F8F9FA;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.rpt-prof-av{width:30px;height:30px;border-radius:7px;background:var(--tf);display:flex;align-items:center;justify-content:center;font-family:var(--font);font-size:11px;font-weight:800;color:#111;flex-shrink:0}
+.rpt-prof-name{font-family:var(--font);font-size:13px;font-weight:700;color:var(--ink);flex:1}
+.rpt-prof-role{font-size:10px;color:var(--gl)}
+.rpt-tl-row{display:flex;align-items:flex-start;padding:8px 16px;border-bottom:1px solid #F5F6F7;gap:12px}
+.rpt-tl-row:last-child{border-bottom:none}
+.rpt-tl-date{font-family:var(--font);font-size:11px;color:var(--gl);min-width:100px;flex-shrink:0;padding-top:2px}
+.rpt-tl-bar{width:3px;border-radius:2px;flex-shrink:0;margin-top:3px;align-self:stretch;min-height:16px}
+.rpt-tl-tipo{font-family:var(--font);font-size:12px;font-weight:700;color:var(--ink)}
+.rpt-tl-notas{font-size:11px;color:var(--gl);margin-top:3px;font-style:italic}
+.rpt-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:4px}
+.rpt-table th{text-align:left;padding:8px 10px;font-family:var(--font);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--gl);border-bottom:2px solid var(--border);white-space:nowrap}
+.rpt-table td{padding:8px 10px;border-bottom:1px solid #F3F4F6;vertical-align:top;font-size:12px}
+.rpt-table tbody tr:hover td{background:#FAFBFC}
+.rpt-badge{display:inline-block;padding:2px 7px;border-radius:5px;font-size:10px;font-weight:700;font-family:var(--font);color:#fff}
+@media print{
+  aside,.ep-wrapper,.cta-bar,.s2-topbar,.scr:not(#scr3){display:none!important}
+  #scr3{display:flex!important;flex-direction:column;height:auto}
+  .rpt-scroll{background:#fff;padding:0;overflow:visible;height:auto;flex:none}
+  .rpt-doc{box-shadow:none;border-radius:0;padding:12mm 16mm;max-width:none}
+  @page{size:A4 portrait;margin:0}
+}
 .cta-bar{padding:12px 26px;border-top:1px solid var(--border);background:#fff;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
 .cta-info{font-size:13px;color:var(--gray)}.cta-info strong{color:var(--ink)}
 .btn-p{height:34px;padding:0 18px;background:var(--tf);border:none;border-radius:7px;font-family:var(--font);font-size:12px;font-weight:700;color:#111;display:flex;align-items:center;gap:5px;transition:all .15s}
@@ -381,16 +394,12 @@ body.bar-dragging .cal-bar .bar-del{display:none}
     </div>
   </div>
   <div class="scr" id="scr3">
-    <div class="rpt-tabs">
-      <button class="rpt-tab active" id="rtab1" onclick="setRTab(1)">Por Etapa</button>
-      <button class="rpt-tab" id="rtab2" onclick="setRTab(2)">Por Arquiteto</button>
-    </div>
     <div class="rpt-scroll" id="rpt-body"></div>
     <div class="cta-bar">
       <div class="cta-info" id="cta3-info">—</div>
       <div style="display:flex;gap:8px">
         <button class="btn-s" onclick="goScr(2)">‹ Alocação</button>
-        <button class="btn-s" onclick="imprimirRpt()" style="border-color:var(--tf);color:var(--tf-dk)">🖨 Imprimir</button>
+        <button class="btn-s" onclick="window.print()" style="border-color:var(--tf);color:var(--tf-dk)">🖨 Imprimir</button>
         <button class="btn-p" onclick="confirmar()">Confirmar equipe <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></button>
       </div>
     </div>
@@ -1228,11 +1237,126 @@ function abrirAddEnt(){if(!curEt){toast('Selecione uma etapa primeiro');return;}
 function fecharAddEnt(){document.getElementById('modal-add-ent').style.display='none';}
 function updAndOpt(){var opt=document.querySelector('input[name="opt-andar"]:checked');document.getElementById('and-chks-wrap').style.display=(opt&&opt.value==='andar')?'block':'none';}
 function confirmarAddEnt(){var nome=document.getElementById('new-ent-nome').value.trim();if(!nome){toast('Digite um nome para a entrega');return;}var opt=document.querySelector('input[name="opt-andar"]:checked'),andares=[];if(opt&&opt.value==='andar'){document.querySelectorAll('#and-chks input:checked').forEach(function(cb){andares.push(cb.value);});if(!andares.length){toast('Selecione pelo menos um andar');return;}}else{andares=['Geral'];}if(!customEnts[curEt])customEnts[curEt]=[];andares.forEach(function(andar){customEnts[curEt].push({id:'cust_'+Date.now()+'_'+Math.random().toString(36).slice(2),tipo:nome,andar:andar});});fecharAddEnt();populateFilt();renderEnt();renderCal();toast('Entrega "'+nome+'" adicionada');}
-function setRTab(n){curRTab=n;document.querySelectorAll('.rpt-tab').forEach(function(t,i){t.classList.toggle('active',i+1===n);});renderRpt();}
+// setRTab mantido para compatibilidade
+function setRTab(n){curRTab=n;renderRpt();}
 function fBR2(iso){var p=iso.split('-');return p[2]+'/'+p[1];}
-function renderRpt(){if(curRTab===1)renderRptEt();else renderRptArq();}
+function renderRpt(){renderRptNova();}
 function renderRptEt(){var el=document.getElementById('rpt-body'),etapas=CTX&&CTX.etapas||[],ativas=CTX&&CTX.etapasAtivas||{},all=[];etapas.forEach(function(et){if(ativas[et.id]===false)return;(plano[et.id]||[]).forEach(function(item){var datas=computeDatas(item.dataInicio,item.dias);all.push({etLabel:et.label||et.id,item:item,ini:datas[0]||item.dataInicio,fim:datas[datas.length-1]||item.dataInicio});});});var porEt={};all.forEach(function(r){if(!porEt[r.etLabel])porEt[r.etLabel]=[];porEt[r.etLabel].push(r);});if(!all.length){el.innerHTML='<div style="text-align:center;padding:48px;color:var(--gl);font-size:13px">Nenhuma entrega alocada ainda.</div>';document.getElementById('cta3-info').textContent='Nenhuma entrega alocada';return;}var h='';Object.keys(porEt).forEach(function(etLabel){var rows=porEt[etLabel];h+='<div style="margin-bottom:22px"><div class="rpt-sec-title">'+etLabel+' <span style="font-size:10px;font-weight:400;text-transform:none">'+rows.length+' entrega(s)</span></div>';h+='<table class="rpt-table"><thead><tr><th>Entrega</th><th>Andar</th><th>Arquiteto</th><th>Início</th><th>Fim</th><th>Dias</th></tr></thead><tbody>';rows.forEach(function(r,i){var c=COLORS[i%COLORS.length];h+='<tr><td><span class="rpt-badge" style="background:'+c+'22;color:'+c+'">'+r.item.tipo+'</span></td><td style="font-family:var(--font);font-weight:700">'+r.item.andar+'</td><td>'+r.item.arquiteto+'</td><td style="font-family:var(--font)">'+fBR2(r.ini)+'</td><td style="font-family:var(--font)">'+fBR2(r.fim)+'</td><td style="font-family:var(--font);font-weight:700;color:var(--tf-dk)">'+r.item.dias+'</td></tr>';});h+='</tbody></table></div>';});el.innerHTML=h;document.getElementById('cta3-info').innerHTML='<strong>'+all.length+'</strong> entregas em <strong>'+Object.keys(porEt).length+'</strong> etapa(s)';}
 function renderRptArq(){var el=document.getElementById('rpt-body'),arqs=eq.arquitetos;if(!arqs.length){el.innerHTML='<div style="text-align:center;padding:48px;color:var(--gl);font-size:13px">Nenhum arquiteto selecionado.</div>';return;}var agenda={};arqs.forEach(function(a){agenda[a]={};});Object.keys(plano).forEach(function(etId){(plano[etId]||[]).forEach(function(item){if(!agenda[item.arquiteto])return;computeDatas(item.dataInicio,item.dias).forEach(function(iso){if(!agenda[item.arquiteto][iso])agenda[item.arquiteto][iso]=[];agenda[item.arquiteto][iso].push(item);});});});var h='',totEnt=0;arqs.forEach(function(arqNome){var dias=Object.keys(agenda[arqNome]||{}).sort(),entCount=0;Object.values(agenda[arqNome]||{}).forEach(function(v){entCount+=v.length;});totEnt+=entCount;var init=arqNome.split(' ').map(function(w){return w[0];}).slice(0,2).join('');h+='<div class="rpt-arq-block"><div class="rpt-arq-hdr"><div class="rpt-arq-av">'+init+'</div><div><div class="rpt-arq-name">'+arqNome+'</div><div class="rpt-arq-count">'+dias.length+' dia(s) · '+entCount+' entrega(s)</div></div></div>';if(!dias.length){h+='<div style="padding:12px 16px;color:var(--gl);font-size:12px;font-style:italic">Nenhuma entrega alocada.</div>';}else{dias.forEach(function(iso){var items=agenda[arqNome][iso];h+='<div class="rpt-day-row"><div class="rpt-day-label">'+fBR2(iso)+'</div><div class="rpt-day-chips">';items.forEach(function(item,i){var c=COLORS[i%COLORS.length];h+='<span class="rpt-chip" style="background:'+c+'">'+item.tipo+' <span style="opacity:.8;font-size:9.5px">'+item.andar+'</span></span>';});h+='</div></div>';});}h+='</div>';});el.innerHTML=h;document.getElementById('cta3-info').innerHTML='<strong>'+arqs.length+'</strong> arquiteto(s) · <strong>'+totEnt+'</strong> alocação(ões)';}
+
+function fBR2(iso){var p=iso.split('-');return p[2]+'/'+p[1];}
+
+function _getRoleLabel(nome){
+  if(nome===eq.diretor) return 'Diretor de Arquitetura';
+  if(eq.gerentes.indexOf(nome)>=0) return 'Gerente de Arquitetura';
+  return 'Arquiteto';
+}
+
+function renderRptNova(){
+  var el=document.getElementById('rpt-body');
+  var meta=ESTADO&&ESTADO.meta||{};
+  var proj=(meta.codigo?meta.codigo+' \u2014 ':'')+( meta.nome||'Projeto');
+  var todas=[];
+  // Todas as alocações de todas as etapas
+  Object.keys(plano).forEach(function(etId){
+    var et=CTX&&CTX.etapas.find(function(e){return e.id===etId;});
+    (plano[etId]||[]).forEach(function(item){
+      var datas=computeDatas(item.dataInicio,item.dias);
+      todas.push({
+        et:et?et.label||etId:etId,
+        tipo:item.tipo,andar:item.andar,arquiteto:item.arquiteto,
+        ini:datas[0]||item.dataInicio,
+        fim:datas[datas.length-1]||item.dataInicio,
+        dias:item.dias,notas:item.notas||''
+      });
+    });
+  });
+
+  if(!todas.length){
+    el.innerHTML='<div class="rpt-doc"><div style="text-align:center;padding:48px;color:var(--gl)">Nenhuma entrega alocada ainda.</div></div>';
+    document.getElementById('cta3-info').textContent='Nenhuma entrega alocada';
+    return;
+  }
+
+  // Cabeçalho do documento
+  var h='<div class="rpt-doc">';
+  h+='<div class="rpt-doc-hdr">'
+    +'<div><div class="rpt-doc-title">Plano de Arquitetura</div>'
+    +'<div class="rpt-doc-sub">'+proj+'</div></div>'
+    +'<div class="rpt-doc-meta">'
+    +'<div>Diretor: <strong>'+eq.diretor+'</strong></div>'
+    +'<div>Emitido em: <strong>'+new Date().toLocaleDateString('pt-BR')+'</strong></div>'
+    +'<div>'+todas.length+' entrega(s) · '+
+    (eq.colaboradores.length+eq.arquitetos.length)+' profissional(is)</div>'
+    +'</div></div>';
+
+  // ── SEÇÃO 1: Por profissional ────────────────────────────────────────────
+  h+='<div class="rpt-sec"><div class="rpt-sec-title">Sequência de produção por profissional</div>';
+  // Reunir todas as pessoas (colaboradores + arquitetos)
+  var collabOrdem=[];
+  if(eq.diretor&&eq.colaboradores.indexOf(eq.diretor)>=0)collabOrdem.push(eq.diretor);
+  eq.gerentes.forEach(function(g){if(eq.colaboradores.indexOf(g)>=0)collabOrdem.push(g);});
+  eq.colaboradores.forEach(function(n){if(collabOrdem.indexOf(n)<0)collabOrdem.push(n);});
+  var todasPessoas=collabOrdem.concat(eq.arquitetos);
+
+  todasPessoas.forEach(function(nome){
+    var itens=todas.filter(function(r){return r.arquiteto===nome;});
+    if(!itens.length)return;
+    itens.sort(function(a,b){return a.ini<b.ini?-1:1;});
+    var init=nome.split(' ').map(function(w){return w[0];}).slice(0,2).join('');
+    var role=_getRoleLabel(nome);
+    h+='<div class="rpt-prof-block">'
+      +'<div class="rpt-prof-hdr">'
+      +'<div class="rpt-prof-av">'+init+'</div>'
+      +'<div><div class="rpt-prof-name">'+nome+'</div>'
+      +'<div class="rpt-prof-role">'+role+' &middot; '+itens.length+' entrega(s)</div></div>'
+      +'</div>';
+    itens.forEach(function(r){
+      var fc=getFloorColor(r.andar);
+      h+='<div class="rpt-tl-row">'
+        +'<div class="rpt-tl-date">'+fBR2(r.ini)
+        +(r.dias>1?' &rarr; '+fBR2(r.fim):'')
+        +(r.dias>1?'<br><span style="font-size:10px;color:var(--gl)">'+r.dias+' dias úteis</span>':'')
+        +'</div>'
+        +'<div class="rpt-tl-bar" style="background:'+fc+'"></div>'
+        +'<div style="flex:1">'
+        +'<div class="rpt-tl-tipo">'+r.tipo
+        +' <span class="rpt-badge" style="background:'+fc+'">'+r.andar+'</span>'
+        +(r.et?'<span style="font-size:10px;color:var(--gl);font-weight:400;margin-left:6px">'+r.et+'</span>':'')
+        +'</div>'
+        +(r.notas?'<div class="rpt-tl-notas">'+r.notas+'</div>':'')
+        +'</div></div>';
+    });
+    h+='</div>';
+  });
+  h+='</div>';
+
+  // ── SEÇÃO 2: Entregáveis por data de término ─────────────────────────────
+  h+='<div class="rpt-sec"><div class="rpt-sec-title">Entregáveis por data de término</div>';
+  var ordenados=todas.slice().sort(function(a,b){return a.fim<b.fim?-1:a.fim>b.fim?1:0;});
+  h+='<table class="rpt-table"><thead><tr>'
+    +'<th>Entregável</th><th>Andar</th><th>Profissional</th>'
+    +'<th>Início</th><th>Término</th><th>Dias</th><th>Comentário</th>'
+    +'</tr></thead><tbody>';
+  ordenados.forEach(function(r){
+    var fc=getFloorColor(r.andar);
+    h+='<tr>'
+      +'<td><span class="rpt-badge" style="background:'+fc+'22;color:'+fc+'">'+r.tipo+'</span></td>'
+      +'<td><span class="rpt-badge" style="background:'+fc+'">'+r.andar+'</span></td>'
+      +'<td style="font-family:var(--font);font-weight:600">'+r.arquiteto+'</td>'
+      +'<td style="font-family:var(--font)">'+fBR2(r.ini)+'</td>'
+      +'<td style="font-family:var(--font);font-weight:700">'+fBR2(r.fim)+'</td>'
+      +'<td style="font-family:var(--font);color:var(--tf-dk);font-weight:700">'+r.dias+'d</td>'
+      +'<td style="color:var(--gl);font-style:italic;font-size:11px">'+r.notas+'</td>'
+      +'</tr>';
+  });
+  h+='</tbody></table></div>';
+  h+='</div>'; // rpt-doc
+
+  el.innerHTML=h;
+  document.getElementById('cta3-info').innerHTML='<strong>'+todas.length+'</strong> entrega(s) · <strong>'+(eq.colaboradores.length+eq.arquitetos.length)+'</strong> profissional(is)';
+}
+
 function imprimirRpt(){var etapas=CTX&&CTX.etapas||[],ativas=CTX&&CTX.etapasAtivas||{},meta=ESTADO&&ESTADO.meta||{};var proj=(meta.codigo?meta.codigo+' — ':'')+( meta.nome||'Planejamento');var arqs=eq.arquitetos,agenda={};arqs.forEach(function(a){agenda[a]={};});Object.keys(plano).forEach(function(etId){(plano[etId]||[]).forEach(function(item){if(!agenda[item.arquiteto])return;computeDatas(item.dataInicio,item.dias).forEach(function(iso){if(!agenda[item.arquiteto][iso])agenda[item.arquiteto][iso]=[];agenda[item.arquiteto][iso].push(item);});});});var rows='';etapas.forEach(function(et){if(ativas[et.id]===false)return;var list=plano[et.id]||[];if(!list.length)return;rows+='<tr><td colspan="6" style="padding:6px 10px;background:#1A5294;color:#fff;font-family:Oswald,sans-serif;font-size:10px;font-weight:700;text-transform:uppercase">'+(et.label||et.id)+'</td></tr>';list.forEach(function(item,i){var datas=computeDatas(item.dataInicio,item.dias),c=COLORS[i%COLORS.length];rows+='<tr style="border-bottom:1px solid #eee"><td style="padding:5px 10px"><span style="display:inline-block;padding:2px 7px;border-radius:8px;font-size:10px;font-weight:700;background:'+c+'22;color:'+c+'">'+item.tipo+'</span></td><td style="padding:5px 10px;font-weight:700">'+item.andar+'</td><td style="padding:5px 10px">'+item.arquiteto+'</td><td style="padding:5px 10px;font-family:monospace">'+fBR2(datas[0]||item.dataInicio)+'</td><td style="padding:5px 10px;font-family:monospace">'+fBR2(datas[datas.length-1]||item.dataInicio)+'</td><td style="padding:5px 10px;font-weight:700;color:#2A9D8F">'+item.dias+'d</td></tr>';});});var agHtml='';arqs.forEach(function(arqNome){var dias=Object.keys(agenda[arqNome]||{}).sort();if(!dias.length)return;var init=arqNome.split(' ').map(function(w){return w[0];}).slice(0,2).join('');agHtml+='<div style="margin-bottom:16px;break-inside:avoid"><div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;padding:6px 10px;background:#f0faf9;border-radius:6px"><div style="width:28px;height:28px;border-radius:7px;background:#3FBFB0;display:flex;align-items:center;justify-content:center;font-family:Oswald,sans-serif;font-size:11px;font-weight:800;color:#111">'+init+'</div><div style="font-family:Oswald,sans-serif;font-size:13px;font-weight:800;color:#1F2326">'+arqNome+'</div><div style="font-size:10px;color:#9CA3AF;margin-left:auto">'+dias.length+' dia(s)</div></div>';dias.forEach(function(iso){var items=agenda[arqNome][iso];agHtml+='<div style="display:flex;align-items:flex-start;padding:4px 10px;gap:10px;border-bottom:1px solid #f3f4f6"><div style="font-family:monospace;font-size:11px;color:#6B7280;min-width:50px;padding-top:2px">'+fBR2(iso)+'</div><div style="display:flex;flex-wrap:wrap;gap:4px">';items.forEach(function(item,i){var c=COLORS[i%COLORS.length];agHtml+='<span style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;background:'+c+';color:#fff;font-size:10px;font-weight:700;font-family:Oswald,sans-serif">'+item.tipo+' <span style="opacity:.8;font-size:9px">'+item.andar+'</span></span>';});agHtml+='</div></div>';});agHtml+='</div>';});var html='<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Plano ARQ</title><style>@page{size:A4 portrait;margin:14mm 12mm}*{box-sizing:border-box}body{font-family:Segoe UI,Arial,sans-serif;font-size:9pt;color:#1F2326;margin:0}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style></head><body>'+'<div style="border-bottom:3px solid #1A5294;padding-bottom:10px;margin-bottom:14px;display:flex;align-items:flex-end;justify-content:space-between"><div><div style="font-size:18pt;font-weight:800;color:#1A2535;text-transform:uppercase">Plano de Arquitetura</div><div style="font-size:10pt;color:#6B7280;margin-top:3px"><strong>'+proj+'</strong></div></div><div style="text-align:right;font-size:8pt;color:#9CA3AF;line-height:1.7"><div>Diretor: <strong>'+eq.diretor+'</strong></div><div>Emitido: <strong>'+new Date().toLocaleDateString('pt-BR')+'</strong></div></div></div>'+'<div style="font-size:10px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Alocação por etapa</div>'+'<table style="width:100%;border-collapse:collapse;font-size:8.5pt;margin-bottom:20px"><thead><tr style="background:#F8F9FA"><th style="text-align:left;padding:6px 10px;border-bottom:2px solid #E5E7EB;font-size:9px;font-weight:700;text-transform:uppercase;color:#9CA3AF">Entrega</th><th style="text-align:left;padding:6px 10px;border-bottom:2px solid #E5E7EB;font-size:9px;font-weight:700;text-transform:uppercase;color:#9CA3AF">Andar</th><th style="text-align:left;padding:6px 10px;border-bottom:2px solid #E5E7EB;font-size:9px;font-weight:700;text-transform:uppercase;color:#9CA3AF">Arquiteto</th><th style="text-align:left;padding:6px 10px;border-bottom:2px solid #E5E7EB;font-size:9px;font-weight:700;text-transform:uppercase;color:#9CA3AF">Início</th><th style="text-align:left;padding:6px 10px;border-bottom:2px solid #E5E7EB;font-size:9px;font-weight:700;text-transform:uppercase;color:#9CA3AF">Fim</th><th style="text-align:left;padding:6px 10px;border-bottom:2px solid #E5E7EB;font-size:9px;font-weight:700;text-transform:uppercase;color:#9CA3AF">Dias</th></tr></thead><tbody>'+rows+'</tbody></table>'+'<div style="font-size:10px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;padding-top:12px;border-top:2px solid #E5E7EB">Agenda por arquiteto</div>'+agHtml+'<scr'+'ipt>window.onload=function(){setTimeout(function(){window.print();},400);}<'+'/scr'+'ipt></body></html>';var w=window.open('','_blank');if(w){w.document.write(html);w.document.close();}}
 function confirmar(){if(!ESTADO)return;if(!ESTADO.cfg)ESTADO.cfg={};if(!ESTADO.cfg.equipeARQ)ESTADO.cfg.equipeARQ={};ESTADO.cfg.equipeARQ.gerentes=eq.gerentes.slice();ESTADO.cfg.equipeARQ.arquitetos=eq.arquitetos.slice();ESTADO.cfg.equipeARQ.planoAloc=plano;try{sessionStorage.setItem('aw_estado_atual',JSON.stringify({ts:Date.now(),estado:ESTADO}));}catch(e){}toast('Equipe e alocação confirmadas ✓');setTimeout(function(){if(window.parent&&window.parent.fecharGestaoArq)window.parent.fecharGestaoArq(true);else window.location.href='app.html';},700);}
 function sair(){if(window.parent&&window.parent.fecharGestaoArq)window.parent.fecharGestaoArq(false);else window.location.href='app.html';}
