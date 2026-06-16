@@ -149,7 +149,7 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 /* Painel recolhível */
 .ep{transition:width .22s ease,min-width .22s ease}
 .ep.collapsed{width:0!important;min-width:0!important;overflow:hidden;border-right:none}
-.ep-toggle-btn{position:absolute;right:-20px;top:50%;transform:translateY(-50%);width:20px;height:80px;background:#EAEBEE;border:1px solid var(--border);border-left:none;border-radius:0 6px 6px 0;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:20;color:var(--gl);transition:all .15s;padding:4px 2px}
+.ep-toggle-btn{position:absolute;right:-14px;top:50%;transform:translateY(-50%);width:14px;height:60px;background:#EAEBEE;border:1px solid var(--border);border-left:none;border-radius:0 6px 6px 0;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:20;color:var(--gl);transition:all .15s;padding:4px 2px}
 .ep-toggle-btn:hover{background:var(--tf-s);color:var(--tf-dk)}
 .ep.collapsed+.ep-toggle-btn,.ep.collapsed .ep-toggle-btn{right:-20px}
 .ep-wrapper{position:relative;display:flex;flex-shrink:0}
@@ -180,13 +180,13 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .cal-prog{margin-left:auto;font-size:11px;color:var(--gl);font-family:var(--font)}.cal-body{flex:1;overflow:auto}
 .at{border-collapse:separate;border-spacing:0;min-width:max-content}
 .at thead th{position:sticky;top:0;z-index:10;background:#fff;border-bottom:2px solid var(--border)}
-.at thead th.lbl{position:sticky;left:0;z-index:20;background:#EAEBEE;width:148px;min-width:148px;padding:7px 11px;text-align:left;font-family:var(--font);font-size:9.5px;font-weight:700;color:var(--gl);text-transform:uppercase;letter-spacing:.06em;border-right:2px solid #D0D1D6}
+.at thead th.lbl{position:sticky;left:0;z-index:20;background:#EAEBEE;width:172px;min-width:172px;padding:7px 11px;text-align:left;font-family:var(--font);font-size:9.5px;font-weight:700;color:var(--gl);text-transform:uppercase;letter-spacing:.06em;border-right:2px solid #D0D1D6}
 .at thead th.dcol{text-align:center;width:92px;min-width:92px;padding:5px 2px;border-left:1px solid #eee}
 .dcol.out{background:#F2F3F5}.dcol.today-col{background:rgba(63,191,176,.07)}
 .dh-dow{display:block;font-size:8px;text-transform:uppercase;color:var(--gl);font-weight:700;font-family:var(--font)}
 .dh-date{display:block;font-size:12.5px;font-weight:800;color:var(--ink);font-family:var(--font)}
 .dcol.out .dh-date,.dcol.out .dh-dow{color:#bbb}.dcol.today-col .dh-date{color:var(--tf-dk)}
-.at tbody td.arq-lbl{position:sticky;left:0;z-index:9;background:#EAEBEE;width:148px;min-width:148px;padding:7px 11px;border-right:2px solid #D0D1D6;border-bottom:2px solid #B0B2B8;vertical-align:middle}
+.at tbody td.arq-lbl{position:sticky;left:0;z-index:9;background:#EAEBEE;width:172px;min-width:172px;padding:7px 11px;border-right:2px solid #D0D1D6;border-bottom:2px solid #B0B2B8;vertical-align:middle}
 .arq-name{font-family:var(--font);font-size:13px;font-weight:700;color:var(--ink)}.arq-role{font-size:10.5px;color:var(--gl)}
 .acell{width:92px;min-width:92px;border-left:1px solid #eee;border-bottom:1px solid var(--border);vertical-align:top;padding:3px 3px 2px;position:relative;min-height:56px}
 .acell.out{background:#F2F3F5}.acell.today-col{background:rgba(63,191,176,.04)}
@@ -610,6 +610,7 @@ function renderFooter(){
 
 function setDiretor(nome){
   eq.diretor=nome;eq.gerentes=[];eq.arquitetos=[];
+  eq.colaboradores=[nome]; // diretor pré-selecionado como colaborador
   document.getElementById('ctx-dir').textContent=nome;
   if(ESTADO&&ESTADO.cfg&&ESTADO.cfg.equipeARQ)ESTADO.cfg.equipeARQ.diretor=nome;
   renderColDir();renderColGA();renderColArq();renderFooter();updCTA1();
@@ -624,6 +625,7 @@ function togG(nome){
       if(gd)gd.arquitetos.forEach(function(a){var i=eq.arquitetos.indexOf(a.nome);if(i>=0)eq.arquitetos.splice(i,1);});}
   } else {
     eq.gerentes.push(nome);
+    if(eq.colaboradores.indexOf(nome)<0)eq.colaboradores.push(nome);
   }
   renderColGA();renderColArq();renderFooter();updCTA1();
 }
@@ -786,13 +788,18 @@ function renderCal(){
   });
   thead+='</tr></thead>';
 
-  // Combinar arquitetos + colaboradores (com separador entre eles)
+  // Ordem: Colaboradores (diretor+GAs) → linha separadora → Arquitetos
   var todasPessoas=[];
+  // Colaboradores na ordem: diretor primeiro, depois GAs, depois outros
+  var collabOrdenados=[];
+  if(eq.diretor&&eq.colaboradores.indexOf(eq.diretor)>=0) collabOrdenados.push(eq.diretor);
+  eq.gerentes.forEach(function(g){if(eq.colaboradores.indexOf(g)>=0)collabOrdenados.push(g);});
+  eq.colaboradores.forEach(function(n){if(collabOrdenados.indexOf(n)<0)collabOrdenados.push(n);});
+  collabOrdenados.forEach(function(n){todasPessoas.push({nome:n,tipo:'collab'});});
   eq.arquitetos.forEach(function(n){todasPessoas.push({nome:n,tipo:'arq'});});
-  eq.colaboradores.forEach(function(n){todasPessoas.push({nome:n,tipo:'collab'});});
 
   var tbody='<tbody>';
-  // Linha separadora antes dos colaboradores
+  // Linha separadora antes dos arquitetos (após colaboradores)
   var collabSepAdded=false;
   todasPessoas.forEach(function(pessoa){
     var arqNome=pessoa.nome;
@@ -839,7 +846,7 @@ function renderCal(){
     var rowH=Math.max(52,(maxSlot+1)*(CHIP_H+CHIP_GAP)+PAD*2)+PLUS_H;
 
     tbody+='<tr>';
-    if(isCollab&&!collabSepAdded&&eq.arquitetos.length>0){
+    if(!isCollab&&!collabSepAdded&&collabOrdenados.length>0){
       collabSepAdded=true;
       tbody+='<tr><td colspan="'+(days.length+1)+'" style="height:3px;padding:0;background:rgba(63,191,176,.35)"></td></tr>';
     }
