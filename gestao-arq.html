@@ -1256,24 +1256,47 @@ function _setSaveStatus(status){
 }
 
 function _autoSaveSB(){
-  // Tentar via parent frame (mesma origem)
-  try{
-    if(window.parent&&window.parent.salvarDados){
-      window.parent.salvarDados().then(function(){_setSaveStatus('ok');}).catch(function(){_setSaveStatus('err');});
-      return;
-    }
-  }catch(e){}
-  // Fallback: salvar direto no Supabase
   var cronoId=sessionStorage.getItem('aw_crono_id')||'';
-  if(!cronoId){_setSaveStatus('ok');return;}
+  console.log('[GestaoARQ] auto-save | cronoId:', cronoId||'(sem ID)');
+  if(!cronoId){
+    // Sem ID de projeto — tentar via parent
+    try{
+      if(window.parent&&window.parent.salvarDados){
+        window.parent.salvarDados();
+        _setSaveStatus('ok');
+        console.log('[GestaoARQ] salvo via parent.salvarDados()');
+      } else {
+        _setSaveStatus('ok'); // sem projeto ativo, ignorar
+      }
+    }catch(e){console.warn('[GestaoARQ] parent.salvarDados erro:',e);}
+    return;
+  }
+  // Salvar direto no Supabase com o ESTADO atual do iframe
   var sbUrl='https://ejneanfveoctdlltjnrs.supabase.co';
   var sbKey='sb_publishable_vZApDmF_C-heCrm8fXJ_XA_ATmMO3YP';
-  var payload=JSON.stringify({ts:Date.now(),estado:ESTADO});
+  var payload={ts:Date.now(),estado:ESTADO};
+  var payloadStr=JSON.stringify(payload);
+  console.log('[GestaoARQ] PATCH /cronogramas?id=eq.'+cronoId);
   fetch(sbUrl+'/rest/v1/cronogramas?id=eq.'+cronoId,{
     method:'PATCH',
     headers:{'Content-Type':'application/json','apikey':sbKey,'Authorization':'Bearer '+sbKey},
-    body:JSON.stringify({estado_json:payload,atualizado_em:new Date().toISOString()})
-  }).then(function(r){_setSaveStatus(r.ok?'ok':'err');}).catch(function(){_setSaveStatus('err');});
+    body:JSON.stringify({
+      codigo:ESTADO.meta&&ESTADO.meta.codigo||'',
+      nome:ESTADO.meta&&ESTADO.meta.nome||'',
+      gi:ESTADO.meta&&ESTADO.meta.gi||'',
+      gp:ESTADO.meta&&ESTADO.meta.gp||'',
+      estado_json:payloadStr,
+      atualizado_em:new Date().toISOString()
+    })
+  }).then(function(r){
+    console.log('[GestaoARQ] save response:', r.status, r.ok?'OK':'ERRO');
+    _setSaveStatus(r.ok?'ok':'err');
+    // Atualizar sessionStorage do parent tb
+    try{sessionStorage.setItem('aw_estado_atual',payloadStr);}catch(e){}
+  }).catch(function(e){
+    console.error('[GestaoARQ] save falhou:',e);
+    _setSaveStatus('err');
+  });
 }
 function abrirAddEnt(){if(!curEt){toast('Selecione uma etapa primeiro');return;}document.getElementById('new-ent-nome').value='';document.getElementById('opt-geral').checked=true;document.getElementById('and-chks-wrap').style.display='none';var andares=(CTX&&CTX.andares)||[];document.getElementById('and-chks').innerHTML=andares.map(function(a){return'<label style="display:flex;align-items:center;gap:5px;font-size:12px;font-family:var(--font);cursor:pointer"><input type="checkbox" value="'+a+'" style="accent-color:var(--tf)"> '+a+'</label>';}).join('');document.getElementById('modal-add-ent').style.display='flex';setTimeout(function(){document.getElementById('new-ent-nome').focus();},50);}
 function fecharAddEnt(){document.getElementById('modal-add-ent').style.display='none';}
