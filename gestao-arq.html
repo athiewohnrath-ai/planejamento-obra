@@ -191,6 +191,8 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .cal-bar{position:absolute;border-radius:4px;display:flex;align-items:center;gap:5px;padding:0 7px;cursor:grab;z-index:3;overflow:visible!important;transition:filter .12s;box-sizing:border-box}
 .cal-bar:hover{filter:brightness(1.1)}
 .cal-bar:active{cursor:grabbing;filter:brightness(.95)}
+body.bar-dragging .cal-bar{pointer-events:none!important}
+body.bar-dragging .cal-bar .bar-del{display:none}
 .bar-del{position:absolute;top:-7px;right:-7px;width:16px;height:16px;border-radius:50%;background:#DC4C2E;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;opacity:0;transition:opacity .15s;cursor:pointer;z-index:10;border:none;line-height:1;flex-shrink:0}
 .cal-bar:hover .bar-del{opacity:1}
 .bar-inner{display:flex;align-items:center;gap:5px;width:100%;overflow:hidden}
@@ -336,9 +338,9 @@ main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
     <div class="s2-topbar" id="etapa-tabs"></div>
     <div class="s2-main">
       <div class="ep-wrapper">
-        <div class="ep collapsed" id="ep-panel">
+        <div class="ep" id="ep-panel">
         <button class="ep-toggle-btn" id="ep-toggle" onclick="togEpanel()" title="Recolher/expandir">
-  <span id="ep-toggle-label" style="writing-mode:vertical-rl;text-orientation:mixed;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-family:var(--font);line-height:1">EXPANDIR</span>
+  <span id="ep-toggle-label" style="font-size:13px">‹</span>
 </button>
         <div class="ep-hdr">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px">
@@ -739,7 +741,7 @@ function setKitMode(v){
 function renderCal(){
   var days=buildCalDays(curEt),arqs=eq.arquitetos;
   var today=new Date();today.setHours(12,0,0,0);var todayISO=fISO(today);
-  var COL_W=92,CHIP_H=24,CHIP_GAP=3,PAD=4;
+  var COL_W=92,CHIP_H=24,CHIP_GAP=3,PAD=4,PLUS_H=22;
 
   // Mapa iso→índice de coluna
   var dayMap={};
@@ -794,7 +796,7 @@ function renderCal(){
       item._si=si;item._ei=ei;item._slot=slot;
     });
     var maxSlot=ri.length?Math.max.apply(null,ri.map(function(i){return i._slot||0;})):0;
-    var rowH=Math.max(52,(maxSlot+1)*(CHIP_H+CHIP_GAP)+PAD*2);
+    var rowH=Math.max(52,(maxSlot+1)*(CHIP_H+CHIP_GAP)+PAD*2)+PLUS_H;
 
     tbody+='<tr>';
     tbody+='<td class="arq-lbl" style="height:'+rowH+'px">'
@@ -852,10 +854,13 @@ function renderCal(){
         return computeDatas(item.dataInicio,item.dias).indexOf(iso)>=0;
       });
       if(!busy){
+        // Drop zone de altura total para dias vazios (recebe drag de barras)
+        tbody+='<div ondragover="onDragOver(event)" ondrop="onDrop(event,\''+arqNome+'\',\''+iso+'\',event)" ondragleave="onDragLeave(event)" '
+          +'style="position:absolute;left:'+(di*COL_W+1)+'px;top:0;width:'+(COL_W-2)+'px;height:'+rowH+'px;z-index:4"></div>';
+        // Botão + na área inferior
         tbody+='<div onclick="cellClick(\''+arqNome+'\',\''+iso+'\',event)" '
-          +'ondragover="onDragOver(event)" ondrop="onDrop(event,\''+arqNome+'\',\''+iso+'\',event)" ondragleave="onDragLeave(event)" '
-          +'style="position:absolute;left:'+(di*COL_W+1)+'px;top:0;width:'+(COL_W-2)+'px;height:'+rowH+'px;'
-          +'display:flex;align-items:center;justify-content:center;color:#d1d5db;font-size:16px;cursor:pointer;z-index:1">'
+          +'style="position:absolute;left:'+(di*COL_W+1)+'px;bottom:0;width:'+(COL_W-2)+'px;height:'+PLUS_H+'px;'
+          +'display:flex;align-items:center;justify-content:center;color:#d1d5db;font-size:14px;cursor:pointer;z-index:6">'
           +'+</div>';
       } else {
         // Drop zone de altura total para receber drag de barras
@@ -882,15 +887,15 @@ function renderCal(){
 var _dragBarData=null,_barEditPop=null,_barEditData=null,_barEditDias=1,_barEditIso=null;
 
 function onBarDragStart(ev,el){
-  ev.stopPropagation();
   try{_dragBarData=JSON.parse(el.dataset.bar);}catch(e){_dragBarData=null;return;}
   ev.dataTransfer.effectAllowed='move';
   ev.dataTransfer.setData('text/plain',JSON.stringify({_isBar:true,bar:_dragBarData}));
-  setTimeout(function(){el.style.opacity='.45';},0);
+  setTimeout(function(){el.style.opacity='.45';document.body.classList.add('bar-dragging');},0);
 }
 function onBarDragEnd(ev){
   _dragBarData=null;
   ev.target.style.opacity='';
+  document.body.classList.remove('bar-dragging');
 }
 
 function barDelete(btn){
