@@ -314,6 +314,7 @@ body.bar-dragging .cal-bar .bar-del{display:none}
     <span class="font-pct" id="fscale-lbl">100%</span>
     <button class="font-btn" onclick="adjFont(0.1)">+</button>
   </div>
+  <div id="ga-save-status" style="font-size:9.5px;color:#444c5a;text-align:center;padding:4px 0;font-family:var(--font);min-height:16px;transition:color .3s"></div>
   <button class="back-btn" onclick="sair()" title="Voltar ao planejamento"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg><span class="back-btn-label">Voltar ao planejamento</span></button>
 </aside>
 
@@ -1232,7 +1233,48 @@ function confirmGrpAloc(){
 }
 function closeGrpPop(){if(_grpPop){_grpPop.remove();_grpPop=null;}}
 function updCTA2(){if(!CTX||!CTX.etapas)return;var tot=0,done=0;(CTX.etapas||[]).forEach(function(e){var items=getEnt(e.id);tot+=items.length;items.forEach(function(it){if(isAloc(e.id,it.id))done++;});});document.getElementById('cta2-info').innerHTML='<strong>'+done+'</strong>/'+tot+' entregas alocadas';}
-function salvAloc(){if(!ESTADO||!ESTADO.cfg||!ESTADO.cfg.equipeARQ)return;ESTADO.cfg.equipeARQ.planoAloc=plano;try{sessionStorage.setItem('aw_estado_atual',JSON.stringify({ts:Date.now(),estado:ESTADO}));}catch(e){}}
+var _saveTimer=null;
+function salvAloc(){
+  if(!ESTADO||!ESTADO.cfg||!ESTADO.cfg.equipeARQ)return;
+  ESTADO.cfg.equipeARQ.planoAloc=plano;
+  ESTADO.cfg.equipeARQ.gerentes=eq.gerentes.slice();
+  ESTADO.cfg.equipeARQ.arquitetos=eq.arquitetos.slice();
+  ESTADO.cfg.equipeARQ.colaboradores=(eq.colaboradores||[]).slice();
+  try{sessionStorage.setItem('aw_estado_atual',JSON.stringify({ts:Date.now(),estado:ESTADO}));}catch(e){}
+  // Auto-save no Supabase com debounce de 1.5s
+  clearTimeout(_saveTimer);
+  _setSaveStatus('saving');
+  _saveTimer=setTimeout(function(){_autoSaveSB();},1500);
+}
+
+function _setSaveStatus(status){
+  var el=document.getElementById('ga-save-status');
+  if(!el)return;
+  if(status==='saving'){el.textContent='Salvando…';el.style.color='#6B7280';}
+  else if(status==='ok'){el.textContent='✓ Salvo';el.style.color='#1D9E75';setTimeout(function(){el.textContent='';},3000);}
+  else if(status==='err'){el.textContent='⚠ Erro ao salvar';el.style.color='#DC4C2E';}
+}
+
+function _autoSaveSB(){
+  // Tentar via parent frame (mesma origem)
+  try{
+    if(window.parent&&window.parent.salvarDados){
+      window.parent.salvarDados().then(function(){_setSaveStatus('ok');}).catch(function(){_setSaveStatus('err');});
+      return;
+    }
+  }catch(e){}
+  // Fallback: salvar direto no Supabase
+  var cronoId=sessionStorage.getItem('aw_crono_id')||'';
+  if(!cronoId){_setSaveStatus('ok');return;}
+  var sbUrl='https://ejneanfveoctdlltjnrs.supabase.co';
+  var sbKey='sb_publishable_vZApDmF_C-heCrm8fXJ_XA_ATmMO3YP';
+  var payload=JSON.stringify({ts:Date.now(),estado:ESTADO});
+  fetch(sbUrl+'/rest/v1/cronogramas?id=eq.'+cronoId,{
+    method:'PATCH',
+    headers:{'Content-Type':'application/json','apikey':sbKey,'Authorization':'Bearer '+sbKey},
+    body:JSON.stringify({estado_json:payload,atualizado_em:new Date().toISOString()})
+  }).then(function(r){_setSaveStatus(r.ok?'ok':'err');}).catch(function(){_setSaveStatus('err');});
+}
 function abrirAddEnt(){if(!curEt){toast('Selecione uma etapa primeiro');return;}document.getElementById('new-ent-nome').value='';document.getElementById('opt-geral').checked=true;document.getElementById('and-chks-wrap').style.display='none';var andares=(CTX&&CTX.andares)||[];document.getElementById('and-chks').innerHTML=andares.map(function(a){return'<label style="display:flex;align-items:center;gap:5px;font-size:12px;font-family:var(--font);cursor:pointer"><input type="checkbox" value="'+a+'" style="accent-color:var(--tf)"> '+a+'</label>';}).join('');document.getElementById('modal-add-ent').style.display='flex';setTimeout(function(){document.getElementById('new-ent-nome').focus();},50);}
 function fecharAddEnt(){document.getElementById('modal-add-ent').style.display='none';}
 function updAndOpt(){var opt=document.querySelector('input[name="opt-andar"]:checked');document.getElementById('and-chks-wrap').style.display=(opt&&opt.value==='andar')?'block':'none';}
