@@ -1,4 +1,4 @@
-// Planejamento de Obra A|W — v6.03.11
+// Planejamento de Obra A|W — v6.03.12
 const SB_URL='https://ejneanfveoctdlltjnrs.supabase.co';
 const SB_KEY='sb_publishable_vZApDmF_C-heCrm8fXJ_XA_ATmMO3YP';
 const SB_HDR={'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
@@ -45,16 +45,15 @@ function _congAvisar(){
   _congToastTs=now;
   if(typeof showToast==='function')showToast('❄ Cronograma congelado — datas macro travadas');
 }
-// Fase 4 — Aparência "congelada": o Gantt inteiro (ARQ, TEC, obra, disciplinas, pré-obra)
-// fica acinzentado e claro. As bolinhas de virada V1/V2/V3 são clonadas para um overlay
-// SEM filtro (irmão de #g-tl-inner), preservando a cor alaranjada.
+// Fase 4 — Aparência "congelada": filtro acinzentado no Gantt inteiro. As bolinhas de virada
+// V1/V2/V3 são reposicionadas por cima, lendo a posição real de cada marcador (.g-virada-mark)
+// e desenhando um clone num overlay sem filtro, alinhado por getBoundingClientRect.
 function _congAplicarVisual(){
   var root=document.getElementById('gantt-root');
   if(!root)return;
   var frozen=_isFrozen();
   var col=root.querySelector('#g-tl-col');
   var inner=root.querySelector('#g-tl-inner');
-  // remove overlay anterior
   var ovOld=col&&col.querySelector('#g-virada-overlay');
   if(ovOld)ovOld.remove();
   if(inner){
@@ -62,19 +61,25 @@ function _congAplicarVisual(){
     inner.style.transition='filter .2s';
   }
   if(frozen&&col&&inner){
-    // cria overlay sobre o inner, fora do filtro, e clona as viradas
     var marks=inner.querySelectorAll('.g-virada-mark');
     if(marks.length){
       if(getComputedStyle(col).position==='static')col.style.position='relative';
+      var colRect=col.getBoundingClientRect();
       var ov=document.createElement('div');
       ov.id='g-virada-overlay';
-      ov.style.cssText='position:absolute;left:0;top:0;width:'+inner.offsetWidth+'px;height:'+inner.offsetHeight+'px;pointer-events:none;z-index:9;';
+      ov.style.cssText='position:absolute;left:0;top:0;right:0;bottom:0;pointer-events:none;z-index:9;overflow:hidden;';
       marks.forEach(function(m){
+        var r=m.getBoundingClientRect();
+        if(r.width===0&&r.height===0)return;
         var c=m.cloneNode(true);
         c.style.filter='none';
+        c.style.position='absolute';
+        // posição relativa ao col, compensando o scroll interno
+        c.style.left=(r.left-colRect.left+col.scrollLeft)+'px';
+        c.style.top=(r.top-colRect.top+col.scrollTop)+'px';
         ov.appendChild(c);
       });
-      inner.parentNode.appendChild(ov);
+      col.appendChild(ov);
     }
   }
   root.querySelectorAll('[data-drag]').forEach(function(el){
