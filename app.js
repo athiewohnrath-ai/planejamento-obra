@@ -1,4 +1,4 @@
-// Planejamento de Obra A|W — v6.03.04
+// Planejamento de Obra A|W — v6.03.05
 const SB_URL='https://ejneanfveoctdlltjnrs.supabase.co';
 const SB_KEY='sb_publishable_vZApDmF_C-heCrm8fXJ_XA_ATmMO3YP';
 const SB_HDR={'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
@@ -45,9 +45,9 @@ function _congAvisar(){
   _congToastTs=now;
   if(typeof showToast==='function')showToast('❄ Cronograma congelado — datas macro travadas');
 }
-// Fase 4 — Aplica aparência "congelada" às barras travadas (ARQ/TEC/Obra-fase/pré-obra),
-// preparando a futura camada de "realizado" que vai sobrepor. Disciplinas de obra
-// permanecem em opacidade plena (continuam editáveis).
+// Fase 4 — Aparência "congelada": barras travadas (ARQ/TEC/Obra-fase/pré-obra) ficam
+// acinzentadas e claras (fundo e contorno), preparando a futura camada de "realizado".
+// Disciplinas de obra permanecem coloridas (continuam editáveis).
 function _congAplicarVisual(){
   var root=document.getElementById('gantt-root');
   if(!root)return;
@@ -57,17 +57,15 @@ function _congAplicarVisual(){
     try{ t=JSON.parse(decodeURIComponent(el.dataset.drag)); }catch(e){ t=null; }
     var trava=frozen&&_congBloqueiaAlvo(t);
     if(trava){
-      el.style.opacity='0.42';
-      el.style.filter='grayscale(0.25)';
+      // grayscale tira a cor, brightness clareia, o conjunto deixa cinza-claro mantendo a forma e o contorno suave
+      el.style.filter='grayscale(1) brightness(1.32) opacity(.9)';
       el.style.cursor='not-allowed';
-      el.style.transition='opacity .2s, filter .2s';
+      el.style.transition='filter .2s';
     }else{
-      // restaura (caso tenha sido esmaecido antes e agora descongelou)
-      if(el.style.opacity==='0.42'){el.style.opacity='';el.style.filter='';el.style.cursor='';}
+      // restaura (caso tenha sido congelado antes e agora descongelou)
+      if(el.style.filter&&el.style.filter.indexOf('grayscale')>=0){el.style.filter='';el.style.cursor='';}
     }
   });
-  // Marca o container para um leve selo/identificação visual (faixa diagonal sutil).
-  root.classList.toggle('gantt-congelado', frozen);
 }
 async function salvarDados(){try{lerUIparaEstado();const ts=Date.now(),payload={ts,estado:ESTADO};sessionStorage.setItem('aw_estado_atual',JSON.stringify(payload));if(_CRONO_ID){const el=document.getElementById('save-info');if(el)el.textContent='Salvando…';const r=await fetch(SB_URL+'/rest/v1/cronogramas?id=eq.'+_CRONO_ID,{method:'PATCH',headers:SB_HDR,body:JSON.stringify({codigo:ESTADO.meta.codigo||'',nome:ESTADO.meta.nome||'',gi:ESTADO.meta.gi||'',gp:ESTADO.meta.gp||'',estado_json:JSON.stringify(payload),atualizado_em:new Date().toISOString()})});const dt=new Date(ts).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});if(el)el.textContent=r.ok?'Salvo às '+dt:'Erro ao salvar';}}catch(e){console.error('salvarDados',e);}}
 async function carregarDadosSB(){if(!_CRONO_ID)return false;const _cachedId=sessionStorage.getItem('aw_crono_id_cached');if(_cachedId&&_cachedId!==_CRONO_ID){sessionStorage.removeItem('aw_estado_atual');}sessionStorage.setItem('aw_crono_id_cached',_CRONO_ID);const cached=sessionStorage.getItem('aw_estado_atual');if(cached){try{const d=JSON.parse(cached);if(d.estado){ESTADO=d.estado;window.__AW_ESTADO=ESTADO;estadoParaUI();fetch(SB_URL+'/rest/v1/cronogramas?id=eq.'+_CRONO_ID+'&select=status,nome',{headers:SB_HDR}).then(function(r){return r.json();}).then(function(data){if(data&&data[0]){sessionStorage.setItem('aw_crono_status',data[0].status||'sim');sessionStorage.setItem('aw_crono_nome',data[0].nome||'');var _st=data[0].status||'sim';if(_st==='frozen'){var _b=document.getElementById('btn-plano-fino');if(_b)_b.style.display='none';var _w=document.getElementById('pf-watermark');if(_w&&!ESTADO.planoFino)_w.style.display='flex';var _ht=document.querySelector('.hdr-title');if(_ht&&data[0].nome){var _nm=data[0].nome;_ht.innerHTML='Planejamento<em> de Obra</em> · <span style="opacity:.6;">'+_nm+'</span> <span style="font-size:9px;background:rgba(0,185,80,.2);color:#00B950;padding:1px 6px;border-radius:8px;">❄ Congelado</span>';}};}}).catch(function(){});return true;}}catch{}}try{const r=await fetch(SB_URL+'/rest/v1/cronogramas?id=eq.'+_CRONO_ID+'&select=*',{headers:SB_HDR});const data=await r.json();if(data&&data[0]){const row=data[0];sessionStorage.setItem('aw_crono_status',row.status||'sim');sessionStorage.setItem('aw_crono_nome',row.nome||'');if(row.estado_json){try{const d=JSON.parse(row.estado_json);if(d.estado){ESTADO=d.estado;window.__AW_ESTADO=ESTADO;estadoParaUI();sessionStorage.setItem('aw_estado_atual',row.estado_json);const dt=new Date(row.atualizado_em);const el=document.getElementById('save-info');if(el)el.textContent='Salvo: '+dt.toLocaleDateString('pt-BR');return true;}}catch{}}ESTADO.meta.codigo=row.codigo||'';ESTADO.meta.nome=row.nome||'';ESTADO.meta.gi=row.gi||'';ESTADO.meta.gp=row.gp||'';window.__AW_ESTADO=ESTADO;estadoParaUI();return true;}}catch(e){console.error('carregarDadosSB',e);}return false;}
