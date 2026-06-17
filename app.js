@@ -1,4 +1,4 @@
-// Planejamento de Obra A|W — v6.03.05
+// Planejamento de Obra A|W — v6.03.06
 const SB_URL='https://ejneanfveoctdlltjnrs.supabase.co';
 const SB_KEY='sb_publishable_vZApDmF_C-heCrm8fXJ_XA_ATmMO3YP';
 const SB_HDR={'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
@@ -56,10 +56,16 @@ function _congAplicarVisual(){
     var t;
     try{ t=JSON.parse(decodeURIComponent(el.dataset.drag)); }catch(e){ t=null; }
     var trava=frozen&&_congBloqueiaAlvo(t);
+    var ehDiscObra=frozen&&t&&t.type==='obraSub'; // disciplina de obra: editável, mas clareada também
     if(trava){
       // grayscale tira a cor, brightness clareia, o conjunto deixa cinza-claro mantendo a forma e o contorno suave
       el.style.filter='grayscale(1) brightness(1.32) opacity(.9)';
       el.style.cursor='not-allowed';
+      el.style.transition='filter .2s';
+    }else if(ehDiscObra){
+      // disciplinas de obra: clareadas (mais suave que as travadas) para a obra parecer congelada,
+      // mas mantêm um resquício de cor e o cursor normal, pois continuam editáveis
+      el.style.filter='grayscale(.55) brightness(1.18) opacity(.95)';
       el.style.transition='filter .2s';
     }else{
       // restaura (caso tenha sido congelado antes e agora descongelou)
