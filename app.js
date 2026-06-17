@@ -1,4 +1,4 @@
-// Planejamento de Obra A|W — v6.03.00
+// Planejamento de Obra A|W — v6.03.01
 const SB_URL='https://ejneanfveoctdlltjnrs.supabase.co';
 const SB_KEY='sb_publishable_vZApDmF_C-heCrm8fXJ_XA_ATmMO3YP';
 const SB_HDR={'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
@@ -20,7 +20,7 @@ function _capturarSnapshotCongelamento(){
   return snap;
 }
 async function salvarDados(){try{lerUIparaEstado();const ts=Date.now(),payload={ts,estado:ESTADO};sessionStorage.setItem('aw_estado_atual',JSON.stringify(payload));if(_CRONO_ID){const el=document.getElementById('save-info');if(el)el.textContent='Salvando…';const r=await fetch(SB_URL+'/rest/v1/cronogramas?id=eq.'+_CRONO_ID,{method:'PATCH',headers:SB_HDR,body:JSON.stringify({codigo:ESTADO.meta.codigo||'',nome:ESTADO.meta.nome||'',gi:ESTADO.meta.gi||'',gp:ESTADO.meta.gp||'',estado_json:JSON.stringify(payload),atualizado_em:new Date().toISOString()})});const dt=new Date(ts).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});if(el)el.textContent=r.ok?'Salvo às '+dt:'Erro ao salvar';}}catch(e){console.error('salvarDados',e);}}
-async function carregarDadosSB(){if(!_CRONO_ID)return false;const _cachedId=sessionStorage.getItem('aw_crono_id_cached');if(_cachedId&&_cachedId!==_CRONO_ID){sessionStorage.removeItem('aw_estado_atual');}sessionStorage.setItem('aw_crono_id_cached',_CRONO_ID);const cached=sessionStorage.getItem('aw_estado_atual');if(cached){try{const d=JSON.parse(cached);if(d.estado){ESTADO=d.estado;window.__AW_ESTADO=ESTADO;estadoParaUI();fetch(SB_URL+'/rest/v1/cronogramas?id=eq.'+_CRONO_ID+'&select=status,nome',{headers:SB_HDR}).then(function(r){return r.json();}).then(function(data){if(data&&data[0]){sessionStorage.setItem('aw_crono_status',data[0].status||'sim');sessionStorage.setItem('aw_crono_nome',data[0].nome||'');var _st=data[0].status||'sim';if(_st==='frozen'){var _b=document.getElementById('btn-plano-fino');if(_b)_b.style.display='';var _w=document.getElementById('pf-watermark');if(_w&&!ESTADO.planoFino)_w.style.display='flex';var _ht=document.querySelector('.hdr-title');if(_ht&&data[0].nome){var _nm=data[0].nome;_ht.innerHTML='Planejamento<em> de Obra</em> · <span style="opacity:.6;">'+_nm+'</span> <span style="font-size:9px;background:rgba(0,185,80,.2);color:#00B950;padding:1px 6px;border-radius:8px;">❄ Congelado</span>';}};}}).catch(function(){});return true;}}catch{}}try{const r=await fetch(SB_URL+'/rest/v1/cronogramas?id=eq.'+_CRONO_ID+'&select=*',{headers:SB_HDR});const data=await r.json();if(data&&data[0]){const row=data[0];sessionStorage.setItem('aw_crono_status',row.status||'sim');sessionStorage.setItem('aw_crono_nome',row.nome||'');if(row.estado_json){try{const d=JSON.parse(row.estado_json);if(d.estado){ESTADO=d.estado;window.__AW_ESTADO=ESTADO;estadoParaUI();sessionStorage.setItem('aw_estado_atual',row.estado_json);const dt=new Date(row.atualizado_em);const el=document.getElementById('save-info');if(el)el.textContent='Salvo: '+dt.toLocaleDateString('pt-BR');return true;}}catch{}}ESTADO.meta.codigo=row.codigo||'';ESTADO.meta.nome=row.nome||'';ESTADO.meta.gi=row.gi||'';ESTADO.meta.gp=row.gp||'';window.__AW_ESTADO=ESTADO;estadoParaUI();return true;}}catch(e){console.error('carregarDadosSB',e);}return false;}
+async function carregarDadosSB(){if(!_CRONO_ID)return false;const _cachedId=sessionStorage.getItem('aw_crono_id_cached');if(_cachedId&&_cachedId!==_CRONO_ID){sessionStorage.removeItem('aw_estado_atual');}sessionStorage.setItem('aw_crono_id_cached',_CRONO_ID);const cached=sessionStorage.getItem('aw_estado_atual');if(cached){try{const d=JSON.parse(cached);if(d.estado){ESTADO=d.estado;window.__AW_ESTADO=ESTADO;estadoParaUI();fetch(SB_URL+'/rest/v1/cronogramas?id=eq.'+_CRONO_ID+'&select=status,nome',{headers:SB_HDR}).then(function(r){return r.json();}).then(function(data){if(data&&data[0]){sessionStorage.setItem('aw_crono_status',data[0].status||'sim');sessionStorage.setItem('aw_crono_nome',data[0].nome||'');var _st=data[0].status||'sim';if(_st==='frozen'){var _b=document.getElementById('btn-plano-fino');if(_b)_b.style.display='none';var _w=document.getElementById('pf-watermark');if(_w&&!ESTADO.planoFino)_w.style.display='flex';var _ht=document.querySelector('.hdr-title');if(_ht&&data[0].nome){var _nm=data[0].nome;_ht.innerHTML='Planejamento<em> de Obra</em> · <span style="opacity:.6;">'+_nm+'</span> <span style="font-size:9px;background:rgba(0,185,80,.2);color:#00B950;padding:1px 6px;border-radius:8px;">❄ Congelado</span>';}};}}).catch(function(){});return true;}}catch{}}try{const r=await fetch(SB_URL+'/rest/v1/cronogramas?id=eq.'+_CRONO_ID+'&select=*',{headers:SB_HDR});const data=await r.json();if(data&&data[0]){const row=data[0];sessionStorage.setItem('aw_crono_status',row.status||'sim');sessionStorage.setItem('aw_crono_nome',row.nome||'');if(row.estado_json){try{const d=JSON.parse(row.estado_json);if(d.estado){ESTADO=d.estado;window.__AW_ESTADO=ESTADO;estadoParaUI();sessionStorage.setItem('aw_estado_atual',row.estado_json);const dt=new Date(row.atualizado_em);const el=document.getElementById('save-info');if(el)el.textContent='Salvo: '+dt.toLocaleDateString('pt-BR');return true;}}catch{}}ESTADO.meta.codigo=row.codigo||'';ESTADO.meta.nome=row.nome||'';ESTADO.meta.gi=row.gi||'';ESTADO.meta.gp=row.gp||'';window.__AW_ESTADO=ESTADO;estadoParaUI();return true;}}catch(e){console.error('carregarDadosSB',e);}return false;}
 
 
 let ESTADO={meta:{codigo:"",nome:"",gi:"",gp:""},cfg:{nProj:1,nObra:1,dnn:"",visita:"",kickoffTec:"",vinculoObraProj:!1,limiteArq:5,projFases:[{etapas:{ep1:!0,ep2:!0,ap:!0,ex:!0,cond:!1},andares:""}],obraFases:[{inicio:"",prazo:"56",andares:"",preObra:{ativo:false,templateId:"pre-obra-padrao",du:5}}]},alocacaoARQ:{}};function confirmarReset(){document.getElementById("modal-confirm").classList.add("open")}function fecharConfirm(){document.getElementById("modal-confirm").classList.remove("open")}function executarReset(){localStorage.removeItem(LS_KEY),ESTADO={meta:{codigo:"",nome:"",gi:"",gp:""},cfg:{nProj:1,nObra:1,dnn:"",visita:"",kickoffTec:"",vinculoObraProj:!1,limiteArq:5,projFases:[{etapas:{ep1:!0,ep2:!0,ap:!0,ex:!0,cond:!1},andares:""}],obraFases:[{inicio:"",prazo:"56",andares:"",preObra:{ativo:false,templateId:"pre-obra-padrao",du:5}}]},alocacaoARQ:{}},window.__AW_ESTADO=ESTADO,gSt.projFases=[],gSt.obraFases=[],gSt.axisStart=null,gSt.totalDays=0,gSt.zoom=1,gSt._obraVinculadaCond=!0,gSt._obraArqSrc="aprovCond",gSt._visitaVinculada=!0,gSt._visitaDate=null,CFG_ANDARES=["5º","6º","7º"],CFG_PERFIL_SEL="proj+obra",_nFasesProj=1,_nFasesObra=1,_cfgAndarModo="inteiro",_cfgEntregaveis={};const t=document.getElementById("cfg-vinculo-obra-proj");t&&(t.checked=!1);const e=document.getElementById("cfg-pre-obra-on");e&&(e.checked=!1);const o=document.getElementById("cfg-pre-obra-wrap");o&&(o.style.display="none");const a=document.getElementById("cfg-vinculo-obra-wrap");a&&(a.style.display="none"),document.querySelectorAll("#cfg-seg-nproj .cfg-seg-btn").forEach((t,e)=>t.classList.toggle("sel",0===e)),document.querySelectorAll("#cfg-seg-nobra .cfg-seg-btn").forEach((t,e)=>t.classList.toggle("sel",0===e)),cfgRenderAndares(),cfgRenderPerfil(),cfgAplicarPerfil(),cfgInitEntregaveis(),cfgBuildEntregaveis(),estadoParaUI(),motorRecalc(),"function"==typeof gRender&&gRender(),document.getElementById("save-info").textContent="Dados zerados",fecharConfirm(),showToast("Dados zerados — protótipo no estado inicial")}function lerUIparaEstado(){ESTADO.meta.codigo=v("meta-codigo"),ESTADO.meta.nome=v("meta-nome"),ESTADO.meta.gi=v("meta-gi"),ESTADO.meta.gp=v("meta-gp"),ESTADO.cfg.dnn=v("cfg-dnn"),ESTADO.cfg.visita=v("cfg-visita"),ESTADO.cfg.kickoffTec=v("cfg-kickofftec");const t=ESTADO.cfg.nProj;for(let e=0;e<t;e++){const t=ESTADO.cfg.projFases[e]||{};["ep1","ep2","ap","ex","cond"].forEach(o=>{const a=document.getElementById(`proj-f${e}-${o}`);a&&(t.etapas[o]=a.checked)});const o=document.getElementById(`proj-f${e}-andares`);o&&(t.andares=o.value),ESTADO.cfg.projFases[e]=t}const e=ESTADO.cfg.nObra;for(let t=0;t<e;t++){const e=ESTADO.cfg.obraFases[t]||{},o=document.getElementById(`obra-f${t}-inicio`),a=document.getElementById(`obra-f${t}-prazo`),n=document.getElementById(`obra-f${t}-andares`);o&&(e.inicio=o.value),a&&(e.prazo=a.value),n&&(e.andares=n.value),ESTADO.cfg.obraFases[t]=e}}function estadoParaUI(){set("meta-codigo",ESTADO.meta.codigo),set("meta-nome",ESTADO.meta.nome),set("meta-gi",ESTADO.meta.gi),set("meta-gp",ESTADO.meta.gp),set("cfg-dnn",ESTADO.cfg.dnn),set("cfg-visita",ESTADO.cfg.visita),set("cfg-kickofftec",ESTADO.cfg.kickoffTec);const t=document.getElementById("cfg-vinculo-obra-proj");if(t){t.checked=!!ESTADO.cfg.vinculoObraProj;const e=document.getElementById("cfg-vinculo-obra-wrap");e&&(e.style.display=t.checked?"":"none")}if(ESTADO.equipeARQ){const t=ESTADO.equipeARQ,e=document.getElementById("earq-ch-arq");e&&(e.value=t.chArq??120);const o=document.getElementById("earq-ch-dir");o&&(o.value=t.chDir??280);const a=document.getElementById("earq-ch-ger");a&&(a.value=t.chGer??180)}const e=document.getElementById("cfg-limite-arq");e&&(e.value=ESTADO.cfg?.limiteArq??5);const o=document.getElementById("val-nproj");o&&(o.textContent=ESTADO.cfg.nProj);const a=document.getElementById("val-nobra");a&&(a.textContent=ESTADO.cfg.nObra),renderProjFases(),renderObraFases(),atualizarHeaderBadge(),motorRecalc(),atualizarResumoDatas()}function v(t){return document.getElementById(t)?.value??""}function set(t,e){const o=document.getElementById(t);o&&(o.value=e)}function onMetaChange(){atualizarHeaderBadge()}function onCfgChange(){lerUIparaEstado(),motorRecalc(),atualizarResumoDatas(),"function"==typeof gRender&&gRender()}function atualizarHeaderBadge(){const t=v("meta-codigo"),e=v("meta-nome"),o=document.getElementById("hdr-badge");t||e?(o.textContent=[t,e].filter(Boolean).join(" — "),o.style.display=""):o.style.display="none"}function stepperChange(t,e){ESTADO.cfg[t]=Math.min(4,Math.max(1,(ESTADO.cfg[t]||1)+e));const o=document.getElementById("nProj"===t?"val-nproj":"val-nobra");if(o&&(o.textContent=ESTADO.cfg[t]),"nProj"===t){for(;ESTADO.cfg.projFases.length<ESTADO.cfg.nProj;)ESTADO.cfg.projFases.push({etapas:{ep1:!0,ep2:!0,ap:!0,ex:!0,cond:!1},andares:""});ESTADO.cfg.projFases.length=ESTADO.cfg.nProj,renderProjFases()}else{for(;ESTADO.cfg.obraFases.length<ESTADO.cfg.nObra;)ESTADO.cfg.obraFases.push({inicio:"",prazo:"56",andares:"",preObra:{ativo:false,templateId:"pre-obra-padrao",du:5}});ESTADO.cfg.obraFases.length=ESTADO.cfg.nObra,renderObraFases()}}window.__AW_ESTADO=ESTADO;const ETAPAS_ARQ=[{id:"ep1",label:"EP1"},{id:"ep2",label:"EP2"},{id:"ap",label:"AP"},{id:"ex",label:"EX"},{id:"cond",label:"Cond."}];function renderProjFases(){const t=document.getElementById("proj-fases-container"),e=ESTADO.cfg.nProj;let o="";for(let t=0;t<e;t++){const e=ESTADO.cfg.projFases[t]||{},a=e.etapas||{};o+=`\n <div class="p-fase"><div class="p-fase-hdr"><span class="p-fase-num">Fase ${t+1}</span></div><div class="p-fase-body"><div class="p-field"><label class="p-label">Etapas ARQ</label><div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:2px;">\n ${ETAPAS_ARQ.map(e=>` <label style="display:flex;align-items:center;gap:3px;cursor:pointer;font-family:var(--font);font-size:10px;font-weight:700;color:var(--txt-muted);letter-spacing:.05em;text-transform:uppercase;"> <input type="checkbox" id="proj-f${t}-${e.id}" ${!1!==a[e.id]?"checked":""} onchange="onCfgChange()" style="accent-color:var(--accent);width:12px;height:12px;"> ${e.label} </label> `).join("")}\n </div></div>
@@ -962,7 +962,7 @@ const r=document.createElementNS("http://www.w3.org/2000/svg","rect");r.setAttri
       l.appendChild(_poTr);
     });
   }
-  o.forEach((t,o)=>{const n=`${e.id}_${t.id}`;window._fornData[n]||(window._fornData[n]={fornecedor:"",responsavel:"",obs:"",mods:{}});const r=window._fornData[n],i=getDiscPal(o),s=HEAT_CFG.discColors[o%HEAT_CFG.discColors.length],d=document.createElement("tr");d.style.cssText="border-bottom:1px solid var(--divider);transition:background .1s;",d.addEventListener("mouseenter",()=>d.style.background="var(--bg-surface2)"),d.addEventListener("mouseleave",()=>d.style.background="");const c=document.createElement("td");c.style.cssText="padding:7px 12px;border-right:2px solid var(--border-md);",c.innerHTML=`<div style="display:flex;align-items:center;gap:5px;"><span style="width:5px;height:5px;border-radius:1px;background:${i[1]};flex-shrink:0;"></span><span style="font-family:var(--font);font-size:10px;font-weight:700;color:var(--txt);">${t.label}</span></div>`,d.appendChild(c);const p=document.createElement("td");p.style.cssText="padding:4px 6px;border-right:1px solid var(--border);";const f=document.createElement("input");f.type="text",f.value=r.fornecedor,f.placeholder="Nome do fornecedor…",f.style.cssText="width:100%;padding:4px 6px;font-size:11px;background:transparent;border:1px solid transparent;border-radius:3px;outline:none;color:var(--txt);font-family:var(--body);",f.addEventListener("focus",()=>f.style.borderColor="var(--accent)"),f.addEventListener("blur",()=>{f.style.borderColor="transparent",r.fornecedor=f.value}),p.appendChild(f),d.appendChild(p);const u=document.createElement("td");u.style.cssText="padding:4px 6px;border-right:1px solid var(--border);";const g=document.createElement("input");g.type="text",g.value=r.responsavel,g.placeholder="Responsável…",g.style.cssText="width:100%;padding:4px 6px;font-size:11px;background:transparent;border:1px solid transparent;border-radius:3px;outline:none;color:var(--txt);font-family:var(--body);",g.addEventListener("focus",()=>g.style.borderColor="var(--accent)"),g.addEventListener("blur",()=>{g.style.borderColor="transparent",r.responsavel=g.value}),u.appendChild(g),d.appendChild(u);for(let e=1;e<=a;e++){const o=t.tasks.some(t=>(t.m[e]||0)>0),a=3===e||5===e,n=document.createElement("td");if(n.style.cssText=`text-align:center;padding:4px 2px;border-right:${a?"2px solid rgba(184,52,24,.35)":"1px solid var(--border)"};`,o){const t=document.createElement("div");t.style.cssText=`width:14px;height:14px;border-radius:3px;background:${s};margin:auto;opacity:.85;`,t.title=`M${e}: ativo`,n.appendChild(t)}else n.innerHTML='<span style="color:var(--txt-dim);font-size:10px;">—</span>';d.appendChild(n)}const m=document.createElement("td");m.style.cssText="padding:4px 6px;";const b=document.createElement("input");b.type="text",b.value=r.obs,b.placeholder="Observações…",b.style.cssText="width:100%;padding:4px 6px;font-size:11px;background:transparent;border:1px solid transparent;border-radius:3px;outline:none;color:var(--txt);font-family:var(--body);",b.addEventListener("focus",()=>b.style.borderColor="var(--accent)"),b.addEventListener("blur",()=>{b.style.borderColor="transparent",r.obs=b.value}),m.appendChild(b),d.appendChild(m),l.appendChild(d)}),i.appendChild(l),r.appendChild(i),t.appendChild(r)}const _origSwitchTab=switchTab;window.switchTab=function(t){_origSwitchTab(t),"efetivo"===t?renderEfetivo():"histograma"===t?renderHistograma():"fornecedores"===t?renderFornecedores():"cronograma"===t&&"function"==typeof gRender&&gRender()},document.addEventListener("DOMContentLoaded",()=>{ativSincronizarG();carregarDadosSB().then(ok=>{try{if(!ok)estadoParaUI();renderProjFases();renderObraFases();motorRecalc();atualizarResumoDatas();requestAnimationFrame(()=>{setTimeout(gRender,80);});}catch(e){console.error('[INIT]',e);}try{const _st=sessionStorage.getItem('aw_crono_status')||'sim';const _nm=sessionStorage.getItem('aw_crono_nome')||ESTADO.meta.nome||'';const _ht=document.querySelector('.hdr-title');if(_ht){_ht.innerHTML='Planejamento<em> de Obra</em>'+(_nm?' · <span style="opacity:.6;">'+_nm+'</span>':'')+(_st==='frozen'?'<span style="font-size:9px;background:rgba(0,185,80,.2);color:#00B950;padding:1px 6px;border-radius:8px;margin-left:6px;">❄ Congelado</span>':'');}if(_st==='frozen'){const _b=document.getElementById('btn-plano-fino');if(_b)_b.style.display='';const _w=document.getElementById('pf-watermark');if(_w&&!ESTADO.planoFino)_w.style.display='flex';}}catch{}});}),window.addEventListener("resize",()=>{"function"==typeof gRender&&gRender()}),document.getElementById("modal-confirm").addEventListener("click",function(t){t.target===this&&fecharConfirm()})
+  o.forEach((t,o)=>{const n=`${e.id}_${t.id}`;window._fornData[n]||(window._fornData[n]={fornecedor:"",responsavel:"",obs:"",mods:{}});const r=window._fornData[n],i=getDiscPal(o),s=HEAT_CFG.discColors[o%HEAT_CFG.discColors.length],d=document.createElement("tr");d.style.cssText="border-bottom:1px solid var(--divider);transition:background .1s;",d.addEventListener("mouseenter",()=>d.style.background="var(--bg-surface2)"),d.addEventListener("mouseleave",()=>d.style.background="");const c=document.createElement("td");c.style.cssText="padding:7px 12px;border-right:2px solid var(--border-md);",c.innerHTML=`<div style="display:flex;align-items:center;gap:5px;"><span style="width:5px;height:5px;border-radius:1px;background:${i[1]};flex-shrink:0;"></span><span style="font-family:var(--font);font-size:10px;font-weight:700;color:var(--txt);">${t.label}</span></div>`,d.appendChild(c);const p=document.createElement("td");p.style.cssText="padding:4px 6px;border-right:1px solid var(--border);";const f=document.createElement("input");f.type="text",f.value=r.fornecedor,f.placeholder="Nome do fornecedor…",f.style.cssText="width:100%;padding:4px 6px;font-size:11px;background:transparent;border:1px solid transparent;border-radius:3px;outline:none;color:var(--txt);font-family:var(--body);",f.addEventListener("focus",()=>f.style.borderColor="var(--accent)"),f.addEventListener("blur",()=>{f.style.borderColor="transparent",r.fornecedor=f.value}),p.appendChild(f),d.appendChild(p);const u=document.createElement("td");u.style.cssText="padding:4px 6px;border-right:1px solid var(--border);";const g=document.createElement("input");g.type="text",g.value=r.responsavel,g.placeholder="Responsável…",g.style.cssText="width:100%;padding:4px 6px;font-size:11px;background:transparent;border:1px solid transparent;border-radius:3px;outline:none;color:var(--txt);font-family:var(--body);",g.addEventListener("focus",()=>g.style.borderColor="var(--accent)"),g.addEventListener("blur",()=>{g.style.borderColor="transparent",r.responsavel=g.value}),u.appendChild(g),d.appendChild(u);for(let e=1;e<=a;e++){const o=t.tasks.some(t=>(t.m[e]||0)>0),a=3===e||5===e,n=document.createElement("td");if(n.style.cssText=`text-align:center;padding:4px 2px;border-right:${a?"2px solid rgba(184,52,24,.35)":"1px solid var(--border)"};`,o){const t=document.createElement("div");t.style.cssText=`width:14px;height:14px;border-radius:3px;background:${s};margin:auto;opacity:.85;`,t.title=`M${e}: ativo`,n.appendChild(t)}else n.innerHTML='<span style="color:var(--txt-dim);font-size:10px;">—</span>';d.appendChild(n)}const m=document.createElement("td");m.style.cssText="padding:4px 6px;";const b=document.createElement("input");b.type="text",b.value=r.obs,b.placeholder="Observações…",b.style.cssText="width:100%;padding:4px 6px;font-size:11px;background:transparent;border:1px solid transparent;border-radius:3px;outline:none;color:var(--txt);font-family:var(--body);",b.addEventListener("focus",()=>b.style.borderColor="var(--accent)"),b.addEventListener("blur",()=>{b.style.borderColor="transparent",r.obs=b.value}),m.appendChild(b),d.appendChild(m),l.appendChild(d)}),i.appendChild(l),r.appendChild(i),t.appendChild(r)}const _origSwitchTab=switchTab;window.switchTab=function(t){_origSwitchTab(t),"efetivo"===t?renderEfetivo():"histograma"===t?renderHistograma():"fornecedores"===t?renderFornecedores():"cronograma"===t&&"function"==typeof gRender&&gRender()},document.addEventListener("DOMContentLoaded",()=>{ativSincronizarG();carregarDadosSB().then(ok=>{try{if(!ok)estadoParaUI();renderProjFases();renderObraFases();motorRecalc();atualizarResumoDatas();requestAnimationFrame(()=>{setTimeout(gRender,80);});}catch(e){console.error('[INIT]',e);}try{const _st=sessionStorage.getItem('aw_crono_status')||'sim';const _nm=sessionStorage.getItem('aw_crono_nome')||ESTADO.meta.nome||'';const _ht=document.querySelector('.hdr-title');if(_ht){_ht.innerHTML='Planejamento<em> de Obra</em>'+(_nm?' · <span style="opacity:.6;">'+_nm+'</span>':'')+(_st==='frozen'?'<span style="font-size:9px;background:rgba(0,185,80,.2);color:#00B950;padding:1px 6px;border-radius:8px;margin-left:6px;">❄ Congelado</span>':'');}if(_st==='frozen'){const _b=document.getElementById('btn-plano-fino');if(_b)_b.style.display='none';const _w=document.getElementById('pf-watermark');if(_w&&!ESTADO.planoFino)_w.style.display='flex';}}catch{}});}),window.addEventListener("resize",()=>{"function"==typeof gRender&&gRender()}),document.getElementById("modal-confirm").addEventListener("click",function(t){t.target===this&&fecharConfirm()})
 function earqUpdateColors(){
   const c=COR?.ARQ_MOM||'#185FA5';
   const el=document.getElementById('earq-arq-label');
@@ -5079,21 +5079,26 @@ window.fecharGestaoArq = function(salvar) {
   if (iframe) iframe.src = '';
   document.body.style.overflow = '';
 
-  // Se o iframe sinalizou que salvou, recarregar estado
-  if (salvar) {
-    try {
-      var raw = sessionStorage.getItem('aw_estado_atual');
-      if (raw) {
-        var parsed = JSON.parse(raw);
-        if (parsed.estado && parsed.estado.cfg && parsed.estado.cfg.equipeARQ) {
-          ESTADO.cfg.equipeARQ = parsed.estado.cfg.equipeARQ;
-          window.__AW_ESTADO = ESTADO;
-          showToast('Equipe de arquitetura confirmada ✓');
-          salvarDados();
+  // Sempre reler o estado que o iframe gravou no sessionStorage e mesclar no ESTADO do pai.
+  // (Correção v6.03.01: antes só ocorria com salvar=true, causando perda da equipe ao
+  //  fechar por outros caminhos e sobrescrita posterior no Supabase.)
+  try {
+    var raw = sessionStorage.getItem('aw_estado_atual');
+    if (raw) {
+      var parsed = JSON.parse(raw);
+      if (parsed.estado && parsed.estado.cfg && parsed.estado.cfg.equipeARQ) {
+        ESTADO.cfg.equipeARQ = parsed.estado.cfg.equipeARQ;
+        window.__AW_ESTADO = ESTADO;
+        if (salvar) { showToast('Equipe de arquitetura confirmada ✓'); salvarDados(); }
+        // Re-renderizar a seleção da equipe na UI do Config (se as funções existirem)
+        if (typeof equipeRenderGerentes === 'function') {
+          var selDir = document.getElementById('equipe-diretor');
+          if (selDir && ESTADO.cfg.equipeARQ.diretor) selDir.value = ESTADO.cfg.equipeARQ.diretor;
+          equipeRenderGerentes();
         }
       }
-    } catch(e) {}
-  }
+    }
+  } catch(e) {}
 };
 
 // Fechar ao clicar no fundo do modal
@@ -5104,4 +5109,161 @@ document.addEventListener('DOMContentLoaded', function() {
       if (e.target === modal) window.fecharGestaoArq(false);
     });
   }
+});
+
+// ══════════════════════════════════════════════════════════════════
+//  CONGELAMENTO DO CRONOGRAMA — v6.03.01 · Fase 2
+//  Botão na barra de abas + modal explicativo + gravação de status/snapshot.
+//  (As travas de edição entram na Fase 3; aqui só o fluxo de UI e persistência.)
+// ══════════════════════════════════════════════════════════════════
+
+// Atualiza visibilidade dos botões da barra de abas conforme o status.
+function _atualizarBotoesCongelamento() {
+  var frozen = _isFrozen();
+  var bCong  = document.getElementById('btn-congelar-crono');
+  var bArq   = document.getElementById('btn-plano-arq');
+  var bPrTec = document.getElementById('btn-plano-prtec');
+  var bObra  = document.getElementById('btn-plano-obra');
+  if (bCong) {
+    if (frozen) {
+      bCong.innerHTML = '❄ Congelado';
+      bCong.title = 'Cronograma congelado — clique para descongelar';
+      bCong.style.background = 'rgba(0,185,80,.22)';
+      bCong.style.borderColor = 'rgba(0,185,80,.6)';
+      bCong.style.color = '#008A3C';
+    } else {
+      bCong.innerHTML = '❄ Congelar';
+      bCong.title = 'Congelar cronograma — datas macro';
+      bCong.style.background = 'rgba(0,185,80,.10)';
+      bCong.style.borderColor = 'rgba(0,185,80,.4)';
+      bCong.style.color = '#00A048';
+    }
+  }
+  // Botões de plano só aparecem quando congelado.
+  if (bArq)   bArq.style.display   = frozen ? '' : 'none';
+  if (bPrTec) bPrTec.style.display = frozen ? '' : 'none';
+  if (bObra)  bObra.style.display  = frozen ? '' : 'none';
+}
+
+// Abre o modal explicativo de congelamento, OU oferece descongelar se já congelado.
+window.abrirModalCongelar = function() {
+  if (_isFrozen()) { _abrirModalDescongelar(); return; }
+  document.getElementById('modal-congelar')?.remove();
+  var ov = document.createElement('div');
+  ov.id = 'modal-congelar';
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9600;display:flex;align-items:center;justify-content:center;padding:18px;';
+  ov.addEventListener('click', function(e){ if(e.target===ov) ov.remove(); });
+  ov.innerHTML =
+    '<div style="background:var(--bg-panel);border-radius:14px;box-shadow:0 24px 70px rgba(0,0,0,.55);width:100%;max-width:560px;max-height:88vh;display:flex;flex-direction:column;overflow:hidden;">'
+    + '<div style="display:flex;align-items:center;gap:10px;padding:18px 22px 14px;border-bottom:1px solid var(--border);background:linear-gradient(135deg,rgba(0,185,80,.10),transparent);">'
+    +   '<span style="font-size:20px;">❄</span>'
+    +   '<div style="flex:1;"><div style="font-family:var(--font);font-size:14px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--txt);">Congelar cronograma</div>'
+    +   '<div style="font-size:11px;color:var(--txt-muted);margin-top:2px;">Versão aprovada com o cliente na venda</div></div>'
+    +   '<button onclick="document.getElementById(\'modal-congelar\').remove()" style="width:28px;height:28px;border:1px solid var(--border);background:var(--bg-surface2);border-radius:6px;cursor:pointer;font-size:14px;color:var(--txt-muted);">✕</button>'
+    + '</div>'
+    + '<div style="flex:1;overflow-y:auto;padding:20px 22px;display:flex;flex-direction:column;gap:14px;">'
+    +   '<div style="display:flex;gap:11px;align-items:flex-start;"><span style="flex-shrink:0;width:22px;height:22px;border-radius:50%;background:rgba(0,185,80,.14);color:#00A048;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:var(--font);">1</span>'
+    +     '<p style="font-size:13px;line-height:1.6;color:var(--txt);margin:0;">A partir de agora todas as <strong>datas macro</strong> definidas neste cronograma estarão congeladas e serão monitoradas. As informações constantes aqui serão transferidas para o <strong>Comunicado Semanal</strong> e farão parte do contrato, devendo inclusive ser apresentadas no <strong>Kickoff Externo</strong>.</p></div>'
+    +   '<div style="display:flex;gap:11px;align-items:flex-start;"><span style="flex-shrink:0;width:22px;height:22px;border-radius:50%;background:rgba(0,185,80,.14);color:#00A048;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:var(--font);">2</span>'
+    +     '<p style="font-size:13px;line-height:1.6;color:var(--txt);margin:0;">Mudanças no planejamento deverão obedecer o <strong>protocolo de alteração</strong>, que incluirá revisão contratual e validação do cliente e da liderança da A|W.</p></div>'
+    +   '<div style="display:flex;gap:11px;align-items:flex-start;"><span style="flex-shrink:0;width:22px;height:22px;border-radius:50%;background:rgba(0,185,80,.14);color:#00A048;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:var(--font);">3</span>'
+    +     '<p style="font-size:13px;line-height:1.6;color:var(--txt);margin:0;">Os <strong>próximos passos</strong> incluem o planejamento fino da arquitetura, o refinamento do cronograma de projetos técnicos e o alinhamento dos prazos de execução dos serviços da planilha de venda.</p></div>'
+    + '</div>'
+    + '<div style="flex-shrink:0;padding:16px 22px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:flex-end;gap:10px;background:var(--bg-surface);">'
+    +   '<button onclick="document.getElementById(\'modal-congelar\').remove()" style="height:34px;padding:0 16px;border:1px solid var(--border);background:var(--bg-surface2);border-radius:7px;font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--txt-muted);cursor:pointer;">Cancelar</button>'
+    +   '<button onclick="confirmarCongelamento()" style="height:34px;padding:0 20px;border:none;background:#00A048;border-radius:7px;font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#fff;cursor:pointer;display:flex;align-items:center;gap:6px;">❄ Concordo e congelar</button>'
+    + '</div></div>';
+  document.body.appendChild(ov);
+};
+
+// Confirma o congelamento: captura snapshot, grava status no Supabase, atualiza UI.
+window.confirmarCongelamento = async function() {
+  try {
+    var snap = _capturarSnapshotCongelamento();
+    if (snap) { ESTADO.frozenSnapshot = snap; ESTADO.frozenAt = new Date().toISOString(); }
+    sessionStorage.setItem('aw_crono_status', 'frozen');
+    // Persistir status + estado no Supabase
+    if (_CRONO_ID) {
+      try { lerUIparaEstado(); } catch(e) {}
+      var payload = { ts: Date.now(), estado: ESTADO };
+      sessionStorage.setItem('aw_estado_atual', JSON.stringify(payload));
+      await fetch(SB_URL + '/rest/v1/cronogramas?id=eq.' + _CRONO_ID, {
+        method: 'PATCH', headers: SB_HDR,
+        body: JSON.stringify({ status: 'frozen', estado_json: JSON.stringify(payload), atualizado_em: new Date().toISOString() })
+      });
+    }
+    document.getElementById('modal-congelar')?.remove();
+    _atualizarBotoesCongelamento();
+    _atualizarHeaderCongelado();
+    if (typeof gRender === 'function') gRender();
+    showToast('Cronograma congelado ❄');
+  } catch(e) { console.error('confirmarCongelamento', e); showToast('Erro ao congelar'); }
+};
+
+// Modal de descongelamento (proteção: ação reversível só para correção).
+function _abrirModalDescongelar() {
+  document.getElementById('modal-descongelar')?.remove();
+  var ov = document.createElement('div');
+  ov.id = 'modal-descongelar';
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9600;display:flex;align-items:center;justify-content:center;padding:18px;';
+  ov.addEventListener('click', function(e){ if(e.target===ov) ov.remove(); });
+  ov.innerHTML =
+    '<div style="background:var(--bg-panel);border-radius:12px;box-shadow:0 24px 64px rgba(0,0,0,.5);width:100%;max-width:420px;padding:24px;display:flex;flex-direction:column;gap:16px;">'
+    + '<div style="font-family:var(--font);font-size:14px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--orange);">↺ Descongelar cronograma</div>'
+    + '<p style="font-size:13px;line-height:1.6;color:var(--txt-muted);margin:0;">O cronograma voltará a ser editável e sairá do estado congelado. Use apenas para correções autorizadas — o protocolo de alteração se aplica.</p>'
+    + '<div style="display:flex;justify-content:flex-end;gap:10px;">'
+    +   '<button onclick="document.getElementById(\'modal-descongelar\').remove()" style="height:34px;padding:0 16px;border:1px solid var(--border);background:var(--bg-surface2);border-radius:7px;font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--txt-muted);cursor:pointer;">Cancelar</button>'
+    +   '<button onclick="confirmarDescongelamento()" style="height:34px;padding:0 18px;border:none;background:var(--orange);border-radius:7px;font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#fff;cursor:pointer;">↺ Descongelar</button>'
+    + '</div></div>';
+  document.body.appendChild(ov);
+}
+
+window.confirmarDescongelamento = async function() {
+  try {
+    sessionStorage.setItem('aw_crono_status', 'sim');
+    if (_CRONO_ID) {
+      try { lerUIparaEstado(); } catch(e) {}
+      var payload = { ts: Date.now(), estado: ESTADO };
+      sessionStorage.setItem('aw_estado_atual', JSON.stringify(payload));
+      await fetch(SB_URL + '/rest/v1/cronogramas?id=eq.' + _CRONO_ID, {
+        method: 'PATCH', headers: SB_HDR,
+        body: JSON.stringify({ status: 'sim', estado_json: JSON.stringify(payload), atualizado_em: new Date().toISOString() })
+      });
+    }
+    document.getElementById('modal-descongelar')?.remove();
+    _atualizarBotoesCongelamento();
+    _atualizarHeaderCongelado();
+    if (typeof gRender === 'function') gRender();
+    showToast('Cronograma descongelado ↺');
+  } catch(e) { console.error('confirmarDescongelamento', e); showToast('Erro ao descongelar'); }
+};
+
+// Atualiza o badge "❄ Congelado" no header conforme o status atual.
+function _atualizarHeaderCongelado() {
+  var ht = document.querySelector('.hdr-title');
+  if (!ht) return;
+  var nm = sessionStorage.getItem('aw_crono_nome') || (ESTADO.meta && ESTADO.meta.nome) || '';
+  var frozen = _isFrozen();
+  ht.innerHTML = 'Planejamento<em> de Obra</em>'
+    + (nm ? ' · <span style="opacity:.6;">' + nm + '</span>' : '')
+    + (frozen ? '<span style="font-size:9px;background:rgba(0,185,80,.2);color:#00B950;padding:1px 6px;border-radius:8px;margin-left:6px;">❄ Congelado</span>' : '');
+}
+
+// Stubs dos planos (conteúdo definido em etapas futuras).
+window.abrirPlanoPrTec = function() { showToast('Plano Pr Téc — em breve'); };
+window.abrirPlanoObra  = function() { showToast('Plano Obra — em breve'); };
+
+// Sincroniza botões/header no carregamento, após o estado chegar do Supabase.
+document.addEventListener('DOMContentLoaded', function() {
+  // pequeno atraso para rodar depois do init principal que resolve carregarDadosSB
+  setTimeout(function() {
+    try { _atualizarBotoesCongelamento(); } catch(e) {}
+    // Restaurar seleção da Equipe ARQ na UI, se já houver dados (correção v6.03.01)
+    try {
+      if (ESTADO.cfg && ESTADO.cfg.equipeARQ && typeof equipeRenderGerentes === 'function') {
+        var selDir = document.getElementById('equipe-diretor');
+        if (selDir && ESTADO.cfg.equipeARQ.diretor) { selDir.value = ESTADO.cfg.equipeARQ.diretor; equipeRenderGerentes(); }
+      }
+    } catch(e) {}
+  }, 400);
 });
