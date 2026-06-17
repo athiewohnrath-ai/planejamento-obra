@@ -1,4 +1,4 @@
-// Planejamento de Obra A|W — v6.03.12
+// Planejamento de Obra A|W — v6.03.13
 const SB_URL='https://ejneanfveoctdlltjnrs.supabase.co';
 const SB_KEY='sb_publishable_vZApDmF_C-heCrm8fXJ_XA_ATmMO3YP';
 const SB_HDR={'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
@@ -82,11 +82,8 @@ function _congAplicarVisual(){
       col.appendChild(ov);
     }
   }
-  root.querySelectorAll('[data-drag]').forEach(function(el){
-    var t;
-    try{ t=JSON.parse(decodeURIComponent(el.dataset.drag)); }catch(e){ t=null; }
-    el.style.cursor=(frozen&&_congBloqueiaAlvo(t))?'not-allowed':'';
-  });
+  // classe controla os cursores via CSS (clique p/ ver dados quando congelado)
+  root.classList.toggle('gantt-congelado', frozen);
 }
 async function salvarDados(){try{lerUIparaEstado();const ts=Date.now(),payload={ts,estado:ESTADO};sessionStorage.setItem('aw_estado_atual',JSON.stringify(payload));if(_CRONO_ID){const el=document.getElementById('save-info');if(el)el.textContent='Salvando…';const r=await fetch(SB_URL+'/rest/v1/cronogramas?id=eq.'+_CRONO_ID,{method:'PATCH',headers:SB_HDR,body:JSON.stringify({codigo:ESTADO.meta.codigo||'',nome:ESTADO.meta.nome||'',gi:ESTADO.meta.gi||'',gp:ESTADO.meta.gp||'',estado_json:JSON.stringify(payload),atualizado_em:new Date().toISOString()})});const dt=new Date(ts).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});if(el)el.textContent=r.ok?'Salvo às '+dt:'Erro ao salvar';}}catch(e){console.error('salvarDados',e);}}
 async function carregarDadosSB(){if(!_CRONO_ID)return false;const _cachedId=sessionStorage.getItem('aw_crono_id_cached');if(_cachedId&&_cachedId!==_CRONO_ID){sessionStorage.removeItem('aw_estado_atual');}sessionStorage.setItem('aw_crono_id_cached',_CRONO_ID);const cached=sessionStorage.getItem('aw_estado_atual');if(cached){try{const d=JSON.parse(cached);if(d.estado){ESTADO=d.estado;window.__AW_ESTADO=ESTADO;estadoParaUI();fetch(SB_URL+'/rest/v1/cronogramas?id=eq.'+_CRONO_ID+'&select=status,nome',{headers:SB_HDR}).then(function(r){return r.json();}).then(function(data){if(data&&data[0]){sessionStorage.setItem('aw_crono_status',data[0].status||'sim');sessionStorage.setItem('aw_crono_nome',data[0].nome||'');var _st=data[0].status||'sim';if(_st==='frozen'){var _b=document.getElementById('btn-plano-fino');if(_b)_b.style.display='none';var _w=document.getElementById('pf-watermark');if(_w)_w.style.display='none'/*plano fino removido v6.03.08*/;var _ht=document.querySelector('.hdr-title');if(_ht&&data[0].nome){var _nm=data[0].nome;_ht.innerHTML='Planejamento<em> de Obra</em> · <span style="opacity:.6;">'+_nm+'</span> <span style="font-size:9px;background:rgba(0,185,80,.2);color:#00B950;padding:1px 6px;border-radius:8px;">❄ Congelado</span>';}};}}).catch(function(){});return true;}}catch{}}try{const r=await fetch(SB_URL+'/rest/v1/cronogramas?id=eq.'+_CRONO_ID+'&select=*',{headers:SB_HDR});const data=await r.json();if(data&&data[0]){const row=data[0];sessionStorage.setItem('aw_crono_status',row.status||'sim');sessionStorage.setItem('aw_crono_nome',row.nome||'');if(row.estado_json){try{const d=JSON.parse(row.estado_json);if(d.estado){ESTADO=d.estado;window.__AW_ESTADO=ESTADO;estadoParaUI();sessionStorage.setItem('aw_estado_atual',row.estado_json);const dt=new Date(row.atualizado_em);const el=document.getElementById('save-info');if(el)el.textContent='Salvo: '+dt.toLocaleDateString('pt-BR');return true;}}catch{}}ESTADO.meta.codigo=row.codigo||'';ESTADO.meta.nome=row.nome||'';ESTADO.meta.gi=row.gi||'';ESTADO.meta.gp=row.gp||'';window.__AW_ESTADO=ESTADO;estadoParaUI();return true;}}catch(e){console.error('carregarDadosSB',e);}return false;}
