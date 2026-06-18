@@ -1398,6 +1398,41 @@ function renderRptNova(){
   var TH='padding:3px 4px;font-family:var(--font);font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--gl);border-bottom:1px solid var(--border);white-space:nowrap;text-align:left';
   var TD='padding:3px 8px;font-size:11px;border-bottom:1px solid #F2F3F4;vertical-align:middle';
 
+  // ── SEÇÃO 2: Por data de término ──────────────────────────────────────────
+  h+='<div class="rpt-sec"><div class="rpt-sec-title">Entregáveis por data de t\xe9rmino</div>';
+  var ordenados=todas.slice().sort(function(a,b){return a.fim<b.fim?-1:a.fim>b.fim?1:a.tipo<b.tipo?-1:1;});
+  var porFim={},fimsOrdem=[];
+  ordenados.forEach(function(r){if(!porFim[r.fim]){porFim[r.fim]=[];fimsOrdem.push(r.fim);}porFim[r.fim].push(r);});
+
+  h+='<table style="width:100%;border-collapse:collapse"><thead><tr style="background:#F8F9FA">'
+    +'<th style="'+TH+';width:80px">Término</th>'
+    +'<th style="'+TH+'">Entregável</th>'
+    +'<th style="'+TH+';width:48px">Andar</th>'
+    +'<th style="'+TH+'">Profissional</th>'
+    +'<th style="'+TH+';width:68px">Início</th>'
+    +'<th style="'+TH+';width:34px;text-align:center">Dias</th>'
+    +'<th style="'+TH+'">Obs.</th>'
+    +'</tr></thead><tbody>';
+
+  fimsOrdem.forEach(function(fim,fi){
+    var grupo=porFim[fim];
+    grupo.forEach(function(r,ri){
+      var fc=getFloorColor(r.andar);
+      var bg=fi%2===1?'#FAFBFC':'#fff';
+      h+='<tr style="background:'+bg+'">'
+        +'<td style="'+TD+';font-family:var(--font);font-size:11px;white-space:nowrap">'+(ri===0?'<strong>'+fBR2(fim)+'</strong>':'')+'</td>'
+        +'<td style="'+TD+';font-family:var(--font);font-weight:600"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:'+fc+';margin-right:5px;vertical-align:middle"></span>'+r.tipo+'</td>'
+        +'<td style="'+TD+';font-size:10.5px;color:var(--gl)">'+r.andar+'</td>'
+        +'<td style="'+TD+';font-size:11px">'+r.arquiteto+'</td>'
+        +'<td style="'+TD+';color:var(--gl);font-size:10.5px;white-space:nowrap">'+fBR2(r.ini)+'</td>'
+        +'<td style="'+TD+';text-align:center;font-family:var(--font);font-weight:700;color:var(--tf-dk)">'+r.dias+'d</td>'
+        +'<td style="'+TD+';color:var(--gl);font-style:italic;font-size:10.5px">'+r.notas+'</td>'
+        +'</tr>';
+    });
+  });
+  h+='</tbody></table></div>';
+  h+='</div>'; // rpt-doc
+
   // ── SEÇÃO 1: Por profissional ─────────────────────────────────────────────
   h+='<div class="rpt-sec"><div class="rpt-sec-title">Sequência por profissional</div>';
 
@@ -1494,8 +1529,14 @@ function renderRptNova(){
     });
     fimsSeq.sort();
     var rowIdx=0;
+    var firstGrp=true;
     fimsSeq.forEach(function(fim){
       var grp=gruposFim[fim];
+      // Linha separadora entre grupos de entrega (exceto antes do primeiro)
+      if(!firstGrp){
+        h+='<tr><td colspan="6" style="height:8px;padding:0;border-bottom:2px solid #E8EAED"></td></tr>';
+      }
+      firstGrp=false;
       grp.forEach(function(r,gi){
         var fc=getFloorColor(r.andar);
         var bg=rowIdx%2===1?'#FAFBFC':'#fff';
@@ -1515,41 +1556,6 @@ function renderRptNova(){
     h+='</tbody></table></div>'; // rpt-prof-block
   });
   h+='</div>'; // seção 1
-
-  // ── SEÇÃO 2: Por data de término ──────────────────────────────────────────
-  h+='<div class="rpt-sec"><div class="rpt-sec-title">Entregáveis por data de t\xe9rmino</div>';
-  var ordenados=todas.slice().sort(function(a,b){return a.fim<b.fim?-1:a.fim>b.fim?1:a.tipo<b.tipo?-1:1;});
-  var porFim={},fimsOrdem=[];
-  ordenados.forEach(function(r){if(!porFim[r.fim]){porFim[r.fim]=[];fimsOrdem.push(r.fim);}porFim[r.fim].push(r);});
-
-  h+='<table style="width:100%;border-collapse:collapse"><thead><tr style="background:#F8F9FA">'
-    +'<th style="'+TH+';width:80px">Término</th>'
-    +'<th style="'+TH+'">Entregável</th>'
-    +'<th style="'+TH+';width:48px">Andar</th>'
-    +'<th style="'+TH+'">Profissional</th>'
-    +'<th style="'+TH+';width:68px">Início</th>'
-    +'<th style="'+TH+';width:34px;text-align:center">Dias</th>'
-    +'<th style="'+TH+'">Obs.</th>'
-    +'</tr></thead><tbody>';
-
-  fimsOrdem.forEach(function(fim,fi){
-    var grupo=porFim[fim];
-    grupo.forEach(function(r,ri){
-      var fc=getFloorColor(r.andar);
-      var bg=fi%2===1?'#FAFBFC':'#fff';
-      h+='<tr style="background:'+bg+'">'
-        +'<td style="'+TD+';font-family:var(--font);font-size:11px;white-space:nowrap">'+(ri===0?'<strong>'+fBR2(fim)+'</strong>':'')+'</td>'
-        +'<td style="'+TD+';font-family:var(--font);font-weight:600"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:'+fc+';margin-right:5px;vertical-align:middle"></span>'+r.tipo+'</td>'
-        +'<td style="'+TD+';font-size:10.5px;color:var(--gl)">'+r.andar+'</td>'
-        +'<td style="'+TD+';font-size:11px">'+r.arquiteto+'</td>'
-        +'<td style="'+TD+';color:var(--gl);font-size:10.5px;white-space:nowrap">'+fBR2(r.ini)+'</td>'
-        +'<td style="'+TD+';text-align:center;font-family:var(--font);font-weight:700;color:var(--tf-dk)">'+r.dias+'d</td>'
-        +'<td style="'+TD+';color:var(--gl);font-style:italic;font-size:10.5px">'+r.notas+'</td>'
-        +'</tr>';
-    });
-  });
-  h+='</tbody></table></div>';
-  h+='</div>'; // rpt-doc
   el.innerHTML=h;
   document.getElementById('cta3-info').innerHTML='<strong>'+todas.length+'</strong> entrega(s) · <strong>'+(eq.colaboradores.length+eq.arquitetos.length)+'</strong> profissional(is)';
 }
@@ -1613,6 +1619,31 @@ function togEpanel(){
 }
 
 function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2600);}
+
+// sair: salva imediatamente e avisa o pai para fechar o iframe
+function sair(){
+  // Cancela o debounce pendente e salva agora
+  clearTimeout(_saveTimer);
+  // Atualiza ESTADO antes de tudo
+  ESTADO.cfg.equipeARQ.planoAloc = plano;
+  ESTADO.cfg.equipeARQ.gerentes = eq.gerentes.slice();
+  ESTADO.cfg.equipeARQ.arquitetos = eq.arquitetos.slice();
+  ESTADO.cfg.equipeARQ.colaboradores = (eq.colaboradores||[]).slice();
+  try { sessionStorage.setItem('aw_estado_atual', JSON.stringify({ts:Date.now(), estado:ESTADO})); } catch(e){}
+  // Salva no Supabase em foreground (sem debounce)
+  _autoSaveSB();
+  // Avisa o pai para fechar o iframe
+  try {
+    if(window.parent && window.parent.fecharGestaoArq) {
+      window.parent.fecharGestaoArq(true);
+    }
+  } catch(e) {}
+}
+
+function confirmar(){
+  salvAloc();
+  goScr(2);
+}
 </script>
 </body>
 </html>
