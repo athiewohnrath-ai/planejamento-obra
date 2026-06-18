@@ -1,4 +1,4 @@
-// Planejamento de Obra A|W — v6.03.22
+// Planejamento de Obra A|W — v6.03.23
 const SB_URL='https://ejneanfveoctdlltjnrs.supabase.co';
 const SB_KEY='sb_publishable_vZApDmF_C-heCrm8fXJ_XA_ATmMO3YP';
 const SB_HDR={'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
@@ -1727,10 +1727,10 @@ let _tplEditorData = null; // { disciplinas: [...] } — espelha estrutura de fa
 // ── Tipografia do Gantt por nível ──────────────────────────
 
 var _ganttTypoDefaults = {
-  T1: { fs: 10, fw: 700, ff: 'Oswald, sans-serif' },
-  T2: { fs: 9,  fw: 700, ff: 'Oswald, sans-serif' },
-  N1: { fs: 9,  fw: 700, ff: '"Barlow Condensed", sans-serif' },
-  N2: { fs: 9,  fw: 700, ff: '"Barlow Condensed", sans-serif' }
+  T1: { fs: 13, fw: 700, ff: 'Oswald, sans-serif' },
+  T2: { fs: 12, fw: 700, ff: 'Oswald, sans-serif' },
+  N1: { fs: 11, fw: 700, ff: 'Oswald, sans-serif' },
+  N2: { fs: 11, fw: 700, ff: 'Oswald, sans-serif' }
 };
 
 function gGetTypo(level) {
