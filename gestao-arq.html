@@ -1414,11 +1414,12 @@ function renderRptNova(){
     var itens=todas.filter(function(r){return r.arquiteto===nome;});
     itens.sort(function(a,b){return a.ini<b.ini?-1:1;});
 
-    // Numeração: mesmo dia = mesmo número
-    var numMap={},numSeq=0,lastIni='';
-    itens.forEach(function(r){
-      if(r.ini!==lastIni){numSeq++;lastIni=r.ini;}
-      r._num=numSeq;numMap[r.ini]=numSeq;
+    // Numeração: mesmo dia de ENTREGA = mesmo número
+    var numMap={},numSeq=0,lastFim='';
+    var itensOrdemFim=itens.slice().sort(function(a,b){return a.fim<b.fim?-1:a.fim>b.fim?1:0;});
+    itensOrdemFim.forEach(function(r){
+      if(r.fim!==lastFim){numSeq++;lastFim=r.fim;}
+      r._num=numSeq;numMap[r.fim]=numSeq;
     });
 
     var init=nome.split(' ').map(function(w){return w[0];}).slice(0,2).join('');
@@ -1472,7 +1473,7 @@ function renderRptNova(){
       var andarColor='';
       if(num!==undefined){var ri=itens.find(function(r){return r.ini===d;});if(ri)andarColor=getFloorColor(ri.andar);}
       h+='<td style="text-align:center;border-top:1px solid #eee;border-bottom:1px solid #eee;border-right:'+(isFimEt?'2px solid '+pal.border:'0.5px solid #eee')+';background:'+(num!==undefined?andarColor+'18':'')+';">'
-        +(num!==undefined?'<span style="font-size:9px;font-weight:700;color:'+andarColor+'">'+num+'</span>':'')
+        +(num!==undefined?'<span style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:#111;color:#fff;font-size:8px;font-weight:700;font-family:var(--font)">'+num+'</span>':'')
         +'</td>';
     });
     h+='</tr></thead></table></div>';
@@ -1485,18 +1486,31 @@ function renderRptNova(){
       +'<th style="'+TH+'">Período</th>'
       +'<th style="'+TH+';text-align:center;width:36px">Dias</th>'
       +'<th style="'+TH+'">Observação</th>'
-      +'</tr></thead><tbody>';
-    itens.forEach(function(r,ri){
-      var fc=getFloorColor(r.andar);
-      var bg=ri%2===1?'#FAFBFC':'#fff';
-      h+='<tr style="background:'+bg+'">'
-        +'<td style="'+TD+';text-align:center;font-family:var(--font);font-weight:800;font-size:12px;color:'+fc+'">'+r._num+'</td>'
-        +'<td style="'+TD+';font-family:var(--font);font-weight:700">'+r.tipo+'</td>'
-        +'<td style="'+TD+'"><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:'+fc+';margin-right:4px;vertical-align:middle"></span>'+r.andar+'</td>'
-        +'<td style="'+TD+';color:var(--gl);font-size:11px;white-space:nowrap">'+fBR2(r.ini)+(r.dias>1?' &rarr; '+fBR2(r.fim):'')+'</td>'
-        +'<td style="'+TD+';text-align:center;font-family:var(--font);font-weight:700;color:var(--tf-dk)">'+r.dias+'d</td>'
-        +'<td style="'+TD+';color:var(--gl);font-style:italic;font-size:10.5px">'+r.notas+'</td>'
-        +'</tr>';
+    // Agrupar por data de entrega (r.fim)
+    var gruposFim={},fimsSeq=[];
+    itens.forEach(function(r){
+      if(!gruposFim[r.fim]){gruposFim[r.fim]=[];fimsSeq.push(r.fim);}
+      gruposFim[r.fim].push(r);
+    });
+    fimsSeq.sort();
+    var rowIdx=0;
+    fimsSeq.forEach(function(fim){
+      var grp=gruposFim[fim];
+      grp.forEach(function(r,gi){
+        var fc=getFloorColor(r.andar);
+        var bg=rowIdx%2===1?'#FAFBFC':'#fff';
+        h+='<tr style="background:'+bg+'">'
+          +'<td style="'+TD+';text-align:center">'
+            +'<span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#111;color:#fff;font-size:10px;font-weight:700;font-family:var(--font)">'+r._num+'</span>'
+          +'</td>'
+          +'<td style="'+TD+';font-family:var(--font);font-weight:700">'+r.tipo+'</td>'
+          +'<td style="'+TD+'"><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:'+fc+';margin-right:4px;vertical-align:middle"></span>'+r.andar+'</td>'
+          +'<td style="'+TD+';color:var(--gl);font-size:11px;white-space:nowrap">'+fBR2(r.ini)+(r.dias>1?' &rarr; '+fBR2(r.fim):'')+' </td>'
+          +'<td style="'+TD+';text-align:center;font-family:var(--font);font-weight:700;color:var(--tf-dk)">'+r.dias+'d</td>'
+          +'<td style="'+TD+';color:var(--gl);font-style:italic;font-size:10.5px">'+r.notas+'</td>'
+          +'</tr>';
+        rowIdx++;
+      });
     });
     h+='</tbody></table></div>'; // rpt-prof-block
   });
