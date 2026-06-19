@@ -329,7 +329,7 @@ body.bar-dragging .cal-bar .bar-del{display:none}
       <div style="color:var(--gl);font-size:12px;padding:20px;text-align:center">Carregando…</div>
     </div>
     <div class="cta-bar">
-      <div class="cta-info" id="cta1-info">Revise o cronograma e avance para montar a equipe</div>
+      <div class="cta-info" id="cta1-info"></div>
       <div style="display:flex;gap:8px">
         <button class="btn-p" onclick="goScr(2)">Próximo: Equipe ›</button>
       </div>
@@ -522,6 +522,42 @@ function renderScr1(){
   var arqEtapas=CTX.etapas||[];
   var tecEtapas=CTX.etapasTec||[];
   var obraEtapas=CTX.etapasObra||[];
+
+  // Se etapasTec veio vazio (CTX antigo), monta do ESTADO
+  if(!tecEtapas.length&&ESTADO&&ESTADO.cfg&&ESTADO.cfg.projFases){
+    var _G_TEC_IDS=['koTec','epTec','apTec','exTec'];
+    var _G_TEC_NAMES={koTec:'Kickoff Proj. Téc.',epTec:'EP Técnicos',apTec:'AP Técnicos',exTec:'EX Técnicos'};
+    (ESTADO.cfg.projFases||[]).forEach(function(fase){
+      var tecSubs=fase.rows&&fase.rows.tec&&fase.rows.tec.subs||{};
+      _G_TEC_IDS.forEach(function(id){
+        var t=tecSubs[id];if(!t)return;
+        var s0=t.start instanceof Date?t.start:pD(t.start);
+        var e0=t.end   instanceof Date?t.end  :pD(t.end);
+        tecEtapas.push({id:'tec_'+id,label:_G_TEC_NAMES[id]||id,tipo:'tec',
+          start:fISO(s0),end:fISO(e0)});
+      });
+    });
+  }
+  // Se etapasObra veio vazio, monta do ESTADO
+  if(!obraEtapas.length&&ESTADO&&ESTADO.cfg&&ESTADO.cfg.obraFases){
+    var _obraFases=ESTADO.cfg.obraFases||[];
+    // gSt não está disponível no iframe — usamos o ESTADO.cfg
+    // Precisamos das datas de obra calculadas — estão no ESTADO salvo
+    // Tentamos ler de gSt via parent
+    try{
+      var _gSt=window.parent&&window.parent.gSt;
+      if(_gSt&&_gSt.obraFases){
+        _gSt.obraFases.forEach(function(of,fi){
+          if(of.obra&&of.obra.start&&of.obra.end){
+            var obraStart=fISO(of.obra.start instanceof Date?of.obra.start:pD(of.obra.start));
+            var obraEnd  =fISO(of.obra.end   instanceof Date?of.obra.end  :pD(of.obra.end));
+            obraEtapas.push({id:'obra_'+fi,label:'Obra'+((_gSt.obraFases.length>1)?' F'+(fi+1):''),
+              tipo:'obra',start:obraStart,end:obraEnd});
+          }
+        });
+      }
+    }catch(e){}
+  }
   if(!arqEtapas.length&&!tecEtapas.length&&!obraEtapas.length){
     el.innerHTML='<div style="padding:32px;text-align:center;color:var(--gl);font-size:13px">Cronograma sem etapas definidas.</div>';
     return;
@@ -646,11 +682,11 @@ function renderScr1(){
     var barY=y+(ROW_H-BAR_H)/2;
     // Barra
     h+='<rect x="'+barX.toFixed(1)+'" y="'+barY.toFixed(1)+'" width="'+barW.toFixed(1)+'" height="'+BAR_H+'" rx="3" fill="'+col+'" fill-opacity="0.85" clip-path="url(#bars-clip)"/>';
-    // Rótulo dentro da barra se houver espaço
-    if(barW>40){
-      var du=0;var c=new Date(pD(e.start));while(c<=pD(e.end)){if(isWork(c))du++;c=addD(c,1);}
-      h+='<text x="'+(barX+5).toFixed(1)+'" y="'+(barY+BAR_H/2+3.5).toFixed(1)+'" font-size="8.5" fill="#fff" font-family="Oswald,sans-serif" font-weight="700" clip-path="url(#bars-clip)">'+fBR2(e.start)+' – '+fBR2(e.end)+' · '+du+'du</text>';
-    }
+    // Rótulo à DIREITA da barra, em fonte escura
+    var du=0;var c=new Date(pD(e.start));while(c<=pD(e.end)){if(isWork(c))du++;c=addD(c,1);}
+    var lblX=(barX+barW+4).toFixed(1);
+    var lblY=(barY+BAR_H/2+3.5).toFixed(1);
+    h+='<text x="'+lblX+'" y="'+lblY+'" font-size="8.5" fill="#2D3748" font-family="Oswald,sans-serif" font-weight="700">'+fBR2(e.start)+' – '+fBR2(e.end)+' · '+du+'du</text>';
     // Label na coluna esquerda
     h+='<text x="'+(LBL_W-6)+'" y="'+(y+ROW_H/2+4)+'" font-size="10" fill="#374151" font-family="Oswald,sans-serif" font-weight="700" text-anchor="end">'+((e.label||e.id).substring(0,16))+'</text>';
     // Separador horizontal
