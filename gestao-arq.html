@@ -244,8 +244,8 @@ body.bar-dragging .cal-bar .bar-del{display:none}
 .pop-btn-ok{flex:1;height:30px;background:var(--tf);border:none;border-radius:6px;font-family:var(--font);font-size:11.5px;font-weight:700;color:#111;transition:all .14s}
 .pop-btn-ok:hover{background:var(--tf-dk);color:#fff}
 .pop-btn-cancel{height:30px;padding:0 12px;border:1.5px solid var(--border);border-radius:6px;background:transparent;font-family:var(--font);font-size:11px;font-weight:600;color:var(--gray)}
-.rpt-scroll{flex:1;overflow-y:auto;padding:24px 32px;background:#EAEBEE}
-.rpt-doc{background:#fff;border-radius:8px;box-shadow:0 2px 16px rgba(0,0,0,.12);padding:40px 48px;max-width:900px;margin:0 auto}
+.rpt-scroll{flex:1;overflow-y:auto;padding:0;background:#fff}
+.rpt-doc{background:#fff;border-radius:0;padding:24px 32px;max-width:none;margin:0}
 .rpt-doc-hdr{border-bottom:3px solid #1A2535;padding-bottom:14px;margin-bottom:28px;display:flex;align-items:flex-end;justify-content:space-between}
 .rpt-doc-title{font-family:var(--font);font-size:22px;font-weight:800;color:#1A2535;text-transform:uppercase}
 .rpt-doc-sub{font-size:12px;color:var(--gl);margin-top:3px}
@@ -1277,7 +1277,7 @@ function _autoSaveSB(){
   var payload={ts:Date.now(),estado:ESTADO};
   var payloadStr=JSON.stringify(payload);
   console.log('[GestaoARQ] PATCH /cronogramas?id=eq.'+cronoId);
-  fetch(sbUrl+'/rest/v1/cronogramas?id=eq.'+cronoId,{
+  return fetch(sbUrl+'/rest/v1/cronogramas?id=eq.'+cronoId,{
     method:'PATCH',
     headers:{'Content-Type':'application/json','apikey':sbKey,'Authorization':'Bearer '+sbKey},
     body:JSON.stringify({
@@ -1291,11 +1291,12 @@ function _autoSaveSB(){
   }).then(function(r){
     console.log('[GestaoARQ] save response:', r.status, r.ok?'OK':'ERRO');
     _setSaveStatus(r.ok?'ok':'err');
-    // Atualizar sessionStorage do parent tb
     try{sessionStorage.setItem('aw_estado_atual',payloadStr);}catch(e){}
+    return r;
   }).catch(function(e){
     console.error('[GestaoARQ] save falhou:',e);
     _setSaveStatus('err');
+    throw e;
   });
 }
 function abrirAddEnt(){if(!curEt){toast('Selecione uma etapa primeiro');return;}document.getElementById('new-ent-nome').value='';document.getElementById('opt-geral').checked=true;document.getElementById('and-chks-wrap').style.display='none';var andares=(CTX&&CTX.andares)||[];document.getElementById('and-chks').innerHTML=andares.map(function(a){return'<label style="display:flex;align-items:center;gap:5px;font-size:12px;font-family:var(--font);cursor:pointer"><input type="checkbox" value="'+a+'" style="accent-color:var(--tf)"> '+a+'</label>';}).join('');document.getElementById('modal-add-ent').style.display='flex';setTimeout(function(){document.getElementById('new-ent-nome').focus();},50);}
@@ -1643,7 +1644,21 @@ function sair(){
 }
 
 function confirmar(){
-  salvAloc();
+  // Salva imediatamente (sem debounce) e mostra confirmação
+  clearTimeout(_saveTimer);
+  if(ESTADO&&ESTADO.cfg&&ESTADO.cfg.equipeARQ){
+    ESTADO.cfg.equipeARQ.planoAloc = plano;
+    ESTADO.cfg.equipeARQ.gerentes = eq.gerentes.slice();
+    ESTADO.cfg.equipeARQ.arquitetos = eq.arquitetos.slice();
+    ESTADO.cfg.equipeARQ.colaboradores = (eq.colaboradores||[]).slice();
+  }
+  try { sessionStorage.setItem('aw_estado_atual', JSON.stringify({ts:Date.now(), estado:ESTADO})); } catch(e){}
+  _setSaveStatus('saving');
+  _autoSaveSB().then(function(){
+    toast('✓ Equipe confirmada e salva');
+  }).catch(function(){
+    toast('✓ Equipe confirmada (salvo localmente)');
+  });
   goScr(2);
 }
 </script>
