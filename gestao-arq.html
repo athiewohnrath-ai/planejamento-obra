@@ -511,6 +511,25 @@ function adjFont(d){_fscale=Math.max(0.7,Math.min(1.8,Math.round((_fscale+d)*10)
 // Zoom inicial aplicado pelo init
 
 
+
+// ── Numeração global de kits de entrega ───────────────────────────────────────
+// Agrupa todas as alocações de todos os profissionais por data de fim.
+// Cada data única recebe um número sequencial (kit). Retorna {isoDate: kitNum}.
+function computeKitMap(){
+  var fimSet={};
+  Object.keys(plano).forEach(function(etId){
+    (plano[etId]||[]).forEach(function(item){
+      var datas=computeDatas(item.dataInicio,item.dias);
+      var fim=datas[datas.length-1]||item.dataInicio;
+      if(fim)fimSet[fim]=true;
+    });
+  });
+  var fims=Object.keys(fimSet).sort();
+  var kitMap={};
+  fims.forEach(function(d,i){kitMap[d]=i+1;});
+  return kitMap;
+}
+
 // ── Passo 1: Gantt read-only do cronograma congelado ─────────────────────────
 function renderScr1(){
   var el=document.getElementById('scr1-body');
@@ -519,6 +538,9 @@ function renderScr1(){
     el.innerHTML='<div style="padding:32px;text-align:center;color:var(--gl);font-size:13px">Nenhum dado disponível. Abra a partir do planejamento de obra.</div>';
     return;
   }
+  // Calcula mapa global de kits antes de renderizar
+  var kitMap=computeKitMap();
+
   var arqEtapas=CTX.etapas||[];
   var tecEtapas=CTX.etapasTec||[];
   var obraEtapas=CTX.etapasObra||[];
@@ -616,7 +638,7 @@ function renderScr1(){
 
   // Dimensões
   var LBL_W=130; // largura do label
-  var ROW_H=26;
+  var ROW_H=30; // aumentado para acomodar barra + bolinha de kit
   var HDR_H=18;
   var AXIS_H=36;
   var totalRows=rows.length;
@@ -726,6 +748,20 @@ function renderScr1(){
     }
     // Label na coluna esquerda
     h+='<text x="'+(LBL_W-6)+'" y="'+(y+ROW_H/2+4)+'" font-size="10" fill="#374151" font-family="Oswald,sans-serif" font-weight="700" text-anchor="end">'+((e.label||e.id).substring(0,16))+'</text>';
+    // Bolinhas de kits de entrega: plotar sobre a linha desta etapa
+    if(kitMap&&e.start&&e.end){
+      var etS=pD(e.start),etE=pD(e.end);
+      Object.keys(kitMap).forEach(function(isoFim){
+        var kd=pD(isoFim);
+        if(kd>=etS&&kd<=etE){
+          var kx=toPx(kd);
+          var ky=y+ROW_H-4; // centro da bolinha na parte inferior da linha
+          var kn=kitMap[isoFim];
+          h+='<circle cx="'+kx.toFixed(1)+'" cy="'+ky+'" r="7" fill="#1A2535" clip-path="url(#bars-clip)"/>';
+          h+='<text x="'+kx.toFixed(1)+'" y="'+(ky+3)+'" font-size="7" fill="#fff" text-anchor="middle" font-weight="700" font-family="Oswald,sans-serif" clip-path="url(#bars-clip)">'+kn+'</text>';
+        }
+      });
+    }
     // Separador horizontal
     h+='<line x1="0" y1="'+(y+ROW_H)+'" x2="10000" y2="'+(y+ROW_H)+'" stroke="#F0F1F2" stroke-width="0.5"/>';
   });
@@ -1745,13 +1781,10 @@ function renderRptNova(){
     var itens=todas.filter(function(r){return r.arquiteto===nome;});
     itens.sort(function(a,b){return a.ini<b.ini?-1:1;});
 
-    // Numeração: mesmo dia de ENTREGA = mesmo número
-    var numMap={},numSeq=0,lastFim='';
-    var itensOrdemFim=itens.slice().sort(function(a,b){return a.fim<b.fim?-1:a.fim>b.fim?1:0;});
-    itensOrdemFim.forEach(function(r){
-      if(r.fim!==lastFim){numSeq++;lastFim=r.fim;}
-      r._num=numSeq;numMap[r.fim]=numSeq;
-    });
+    // Numeração global: usa computeKitMap() para números únicos por data de entrega
+    var _globalKitMap=computeKitMap();
+    var numMap=_globalKitMap;
+    itens.forEach(function(r){ r._num=_globalKitMap[r.fim]||'?'; });
 
     var init=nome.split(' ').map(function(w){return w[0];}).slice(0,2).join('');
     var role=_getRoleLabel(nome);
