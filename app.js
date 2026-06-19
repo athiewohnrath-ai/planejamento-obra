@@ -1,4 +1,4 @@
-// Planejamento de Obra A|W — v6.03.36
+// Planejamento de Obra A|W — v6.03.37
 const SB_URL='https://ejneanfveoctdlltjnrs.supabase.co';
 const SB_KEY='sb_publishable_vZApDmF_C-heCrm8fXJ_XA_ATmMO3YP';
 const SB_HDR={'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
@@ -5121,13 +5121,60 @@ window.abrirPlanoFino = function() {
         });
       });
     });
+    // Adiciona etapas técnicas ao CTX
+    var etapasTec = [];
+    (gSt.projFases || []).forEach(function(fase) {
+      var tecSubs = fase.rows && fase.rows.tec && fase.rows.tec.subs || {};
+      G.TEC_IDS.forEach(function(id) {
+        var t = tecSubs[id]; if (!t) return;
+        etapasTec.push({
+          id: 'tec_' + id, label: G.TEC_NAMES ? (G.TEC_NAMES[id] || id) : id,
+          tipo: 'tec', faseId: fase.id,
+          start: G.fmtISO(t.start instanceof Date ? t.start : G.parseD(t.start)),
+          end:   G.fmtISO(t.end   instanceof Date ? t.end   : G.parseD(t.end))
+        });
+      });
+    });
+    // Adiciona fases de obra (totalizador: pré-obra + obra)
+    var etapasObra = [];
+    (gSt.obraFases || []).forEach(function(of, fi) {
+      var obraStart = null, obraEnd = null;
+      // Pré-obra
+      var poCfg = ESTADO.cfg && ESTADO.cfg.obraFases && ESTADO.cfg.obraFases[fi] && ESTADO.cfg.obraFases[fi].preObra;
+      if (poCfg && poCfg.ativo) {
+        var poDu = poCfg.du || 5;
+        var obraIni = of.obra && (of.obra.start instanceof Date ? of.obra.start : G.parseD(of.obra.start));
+        if (obraIni) {
+          var poEnd = new Date(obraIni); poEnd.setDate(poEnd.getDate() - 1);
+          var cur = new Date(poEnd), cnt = 0;
+          while (cnt < poDu) { cur.setDate(cur.getDate() - 1); if (!CALENDARIO.isNaoUtil(cur)) cnt++; }
+          obraStart = G.fmtISO(cur);
+        }
+      }
+      if (of.obra) {
+        var os = of.obra.start instanceof Date ? of.obra.start : G.parseD(of.obra.start);
+        var oe = of.obra.end   instanceof Date ? of.obra.end   : G.parseD(of.obra.end);
+        if (!obraStart) obraStart = G.fmtISO(os);
+        obraEnd = G.fmtISO(oe);
+      }
+      if (obraStart && obraEnd) {
+        etapasObra.push({
+          id: 'obra_' + fi, label: 'Obra' + (gSt.obraFases.length > 1 ? ' F' + (fi+1) : ''),
+          tipo: 'obra', faseId: fi,
+          start: obraStart, end: obraEnd
+        });
+      }
+    });
     var andares = (typeof CFG_ANDARES !== 'undefined' && CFG_ANDARES) ||
                   (ESTADO.cfg && ESTADO.cfg.andares) || [];
     var etapasAtivas = {};
     (ESTADO.cfg.projFases || []).forEach(function(f) {
       Object.keys(f.etapas || {}).forEach(function(k) { if(f.etapas[k]) etapasAtivas[k] = true; });
     });
-    sessionStorage.setItem('aw_gestao_ctx', JSON.stringify({andares: andares, etapas: etapas, etapasAtivas: etapasAtivas}));
+    sessionStorage.setItem('aw_gestao_ctx', JSON.stringify({
+      andares: andares, etapas: etapas, etapasTec: etapasTec,
+      etapasObra: etapasObra, etapasAtivas: etapasAtivas
+    }));
   } catch(e) {}
 
   // Salvar estado no sessionStorage (compartilhado com iframe mesma origem)
