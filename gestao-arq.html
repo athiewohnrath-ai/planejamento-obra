@@ -577,7 +577,7 @@ function renderScr1(){
   }
 
   // Paletas
-  var ARQ_COL='#7A8898'; var TEC_COL='#1D9E75'; var OBRA_COL='#8B5E20';
+  var ARQ_COL='#7A8898'; var TEC_COL='#7A9488'; var OBRA_COL='#8B8070';
   var arqPal=['#7A8898','#6B7A88','#7E8E9C','#8A9BAA','#6E7E8C','#7C8C9A','#697888','#8898A6','#72838F','#80909E'];
 
   // Todas as linhas
@@ -695,8 +695,8 @@ function renderScr1(){
     var barY=y+(ROW_H-BAR_H)/2;
     if(row.tipo==='obra'&&e.poStart&&e.obraStart){
       // Barra DUPLA: pré-obra (tom claro) + obra (tom escuro), mesma linha
-      var OBRA_DK='#6B3D0A'; // marrom escuro para obra
-      var OBRA_LT='#C47C2A'; // marrom claro para pré-obra
+      var OBRA_DK='#787068'; // cinza-bege escuro para obra
+      var OBRA_LT='#A09888'; // cinza-bege claro para pré-obra
       var poBarX=Math.max(LBL_W+1,toPx(pD(e.poStart)));
       var poBarEnd=Math.min(REF_W-1,toPx(addD(pD(e.poEnd),1)));
       var poBarW=Math.max(2,poBarEnd-poBarX);
