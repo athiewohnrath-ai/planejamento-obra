@@ -1,4 +1,4 @@
-// Planejamento de Obra A|W — v6.03.39
+// Planejamento de Obra A|W — v6.03.40
 const SB_URL='https://ejneanfveoctdlltjnrs.supabase.co';
 const SB_KEY='sb_publishable_vZApDmF_C-heCrm8fXJ_XA_ATmMO3YP';
 const SB_HDR={'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
@@ -5158,10 +5158,15 @@ window.abrirPlanoFino = function() {
         obraEnd = G.fmtISO(oe);
       }
       if (obraStart && obraEnd) {
+        var _obraS = G.fmtISO(of.obra.start instanceof Date ? of.obra.start : G.parseD(of.obra.start));
+        var _obraE = G.fmtISO(of.obra.end   instanceof Date ? of.obra.end   : G.parseD(of.obra.end));
         etapasObra.push({
           id: 'obra_' + fi, label: 'Obra' + (gSt.obraFases.length > 1 ? ' F' + (fi+1) : ''),
           tipo: 'obra', faseId: fi,
-          start: obraStart, end: obraEnd
+          start: obraStart, end: obraEnd,
+          obraStart: _obraS, obraEnd: _obraE,
+          poStart: (obraStart !== _obraS) ? obraStart : null,
+          poEnd:   (obraStart !== _obraS) ? G.fmtISO(G.addD(G.parseD(_obraS), -1)) : null
         });
       }
     });

@@ -544,11 +544,29 @@ function renderScr1(){
       if(!obraEtapas.length&&_gSt.obraFases){
         _gSt.obraFases.forEach(function(of,fi){
           if(!of.obra||!of.obra.start||!of.obra.end)return;
-          var s0=of.obra.start instanceof Date?of.obra.start:pD(String(of.obra.start));
-          var e0=of.obra.end   instanceof Date?of.obra.end  :pD(String(of.obra.end));
-          obraEtapas.push({id:'obra_'+fi,
+          var obraS=of.obra.start instanceof Date?of.obra.start:pD(String(of.obra.start));
+          var obraE=of.obra.end   instanceof Date?of.obra.end  :pD(String(of.obra.end));
+          // Calcula início da pré-obra (se ativa)
+          var poCfg=ESTADO&&ESTADO.cfg&&ESTADO.cfg.obraFases&&ESTADO.cfg.obraFases[fi]&&ESTADO.cfg.obraFases[fi].preObra;
+          var poStart=null,poEnd=null;
+          if(poCfg&&poCfg.ativo){
+            var poDu=poCfg.du||5;
+            // Pré-obra termina 1 dia antes do início da obra
+            var poE=new Date(obraS);poE=addD(poE,-1);
+            while(isWork&&!isWork(poE))poE=addD(poE,-1);
+            // Pré-obra começa poDu dias úteis antes
+            var cnt=0,cur=new Date(poE);
+            while(cnt<poDu-1){cur=addD(cur,-1);if(isWork&&isWork(cur))cnt++;}
+            poStart=fISO(cur);poEnd=fISO(poE);
+          }
+          obraEtapas.push({
+            id:'obra_'+fi,
             label:'Obra'+((_gSt.obraFases.length>1)?' F'+(fi+1):''),
-            tipo:'obra',start:fISO(s0),end:fISO(e0)});
+            tipo:'obra',
+            start: poStart||fISO(obraS), end: fISO(obraE),
+            obraStart:fISO(obraS), obraEnd:fISO(obraE),
+            poStart:poStart, poEnd:poEnd
+          });
         });
       }
     }
@@ -675,13 +693,37 @@ function renderScr1(){
     var barXend=Math.min(REF_W-1, toPx(addD(pD(e.end),1)));
     var barW=Math.max(3, barXend-barX);
     var barY=y+(ROW_H-BAR_H)/2;
-    // Barra
-    h+='<rect x="'+barX.toFixed(1)+'" y="'+barY.toFixed(1)+'" width="'+barW.toFixed(1)+'" height="'+BAR_H+'" rx="3" fill="'+col+'" fill-opacity="0.85" clip-path="url(#bars-clip)"/>';
-    // Rótulo à DIREITA da barra, em fonte escura
-    var du=0;var c=new Date(pD(e.start));while(c<=pD(e.end)){if(isWork(c))du++;c=addD(c,1);}
-    var lblX=(barX+barW+4).toFixed(1);
-    var lblY=(barY+BAR_H/2+3.5).toFixed(1);
-    h+='<text x="'+lblX+'" y="'+lblY+'" font-size="8.5" fill="#2D3748" font-family="Oswald,sans-serif" font-weight="700">'+fBR2(e.start)+' – '+fBR2(e.end)+' · '+du+'du</text>';
+    if(row.tipo==='obra'&&e.poStart&&e.obraStart){
+      // Barra DUPLA: pré-obra (tom claro) + obra (tom escuro), mesma linha
+      var OBRA_DK='#6B3D0A'; // marrom escuro para obra
+      var OBRA_LT='#C47C2A'; // marrom claro para pré-obra
+      var poBarX=Math.max(LBL_W+1,toPx(pD(e.poStart)));
+      var poBarEnd=Math.min(REF_W-1,toPx(addD(pD(e.poEnd),1)));
+      var poBarW=Math.max(2,poBarEnd-poBarX);
+      var obBarX=Math.max(LBL_W+1,toPx(pD(e.obraStart)));
+      var obBarEnd=Math.min(REF_W-1,toPx(addD(pD(e.obraEnd),1)));
+      var obBarW=Math.max(2,obBarEnd-obBarX);
+      // Pré-obra (mais claro)
+      h+='<rect x="'+poBarX.toFixed(1)+'" y="'+barY.toFixed(1)+'" width="'+poBarW.toFixed(1)+'" height="'+BAR_H+'" rx="3" fill="'+OBRA_LT+'" fill-opacity="0.9" clip-path="url(#bars-clip)"/>';
+      // Obra (mais escuro)
+      h+='<rect x="'+obBarX.toFixed(1)+'" y="'+barY.toFixed(1)+'" width="'+obBarW.toFixed(1)+'" height="'+BAR_H+'" rx="3" fill="'+OBRA_DK+'" fill-opacity="0.9" clip-path="url(#bars-clip)"/>';
+      // Separador entre as duas
+      h+='<line x1="'+obBarX.toFixed(1)+'" y1="'+barY.toFixed(1)+'" x2="'+obBarX.toFixed(1)+'" y2="'+(barY+BAR_H).toFixed(1)+'" stroke="#fff" stroke-width="2" clip-path="url(#bars-clip)"/>';
+      // Rótulo à direita: pré-obra · obra
+      var duPo=0;var cPo=new Date(pD(e.poStart));while(cPo<=pD(e.poEnd)){if(isWork(cPo))duPo++;cPo=addD(cPo,1);}
+      var duOb=0;var cOb=new Date(pD(e.obraStart));while(cOb<=pD(e.obraEnd)){if(isWork(cOb))duOb++;cOb=addD(cOb,1);}
+      var lblX2=(Math.max(poBarX,obBarX)+Math.max(poBarW,obBarW)+4).toFixed(1);
+      var lblY2=(barY+BAR_H/2+3.5).toFixed(1);
+      h+='<text x="'+lblX2+'" y="'+lblY2+'" font-size="8.5" fill="#2D3748" font-family="Oswald,sans-serif" font-weight="700">Pré: '+fBR2(e.poStart)+' – '+fBR2(e.poEnd)+' · '+duPo+'du  |  Obra: '+fBR2(e.obraStart)+' – '+fBR2(e.obraEnd)+' · '+duOb+'du</text>';
+    } else {
+      // Barra simples
+      h+='<rect x="'+barX.toFixed(1)+'" y="'+barY.toFixed(1)+'" width="'+barW.toFixed(1)+'" height="'+BAR_H+'" rx="3" fill="'+col+'" fill-opacity="0.85" clip-path="url(#bars-clip)"/>';
+      // Rótulo à DIREITA da barra, em fonte escura
+      var du=0;var c=new Date(pD(e.start));while(c<=pD(e.end)){if(isWork(c))du++;c=addD(c,1);}
+      var lblX=(barX+barW+4).toFixed(1);
+      var lblY=(barY+BAR_H/2+3.5).toFixed(1);
+      h+='<text x="'+lblX+'" y="'+lblY+'" font-size="8.5" fill="#2D3748" font-family="Oswald,sans-serif" font-weight="700">'+fBR2(e.start)+' – '+fBR2(e.end)+' · '+du+'du</text>';
+    }
     // Label na coluna esquerda
     h+='<text x="'+(LBL_W-6)+'" y="'+(y+ROW_H/2+4)+'" font-size="10" fill="#374151" font-family="Oswald,sans-serif" font-weight="700" text-anchor="end">'+((e.label||e.id).substring(0,16))+'</text>';
     // Separador horizontal
