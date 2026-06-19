@@ -523,41 +523,36 @@ function renderScr1(){
   var tecEtapas=CTX.etapasTec||[];
   var obraEtapas=CTX.etapasObra||[];
 
-  // Se etapasTec veio vazio (CTX antigo), monta do ESTADO
-  if(!tecEtapas.length&&ESTADO&&ESTADO.cfg&&ESTADO.cfg.projFases){
-    var _G_TEC_IDS=['koTec','epTec','apTec','exTec'];
-    var _G_TEC_NAMES={koTec:'Kickoff Proj. Téc.',epTec:'EP Técnicos',apTec:'AP Técnicos',exTec:'EX Técnicos'};
-    (ESTADO.cfg.projFases||[]).forEach(function(fase){
-      var tecSubs=fase.rows&&fase.rows.tec&&fase.rows.tec.subs||{};
-      _G_TEC_IDS.forEach(function(id){
-        var t=tecSubs[id];if(!t)return;
-        var s0=t.start instanceof Date?t.start:pD(t.start);
-        var e0=t.end   instanceof Date?t.end  :pD(t.end);
-        tecEtapas.push({id:'tec_'+id,label:_G_TEC_NAMES[id]||id,tipo:'tec',
-          start:fISO(s0),end:fISO(e0)});
-      });
-    });
-  }
-  // Se etapasObra veio vazio, monta do ESTADO
-  if(!obraEtapas.length&&ESTADO&&ESTADO.cfg&&ESTADO.cfg.obraFases){
-    var _obraFases=ESTADO.cfg.obraFases||[];
-    // gSt não está disponível no iframe — usamos o ESTADO.cfg
-    // Precisamos das datas de obra calculadas — estão no ESTADO salvo
-    // Tentamos ler de gSt via parent
-    try{
-      var _gSt=window.parent&&window.parent.gSt;
-      if(_gSt&&_gSt.obraFases){
-        _gSt.obraFases.forEach(function(of,fi){
-          if(of.obra&&of.obra.start&&of.obra.end){
-            var obraStart=fISO(of.obra.start instanceof Date?of.obra.start:pD(of.obra.start));
-            var obraEnd  =fISO(of.obra.end   instanceof Date?of.obra.end  :pD(of.obra.end));
-            obraEtapas.push({id:'obra_'+fi,label:'Obra'+((_gSt.obraFases.length>1)?' F'+(fi+1):''),
-              tipo:'obra',start:obraStart,end:obraEnd});
-          }
+  // Se etapasTec ou etapasObra vieram vazios (CTX antigo), busca do parent.gSt
+  try{
+    var _gSt=window.parent&&window.parent.gSt;
+    if(_gSt){
+      var _TEC_IDS=['koTec','epTec','apTec','exTec'];
+      var _TEC_NAMES={koTec:'Kickoff Proj. Téc.',epTec:'EP Técnicos',apTec:'AP Técnicos',exTec:'EX Técnicos'};
+      if(!tecEtapas.length&&_gSt.projFases){
+        _gSt.projFases.forEach(function(fase){
+          var tecSubs=fase.rows&&fase.rows.tec&&fase.rows.tec.subs||{};
+          _TEC_IDS.forEach(function(id){
+            var t=tecSubs[id];if(!t)return;
+            var s0=t.start instanceof Date?t.start:pD(String(t.start));
+            var e0=t.end   instanceof Date?t.end  :pD(String(t.end));
+            tecEtapas.push({id:'tec_'+id,label:_TEC_NAMES[id]||id,tipo:'tec',
+              start:fISO(s0),end:fISO(e0)});
+          });
         });
       }
-    }catch(e){}
-  }
+      if(!obraEtapas.length&&_gSt.obraFases){
+        _gSt.obraFases.forEach(function(of,fi){
+          if(!of.obra||!of.obra.start||!of.obra.end)return;
+          var s0=of.obra.start instanceof Date?of.obra.start:pD(String(of.obra.start));
+          var e0=of.obra.end   instanceof Date?of.obra.end  :pD(String(of.obra.end));
+          obraEtapas.push({id:'obra_'+fi,
+            label:'Obra'+((_gSt.obraFases.length>1)?' F'+(fi+1):''),
+            tipo:'obra',start:fISO(s0),end:fISO(e0)});
+        });
+      }
+    }
+  }catch(_e){}
   if(!arqEtapas.length&&!tecEtapas.length&&!obraEtapas.length){
     el.innerHTML='<div style="padding:32px;text-align:center;color:var(--gl);font-size:13px">Cronograma sem etapas definidas.</div>';
     return;
