@@ -1620,19 +1620,21 @@ function togEpanel(){
 
 function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2600);}
 
-// sair: salva imediatamente e avisa o pai para fechar o iframe
+// sair: atualiza sessionStorage com estado mais recente e avisa o pai.
+// O pai (fecharGestaoArq) lê o sessionStorage e faz o PATCH no Supabase —
+// assim o fetch não é cancelado pela destruição do iframe.
 function sair(){
-  // Cancela o debounce pendente e salva agora
   clearTimeout(_saveTimer);
-  // Atualiza ESTADO antes de tudo
-  ESTADO.cfg.equipeARQ.planoAloc = plano;
-  ESTADO.cfg.equipeARQ.gerentes = eq.gerentes.slice();
-  ESTADO.cfg.equipeARQ.arquitetos = eq.arquitetos.slice();
-  ESTADO.cfg.equipeARQ.colaboradores = (eq.colaboradores||[]).slice();
+  // Garante que o ESTADO está completo antes de serializar
+  if(ESTADO&&ESTADO.cfg&&ESTADO.cfg.equipeARQ){
+    ESTADO.cfg.equipeARQ.planoAloc = plano;
+    ESTADO.cfg.equipeARQ.gerentes = eq.gerentes.slice();
+    ESTADO.cfg.equipeARQ.arquitetos = eq.arquitetos.slice();
+    ESTADO.cfg.equipeARQ.colaboradores = (eq.colaboradores||[]).slice();
+  }
+  // Grava no sessionStorage de forma síncrona — o pai vai ler isso
   try { sessionStorage.setItem('aw_estado_atual', JSON.stringify({ts:Date.now(), estado:ESTADO})); } catch(e){}
-  // Salva no Supabase em foreground (sem debounce)
-  _autoSaveSB();
-  // Avisa o pai para fechar o iframe
+  // Avisa o pai para fechar e salvar (o pai faz o PATCH no Supabase)
   try {
     if(window.parent && window.parent.fecharGestaoArq) {
       window.parent.fecharGestaoArq(true);

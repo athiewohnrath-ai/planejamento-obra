@@ -1,4 +1,4 @@
-// Planejamento de Obra A|W — v6.03.29
+// Planejamento de Obra A|W — v6.03.30
 const SB_URL='https://ejneanfveoctdlltjnrs.supabase.co';
 const SB_KEY='sb_publishable_vZApDmF_C-heCrm8fXJ_XA_ATmMO3YP';
 const SB_HDR={'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
@@ -5144,12 +5144,10 @@ window.fecharGestaoArq = function(salvar) {
   var modal = document.getElementById('modal-gestao-arq');
   var iframe = document.getElementById('iframe-gestao-arq');
   if (modal) modal.style.display = 'none';
-  if (iframe) iframe.src = '';
   document.body.style.overflow = '';
 
-  // Sempre reler o estado que o iframe gravou no sessionStorage e mesclar no ESTADO do pai.
-  // (Correção v6.03.01: antes só ocorria com salvar=true, causando perda da equipe ao
-  //  fechar por outros caminhos e sobrescrita posterior no Supabase.)
+  // Sempre reler o estado que o iframe gravou no sessionStorage e mesclar no ESTADO do pai,
+  // e salvar no Supabase — antes de destruir o iframe (que cancelaria fetches pendentes).
   try {
     var raw = sessionStorage.getItem('aw_estado_atual');
     if (raw) {
@@ -5157,8 +5155,10 @@ window.fecharGestaoArq = function(salvar) {
       if (parsed.estado && parsed.estado.cfg && parsed.estado.cfg.equipeARQ) {
         ESTADO.cfg.equipeARQ = parsed.estado.cfg.equipeARQ;
         window.__AW_ESTADO = ESTADO;
-        if (salvar) { showToast('Equipe de arquitetura confirmada ✓'); salvarDados(); }
-        // Re-renderizar a seleção da equipe na UI do Config (se as funções existirem)
+        // Sempre salvar no Supabase (não só quando salvar=true)
+        salvarDados();
+        if (salvar) showToast('Gestão de arquitetura salva ✓');
+        // Re-renderizar a seleção da equipe na UI do Config
         if (typeof equipeRenderGerentes === 'function') {
           var selDir = document.getElementById('equipe-diretor');
           if (selDir && ESTADO.cfg.equipeARQ.diretor) selDir.value = ESTADO.cfg.equipeARQ.diretor;
@@ -5167,6 +5167,9 @@ window.fecharGestaoArq = function(salvar) {
       }
     }
   } catch(e) {}
+
+  // Destrói o iframe depois de capturar o estado
+  if (iframe) iframe.src = '';
 };
 
 // Fechar ao clicar no fundo do modal
