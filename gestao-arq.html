@@ -451,6 +451,17 @@ var DOWS=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
 function computeDatas(isoStart,dias){var r=[],cur=pD(isoStart),cnt=0;while(cnt<dias){if(isWork(cur)){r.push(fISO(cur));cnt++;}cur=addD(cur,1);}return r;}
 
 (function(){
+  // Garante que aw_crono_id está disponível no sessionStorage do iframe
+  // (compartilhado por aba, mas verificamos e sincronizamos com o pai se necessário)
+  if(!sessionStorage.getItem('aw_crono_id')){
+    try{
+      var _pid=window.parent&&window.parent._CRONO_ID;
+      if(_pid){sessionStorage.setItem('aw_crono_id',_pid);console.log('[GestaoARQ] aw_crono_id recuperado do pai:',_pid);}
+    }catch(e){}
+  }
+  var _dbgId=sessionStorage.getItem('aw_crono_id')||'(não encontrado)';
+  var _dbgSt=sessionStorage.getItem('aw_estado_atual')?'presente':'ausente';
+  console.log('[GestaoARQ init] aw_crono_id='+_dbgId+' | aw_estado_atual='+_dbgSt);
   try{var r=sessionStorage.getItem('aw_estado_atual');if(r){var p=JSON.parse(r);ESTADO=p.estado||p;}}catch(e){}
   try{var c=sessionStorage.getItem('aw_gestao_ctx');if(c)CTX=JSON.parse(c);}catch(e){}
   if(!ESTADO){
@@ -1240,11 +1251,34 @@ function salvAloc(){
   ESTADO.cfg.equipeARQ.gerentes=eq.gerentes.slice();
   ESTADO.cfg.equipeARQ.arquitetos=eq.arquitetos.slice();
   ESTADO.cfg.equipeARQ.colaboradores=(eq.colaboradores||[]).slice();
-  try{sessionStorage.setItem('aw_estado_atual',JSON.stringify({ts:Date.now(),estado:ESTADO}));}catch(e){}
-  // Auto-save no Supabase com debounce de 1.5s
+  var payload={ts:Date.now(),estado:ESTADO};
+  var payloadStr=JSON.stringify(payload);
+  // Grava no sessionStorage do iframe (síncrono)
+  try{sessionStorage.setItem('aw_estado_atual',payloadStr);}catch(e){}
+  // Também notifica o pai para mesclar o estado imediatamente no ESTADO dele
+  // (assim se o usuário der F5 no pai, o ESTADO do pai já tem os dados)
+  try{
+    if(window.parent&&window.parent.ESTADO&&window.parent.ESTADO.cfg){
+      window.parent.ESTADO.cfg.equipeARQ=ESTADO.cfg.equipeARQ;
+    }
+  }catch(e){}
+  // Auto-save no Supabase com debounce de 1.5s (via pai, que tem o _CRONO_ID certo)
   clearTimeout(_saveTimer);
   _setSaveStatus('saving');
-  _saveTimer=setTimeout(function(){_autoSaveSB();},1500);
+  _saveTimer=setTimeout(function(){
+    // Tenta salvar direto; se falhar, usa o pai
+    var p=_autoSaveSB();
+    if(!p||typeof p.then!=='function'){
+      // _autoSaveSB não encontrou cronoId — salva via pai
+      try{
+        if(window.parent&&window.parent.salvarDados){
+          window.parent.ESTADO.cfg.equipeARQ=ESTADO.cfg.equipeARQ;
+          window.parent.salvarDados();
+          _setSaveStatus('ok');
+        }
+      }catch(e){_setSaveStatus('err');}
+    }
+  },1500);
 }
 
 function _setSaveStatus(status){
@@ -1256,20 +1290,29 @@ function _setSaveStatus(status){
 }
 
 function _autoSaveSB(){
+  // Tenta obter o cronoId do sessionStorage; se falhar, busca do pai
   var cronoId=sessionStorage.getItem('aw_crono_id')||'';
+  if(!cronoId){
+    try{
+      var parentId=window.parent&&window.parent.sessionStorage&&window.parent.sessionStorage.getItem('aw_crono_id');
+      if(parentId) cronoId=parentId;
+    }catch(e){}
+  }
   console.log('[GestaoARQ] auto-save | cronoId:', cronoId||'(sem ID)');
   if(!cronoId){
-    // Sem ID de projeto — tentar via parent
+    // Último recurso: salvar via parent.salvarDados()
     try{
-      if(window.parent&&window.parent.salvarDados){
+      if(window.parent&&window.parent.ESTADO&&window.parent.ESTADO.cfg){
+        // Mescla estado do iframe no pai e salva
+        window.parent.ESTADO.cfg.equipeARQ=ESTADO.cfg&&ESTADO.cfg.equipeARQ;
         window.parent.salvarDados();
         _setSaveStatus('ok');
         console.log('[GestaoARQ] salvo via parent.salvarDados()');
       } else {
-        _setSaveStatus('ok'); // sem projeto ativo, ignorar
+        _setSaveStatus('ok');
       }
     }catch(e){console.warn('[GestaoARQ] parent.salvarDados erro:',e);}
-    return;
+    return Promise.resolve();
   }
   // Salvar direto no Supabase com o ESTADO atual do iframe
   var sbUrl='https://ejneanfveoctdlltjnrs.supabase.co';
