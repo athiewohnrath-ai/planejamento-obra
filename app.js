@@ -1,4 +1,4 @@
-// Planejamento de Obra A|W — v6.03.34
+// Planejamento de Obra A|W — v6.03.35
 const SB_URL='https://ejneanfveoctdlltjnrs.supabase.co';
 const SB_KEY='sb_publishable_vZApDmF_C-heCrm8fXJ_XA_ATmMO3YP';
 const SB_HDR={'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
@@ -5171,6 +5171,35 @@ window.fecharGestaoArq = function(salvar) {
   // Destrói o iframe depois de capturar o estado
   if (iframe) iframe.src = '';
 };
+
+// Salvar estado antes de fechar/recarregar a página (F5, fechar aba, etc.)
+window.addEventListener('beforeunload', function() {
+  // Tenta mesclar o estado do iframe (se estiver aberto) antes de sair
+  try {
+    var raw = sessionStorage.getItem('aw_estado_atual');
+    if (raw) {
+      var parsed = JSON.parse(raw);
+      if (parsed.estado && parsed.estado.cfg && parsed.estado.cfg.equipeARQ) {
+        ESTADO.cfg.equipeARQ = parsed.estado.cfg.equipeARQ;
+      }
+    }
+  } catch(e) {}
+  // Força salvamento síncrono via sendBeacon (não é cancelado pelo unload)
+  try {
+    if (_CRONO_ID) {
+      var payload = {ts: Date.now(), estado: ESTADO};
+      var payloadStr = JSON.stringify(payload);
+      sessionStorage.setItem('aw_estado_atual', payloadStr);
+      // fetch com keepalive:true não é cancelado pelo beforeunload
+      fetch(SB_URL + '/rest/v1/cronogramas?id=eq.' + _CRONO_ID, {
+        method: 'PATCH',
+        headers: SB_HDR,
+        body: JSON.stringify({estado_json: payloadStr, atualizado_em: new Date().toISOString()}),
+        keepalive: true
+      });
+    }
+  } catch(e) {}
+});
 
 // Fechar ao clicar no fundo do modal
 document.addEventListener('DOMContentLoaded', function() {
