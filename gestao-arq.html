@@ -1334,7 +1334,11 @@ function _autoSaveSB(){
   }).then(function(r){
     console.log('[GestaoARQ] save response:', r.status, r.ok?'OK':'ERRO');
     _setSaveStatus(r.ok?'ok':'err');
-    try{sessionStorage.setItem('aw_estado_atual',payloadStr);}catch(e){}
+    if(r.ok){
+      // Atualiza o sessionStorage com o estado mais recente (inclui planoAloc)
+      // Isso garante que o próximo F5 do pai encontre o estado correto no cache
+      try{sessionStorage.setItem('aw_estado_atual',payloadStr);}catch(e){}
+    }
     return r;
   }).catch(function(e){
     console.error('[GestaoARQ] save falhou:',e);
