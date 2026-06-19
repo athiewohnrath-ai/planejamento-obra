@@ -270,8 +270,8 @@ body.bar-dragging .cal-bar .bar-del{display:none}
 .rpt-table tbody tr:hover td{background:#FAFBFC}
 .rpt-badge{display:inline-block;padding:2px 7px;border-radius:5px;font-size:10px;font-weight:700;font-family:var(--font);color:#fff}
 @media print{
-  aside,.ep-wrapper,.cta-bar,.s2-topbar,.scr:not(#scr3){display:none!important}
-  #scr3{display:flex!important;flex-direction:column;height:auto}
+  aside,.ep-wrapper,.cta-bar,.s2-topbar,.scr:not(#scr4){display:none!important}
+  #scr4{display:flex!important;flex-direction:column;height:auto}
   .rpt-scroll{background:#fff;padding:0;overflow:visible;height:auto;flex:none}
   .rpt-doc{box-shadow:none;border-radius:0;padding:12mm 16mm;max-width:none}
   @page{size:A4 portrait;margin:0}
@@ -303,9 +303,10 @@ body.bar-dragging .cal-bar .bar-del{display:none}
   <div class="divider"></div>
   <div class="nav-label">Etapas</div>
   <div class="steps">
-    <button class="step-btn clickable" id="sb1" onclick="goScr(1)" title="Equipe"><div class="step-dot" id="sd1">1</div><div><div class="step-label">Equipe</div><div class="step-sub">Gerentes e arquitetos</div></div></button>
-    <button class="step-btn clickable" id="sb2" onclick="goScr(2)" title="Alocação"><div class="step-dot" id="sd2">2</div><div><div class="step-label">Alocação</div><div class="step-sub">Calendário dia a dia</div></div></button>
-    <button class="step-btn locked" id="sb3" onclick="goScr(3)" title="Relatório"><div class="step-dot" id="sd3">3</div><div><div class="step-label">Relatório</div><div class="step-sub">Visão geral + impressão</div></div></button>
+    <button class="step-btn active clickable" id="sb1" onclick="goScr(1)" title="Plano"><div class="step-dot" id="sd1">1</div><div><div class="step-label">Plano</div><div class="step-sub">Cronograma congelado</div></div></button>
+    <button class="step-btn clickable" id="sb2" onclick="goScr(2)" title="Equipe"><div class="step-dot" id="sd2">2</div><div><div class="step-label">Equipe</div><div class="step-sub">Gerentes e arquitetos</div></div></button>
+    <button class="step-btn clickable" id="sb3" onclick="goScr(3)" title="Alocação"><div class="step-dot" id="sd3">3</div><div><div class="step-label">Alocação</div><div class="step-sub">Calendário dia a dia</div></div></button>
+    <button class="step-btn locked" id="sb4" onclick="goScr(4)" title="Relatório"><div class="step-dot" id="sd4">4</div><div><div class="step-label">Relatório</div><div class="step-sub">Visão geral + impressão</div></div></button>
   </div>
   <div class="spacer"></div>
   <div class="font-ctrl">
@@ -320,6 +321,21 @@ body.bar-dragging .cal-bar .bar-del{display:none}
 
 <main id="main-area">
   <div class="scr active" id="scr1">
+    <div class="s1-hdr">
+      <h1>Plano de Arquitetura — Cronograma Congelado</h1>
+      <p class="s1-sub">Visão das etapas de Arquitetura e Projetos Técnicos definidas no cronograma congelado.</p>
+    </div>
+    <div style="flex:1;overflow:auto;padding:16px 20px" id="scr1-body">
+      <div style="color:var(--gl);font-size:12px;padding:20px;text-align:center">Carregando…</div>
+    </div>
+    <div class="cta-bar">
+      <div class="cta-info" id="cta1-info">Revise o cronograma e avance para montar a equipe</div>
+      <div style="display:flex;gap:8px">
+        <button class="btn-p" onclick="goScr(2)">Próximo: Equipe ›</button>
+      </div>
+    </div>
+  </div>
+  <div class="scr" id="scr2">
     <div class="s1-hdr"><h1>Equipe de Arquitetura</h1><p class="s1-sub">Selecione a diretoria, os gerentes e os arquitetos para este projeto</p></div>
     <div class="s1-scroll">
       <div class="s1-3col">
@@ -350,11 +366,11 @@ body.bar-dragging .cal-bar .bar-del{display:none}
           <span class="s1-footer-empty">Nenhum arquiteto selecionado ainda</span>
         </div>
         <span class="s1-footer-count" id="footer-count" style="display:none">0 na equipe</span>
-        <button class="btn-p" id="btn-prox" disabled onclick="goScr(2)" style="flex-shrink:0;height:32px;font-size:11px">Próximo: Alocação ›</button>
+        <button class="btn-p" id="btn-prox" disabled onclick="goScr(3)" style="flex-shrink:0;height:32px;font-size:11px">Próximo: Alocação ›</button>
       </div>
     </div>
   </div>
-  <div class="scr" id="scr2">
+  <div class="scr" id="scr3">
     <div class="s2-topbar" id="etapa-tabs"></div>
     <div class="s2-main">
       <div class="ep-wrapper">
@@ -389,17 +405,17 @@ body.bar-dragging .cal-bar .bar-del{display:none}
     <div class="cta-bar">
       <div class="cta-info" id="cta2-info">Aloque as entregas no calendário</div>
       <div style="display:flex;gap:8px">
-        <button class="btn-s" onclick="goScr(1)">‹ Equipe</button>
+        <button class="btn-s" onclick="goScr(2)">‹ Equipe</button>
         <button class="btn-p" onclick="confirmar()">Confirmar equipe <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></button>
       </div>
     </div>
   </div>
-  <div class="scr" id="scr3">
+  <div class="scr" id="scr4">
     <div class="rpt-scroll" id="rpt-body"></div>
     <div class="cta-bar">
       <div class="cta-info" id="cta3-info">—</div>
       <div style="display:flex;gap:8px">
-        <button class="btn-s" onclick="goScr(2)">‹ Alocação</button>
+        <button class="btn-s" onclick="goScr(3)">‹ Alocação</button>
         <button class="btn-s" onclick="imprimirRpt()" style="border-color:var(--tf);color:var(--tf-dk)">🖨 Imprimir</button>
         <button class="btn-p" onclick="confirmar()">Confirmar equipe <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></button>
       </div>
@@ -481,6 +497,8 @@ function computeDatas(isoStart,dias){var r=[],cur=pD(isoStart),cnt=0;while(cnt<d
   eq.arquitetos=temAloc?(ea.arquitetos||[]).slice():[];
   if(ea.planoAloc)plano=ea.planoAloc;
   renderColDir();renderColGA();renderColArq();renderFooter();updSB();
+  // Renderiza o passo 1 com o plano congelado
+  setTimeout(function(){renderScr1();},50);
   // Zoom inicial
   _fscale=1.15;
   var _ma=document.getElementById('main-area');if(_ma)_ma.style.zoom=_fscale;
@@ -492,19 +510,103 @@ function computeDatas(isoStart,dias){var r=[],cur=pD(isoStart),cnt=0;while(cnt<d
 function adjFont(d){_fscale=Math.max(0.7,Math.min(1.8,Math.round((_fscale+d)*10)/10));document.getElementById('main-area').style.zoom=_fscale;document.getElementById('fscale-lbl').textContent=Math.round(_fscale*100)+'%';}
 // Zoom inicial aplicado pelo init
 
+
+// ── Passo 1: replica o cronograma congelado de ARQ e Técnicos ─────────────────
+function renderScr1(){
+  var el=document.getElementById('scr1-body');
+  if(!el)return;
+  if(!CTX||!CTX.etapas||!CTX.etapas.length){
+    el.innerHTML='<div style="padding:32px;text-align:center;color:var(--gl);font-size:13px">Nenhum dado de cronograma disponível.<br>Abra a partir do planejamento de obra com um cronograma congelado.</div>';
+    return;
+  }
+
+  // Paleta de cores por etapa (mesma do relatório)
+  var etPal=[
+    {bg:'#E6F1FB',txt:'#185FA5',border:'#378ADD'},
+    {bg:'#E1F5EE',txt:'#0F6E56',border:'#1D9E75'},
+    {bg:'#EEEDFE',txt:'#534AB7',border:'#7F77DD'},
+    {bg:'#FAEEDA',txt:'#854F0B',border:'#BA7517'},
+    {bg:'#FAECE7',txt:'#993C1D',border:'#D85A30'},
+    {bg:'#FBEAF0',txt:'#993556',border:'#D4537E'},
+    {bg:'#EAF3DE',txt:'#3B6D11',border:'#639922'}
+  ];
+
+  // Calcula o span de datas total
+  var allDates=CTX.etapas.map(function(e){return[pD(e.start),pD(e.end)];});
+  var minD=allDates.reduce(function(a,b){return a<b[0]?a:b[0];},allDates[0][0]);
+  var maxD=allDates.reduce(function(a,b){return a>b[1]?a:b[1];},allDates[0][1]);
+
+  var h='<div style="font-family:var(--font);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--gl);margin-bottom:12px">Etapas do projeto</div>';
+
+  // Barra de progresso visual por etapa
+  h+='<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:24px">';
+  var totalDias=(maxD-minD)/(1000*60*60*24)||1;
+  CTX.etapas.forEach(function(et,ei){
+    if(CTX.etapasAtivas&&CTX.etapasAtivas[et.id]===false)return;
+    var pal=etPal[ei%etPal.length];
+    var s0=pD(et.start),e0=pD(et.end);
+    var offPct=((s0-minD)/(1000*60*60*24))/totalDias*100;
+    var widPct=((e0-s0)/(1000*60*60*24)+1)/totalDias*100;
+    var du=0;var cur=new Date(s0);while(cur<=e0){if(isWork(cur))du++;cur=addD(cur,1);}
+    h+='<div style="display:flex;align-items:center;gap:10px">'
+      +'<div style="width:100px;flex-shrink:0;font-size:11px;font-weight:700;color:'+pal.txt+';text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="'+(et.label||et.id)+'">'+(et.label||et.id)+'</div>'
+      +'<div style="flex:1;position:relative;height:22px;background:#F3F4F6;border-radius:4px;overflow:hidden">'
+        +'<div style="position:absolute;left:'+offPct.toFixed(1)+'%;width:'+Math.max(widPct,1).toFixed(1)+'%;height:100%;background:'+pal.bg+';border-left:3px solid '+pal.border+';border-radius:3px;display:flex;align-items:center;padding-left:6px">'
+          +'<span style="font-size:9px;font-weight:700;color:'+pal.txt+';white-space:nowrap">'+fBR2(et.start)+' → '+fBR2(et.end)+'</span>'
+        +'</div>'
+      +'</div>'
+      +'<div style="width:44px;flex-shrink:0;font-size:11px;font-weight:700;color:var(--gl);text-align:right">'+du+'du</div>'
+    +'</div>';
+  });
+  h+='</div>';
+
+  // Tabela de detalhes
+  h+='<div style="font-family:var(--font);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--gl);margin-bottom:8px">Detalhe das etapas</div>';
+  h+='<table style="width:100%;border-collapse:collapse;font-size:11px">'
+    +'<thead><tr style="background:#F8F9FA">'
+    +'<th style="padding:6px 10px;text-align:left;font-family:var(--font);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#888;border-bottom:2px solid #E5E7EB">Etapa</th>'
+    +'<th style="padding:6px 10px;font-family:var(--font);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#888;border-bottom:2px solid #E5E7EB;white-space:nowrap">Início</th>'
+    +'<th style="padding:6px 10px;font-family:var(--font);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#888;border-bottom:2px solid #E5E7EB;white-space:nowrap">Término</th>'
+    +'<th style="padding:6px 10px;text-align:center;font-family:var(--font);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#888;border-bottom:2px solid #E5E7EB">DU</th>'
+    +'</tr></thead><tbody>';
+
+  CTX.etapas.forEach(function(et,ei){
+    if(CTX.etapasAtivas&&CTX.etapasAtivas[et.id]===false)return;
+    var pal=etPal[ei%etPal.length];
+    var s0=pD(et.start),e0=pD(et.end);
+    var du=0;var cur=new Date(s0);while(cur<=e0){if(isWork(cur))du++;cur=addD(cur,1);}
+    var bg=ei%2===1?'#FAFBFC':'#fff';
+    h+='<tr style="background:'+bg+'">'
+      +'<td style="padding:7px 10px;border-bottom:1px solid #F0F1F2;border-left:3px solid '+pal.border+'">'
+        +'<span style="font-family:var(--font);font-weight:700;color:'+pal.txt+'">'+(et.label||et.id)+'</span>'
+      +'</td>'
+      +'<td style="padding:7px 10px;border-bottom:1px solid #F0F1F2;white-space:nowrap;color:var(--gl)">'+fBR2(et.start)+'</td>'
+      +'<td style="padding:7px 10px;border-bottom:1px solid #F0F1F2;white-space:nowrap;color:var(--gl)">'+fBR2(et.end)+'</td>'
+      +'<td style="padding:7px 10px;border-bottom:1px solid #F0F1F2;text-align:center;font-family:var(--font);font-weight:700;color:var(--tf-dk)">'+du+'</td>'
+    +'</tr>';
+  });
+  h+='</tbody></table>';
+  el.innerHTML=h;
+}
 function goScr(n){
-  if(n===2&&!eq.gerentes.length){toast('Selecione gerentes primeiro');return;}
-  if(n===3&&!Object.keys(plano).length){toast('Aloque entregas antes de ver o relatório');return;}
-  curScr=n;document.querySelectorAll('.scr').forEach(function(s,i){s.classList.toggle('active',i+1===n);});updSB();
-  if(n===2)initS2();
-  if(n===3){renderRptNova();}
+  // Passo 3 (Equipe→Alocação): exige gerentes
+  if(n===3&&!eq.gerentes.length){toast('Selecione gerentes primeiro');return;}
+  // Passo 4 (Relatório): exige alocações
+  if(n===4&&!Object.keys(plano).length){toast('Aloque entregas antes de ver o relatório');return;}
+  curScr=n;
+  document.querySelectorAll('.scr').forEach(function(el,i){el.classList.toggle('active',i+1===n);});
+  updSB();
+  if(n===1){renderScr1();}
+  if(n===3){initS2();}
+  if(n===4){renderRptNova();}
 }
 function updSB(){
-  [1,2,3].forEach(function(i){
+  var hasAloc=Object.keys(plano).length>0;
+  [1,2,3,4].forEach(function(i){
     var btn=document.getElementById('sb'+i),dot=document.getElementById('sd'+i);if(!btn||!dot)return;
-    var done=(i===1&&eq.gerentes.length>0)||(i===2&&Object.keys(plano).length>0);
-    var hasAloc=Object.keys(plano).length>0;
-    btn.className='step-btn'+(i===3&&!hasAloc?' locked':' clickable')+(curScr===i?' active':'')+(done&&curScr!==i?' done':'');
+    var done=(i===1)||(i===2&&eq.gerentes.length>0)||(i===3&&hasAloc)||(i===4&&hasAloc);
+    var locked=(i===4&&!hasAloc);
+    btn.className='step-btn'+(locked?' locked':' clickable')+(curScr===i?' active':'')+(done&&curScr!==i?' done':'');
     dot.textContent=(done&&curScr!==i)?'✓':String(i);
   });
 }
@@ -1706,7 +1808,7 @@ function confirmar(){
   }).catch(function(){
     toast('✓ Equipe confirmada (salvo localmente)');
   });
-  goScr(2);
+  goScr(3);
 }
 </script>
 </body>
