@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- gestao-arq v6.03.60 -->
+<!-- gestao-arq v6.03.61 -->
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"/>
@@ -801,24 +801,25 @@ function salvarAlocExplicito(){
     sessionStorage.setItem('aw_estado_atual', JSON.stringify({ts:Date.now(), estado:ESTADO}));
   }catch(e){}
 
-  // Garante que o ESTADO do PAI tem o equipeARQ antes de chamar salvarDados()
-  console.log('[salvarAlocExplicito] plano no iframe:', Object.keys(plano||{}).length, 'etapas');
-  console.log('[salvarAlocExplicito] ESTADO.cfg.equipeARQ existe?', !!(ESTADO&&ESTADO.cfg&&ESTADO.cfg.equipeARQ));
+  // Monta equipeARQ diretamente de eq e plano (fontes de verdade do iframe)
+  // Não depende de ESTADO.cfg.equipeARQ que pode não existir
+  var _eqSave = {
+    diretor: (eq&&eq.gerentes&&eq.gerentes[0])||'',
+    gerentes: (eq&&eq.gerentes||[]).slice(),
+    arquitetos: (eq&&eq.arquitetos||[]).slice(),
+    colaboradores: (eq&&eq.colaboradores||[]).slice(),
+    planoAloc: JSON.parse(JSON.stringify(plano||{}))
+  };
+  console.log('[salvarAlocExplicito] gerentes:', _eqSave.gerentes.length, '| arquitetos:', _eqSave.arquitetos.length, '| planoAloc etapas:', Object.keys(_eqSave.planoAloc).length);
+
+  // Injeta no ESTADO do pai
   try{
     if(window.parent&&window.parent.ESTADO){
       if(!window.parent.ESTADO.cfg) window.parent.ESTADO.cfg={};
-      // Monta equipeARQ manualmente para garantir planoAloc
-      var _eq = {
-        diretor: ESTADO.cfg&&ESTADO.cfg.equipeARQ&&ESTADO.cfg.equipeARQ.diretor || '',
-        gerentes: (eq&&eq.gerentes||[]).slice(),
-        arquitetos: (eq&&eq.arquitetos||[]).slice(),
-        colaboradores: (eq&&eq.colaboradores||[]).slice(),
-        planoAloc: JSON.parse(JSON.stringify(plano||{}))
-      };
-      window.parent.ESTADO.cfg.equipeARQ = _eq;
-      console.log('[salvarAlocExplicito] mesclado | gerentes:', _eq.gerentes.length, '| planoAloc etapas:', Object.keys(_eq.planoAloc).length);
+      window.parent.ESTADO.cfg.equipeARQ = _eqSave;
+      console.log('[salvarAlocExplicito] injetado no pai OK');
     }
-  }catch(e){ console.error('[salvarAlocExplicito] ERRO na mescla:', e, e&&e.stack); }
+  }catch(e){ console.error('[salvarAlocExplicito] ERRO ao injetar no pai:', e); }
 
   // Salva via pai (que tem o _CRONO_ID correto e o ESTADO completo)
   try{
