@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- gestao-arq v6.03.58 -->
+<!-- gestao-arq v6.03.59 -->
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"/>
@@ -800,6 +800,17 @@ function salvarAlocExplicito(){
     // (garante que fecharGestaoArq vai ler dados corretos)
     sessionStorage.setItem('aw_estado_atual', JSON.stringify({ts:Date.now(), estado:ESTADO}));
   }catch(e){}
+
+  // Garante que o ESTADO do PAI tem o equipeARQ antes de chamar salvarDados()
+  try{
+    if(window.parent&&window.parent.ESTADO){
+      if(!window.parent.ESTADO.cfg) window.parent.ESTADO.cfg={};
+      // Cópia profunda para evitar problemas de referência
+      window.parent.ESTADO.cfg.equipeARQ = JSON.parse(JSON.stringify(ESTADO.cfg.equipeARQ));
+      console.log('[salvarAlocExplicito] equipeARQ mesclado no pai | planoAloc etapas:',
+        Object.keys(window.parent.ESTADO.cfg.equipeARQ.planoAloc||{}).length);
+    }
+  }catch(e){ console.error('erro ao mesclar equipeARQ:', e); }
 
   // Salva via pai (que tem o _CRONO_ID correto e o ESTADO completo)
   try{
