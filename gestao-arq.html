@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- gestao-arq v6.03.57 -->
+<!-- gestao-arq v6.03.58 -->
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"/>
@@ -791,11 +791,14 @@ function salvarAlocExplicito(){
     ESTADO.cfg.equipeARQ.colaboradores = (eq.colaboradores||[]).slice();
   }
 
-  // Mescla no pai imediatamente
+  // Mescla no pai imediatamente E atualiza sessionStorage
   try{
     if(window.parent&&window.parent.ESTADO&&window.parent.ESTADO.cfg){
       window.parent.ESTADO.cfg.equipeARQ = ESTADO.cfg&&ESTADO.cfg.equipeARQ;
     }
+    // Atualiza sessionStorage com o estado completo do iframe
+    // (garante que fecharGestaoArq vai ler dados corretos)
+    sessionStorage.setItem('aw_estado_atual', JSON.stringify({ts:Date.now(), estado:ESTADO}));
   }catch(e){}
 
   // Salva via pai (que tem o _CRONO_ID correto e o ESTADO completo)
