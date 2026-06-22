@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- gestao-arq v6.03.66 -->
+<!-- gestao-arq v6.03.67 -->
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"/>
@@ -499,7 +499,7 @@ function computeDatas(isoStart,dias){var r=[],cur=pD(isoStart),cnt=0;while(cnt<d
   eq.diretor=ea.diretor||'';eq.gerentes=(ea.gerentes||[]).slice();eq.colaboradores=(ea.colaboradores||[]).slice();
   // Só restaurar arquitetos se houver alocações salvas (evita manter seleção automática antiga)
   var temAloc=ea.planoAloc&&Object.keys(ea.planoAloc).length>0;
-  eq.arquitetos=temAloc?(ea.arquitetos||[]).slice():[];
+  eq.arquitetos=(ea.arquitetos||[]).slice(); // restaura sempre
   if(ea.planoAloc)plano=ea.planoAloc;
   renderColDir();renderColGA();renderColArq();renderFooter();updSB();
   // Renderiza o passo 1 com o plano congelado
@@ -846,6 +846,15 @@ function salvarAlocExplicito(){
   });
 }
 
+
+function togSidebar(){
+  var aside=document.querySelector('aside');
+  if(!aside)return;
+  var btn=document.getElementById('aside-collapse-btn');
+  aside.classList.toggle('collapsed');
+  var collapsed=aside.classList.contains('collapsed');
+  if(btn)btn.textContent=collapsed?'›':'‹';
+}
 function goScr(n){
   // Passo 3 (Equipe→Alocação): exige gerentes
   if(n===3&&!eq.gerentes.length){toast('Selecione gerentes primeiro');return;}
