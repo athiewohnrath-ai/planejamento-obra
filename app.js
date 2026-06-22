@@ -1,4 +1,4 @@
-// Planejamento de Obra A|W — v6.03.64
+// Planejamento de Obra A|W — v6.03.65
 const SB_URL='https://ejneanfveoctdlltjnrs.supabase.co';
 const SB_KEY='sb_publishable_vZApDmF_C-heCrm8fXJ_XA_ATmMO3YP';
 const SB_HDR={'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
@@ -5231,36 +5231,22 @@ window.fecharGestaoArq = function(salvar) {
   if (modal) modal.style.display = 'none';
   document.body.style.overflow = '';
 
-  // Sempre reler o estado que o iframe gravou no sessionStorage e mesclar no ESTADO do pai,
-  // e salvar no Supabase — antes de destruir o iframe (que cancelaria fetches pendentes).
+  // Lê o sessionStorage que o iframe gravou (contém equipeARQ atualizado)
+  // NÃO chama salvarDados() — o iframe já fez o PATCH direto no Supabase
   try {
     var raw = sessionStorage.getItem('aw_estado_atual');
     if (raw) {
       var parsed = JSON.parse(raw);
       if (parsed.estado && parsed.estado.cfg && parsed.estado.cfg.equipeARQ) {
+        // Mescla apenas em memória — sem sobrescrever o sessionStorage
         ESTADO.cfg.equipeARQ = parsed.estado.cfg.equipeARQ;
         window.__AW_ESTADO = ESTADO;
-        // Sempre salvar no Supabase (não só quando salvar=true)
-        salvarDados();
         if (salvar) showToast('Gestão de arquitetura salva ✓');
-        // Re-renderizar a seleção da equipe na UI do Config
-        if (typeof equipeRenderGerentes === 'function') {
-          var selDir = document.getElementById('equipe-diretor');
-          if (selDir && ESTADO.cfg.equipeARQ.diretor) selDir.value = ESTADO.cfg.equipeARQ.diretor;
-          equipeRenderGerentes();
-        }
       }
     }
   } catch(e) {}
 
-  // Limpa o localStorage após capturar o estado (o pai vai salvar via salvarDados())
-  try{
-    var _cid2=sessionStorage.getItem('aw_crono_id')||'';
-    if(_cid2) localStorage.removeItem('aw_equipe_arq_'+_cid2);
-    localStorage.removeItem('aw_equipe_arq_last_id');
-  }catch(e){}
-
-  // Destrói o iframe depois de capturar o estado
+  // Destrói o iframe
   if (iframe) iframe.src = '';
 };
 
