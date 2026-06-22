@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- gestao-arq v6.03.53 -->
+<!-- gestao-arq v6.03.54 -->
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"/>
@@ -1563,7 +1563,7 @@ function salvAloc(){
         }
       }catch(e){_setSaveStatus('err');}
     }
-  },300);
+  },1500);
 }
 
 function _setSaveStatus(status){
@@ -1575,6 +1575,8 @@ function _setSaveStatus(status){
 }
 
 function _autoSaveSB(){
+  // Aborta se o iframe já foi destruído pelo pai
+  try { if(!window.parent || !window.parent.document) return; } catch(e){ return; }
   // Tenta obter o cronoId do sessionStorage; se falhar, busca do pai
   var cronoId=sessionStorage.getItem('aw_crono_id')||'';
   if(!cronoId){
@@ -1954,8 +1956,9 @@ function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.c
 // O pai (fecharGestaoArq) lê o sessionStorage e faz o PATCH no Supabase —
 // assim o fetch não é cancelado pela destruição do iframe.
 function sair(){
+  // Cancela qualquer save pendente no iframe — o pai vai salvar no Supabase
   clearTimeout(_saveTimer);
-  // Garante que o ESTADO está completo antes de serializar
+  // Garante estado completo antes de serializar
   if(ESTADO&&ESTADO.cfg&&ESTADO.cfg.equipeARQ){
     ESTADO.cfg.equipeARQ.planoAloc = plano;
     ESTADO.cfg.equipeARQ.gerentes = eq.gerentes.slice();
@@ -1964,7 +1967,7 @@ function sair(){
   }
   // Grava no sessionStorage de forma síncrona — o pai vai ler isso
   try { sessionStorage.setItem('aw_estado_atual', JSON.stringify({ts:Date.now(), estado:ESTADO})); } catch(e){}
-  // Avisa o pai para fechar e salvar (o pai faz o PATCH no Supabase)
+  // Avisa o pai para fechar (o pai lê o sessionStorage e chama salvarDados())
   try {
     if(window.parent && window.parent.fecharGestaoArq) {
       window.parent.fecharGestaoArq(true);
