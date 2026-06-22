@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- gestao-arq v6.03.62 -->
+<!-- gestao-arq v6.03.63 -->
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"/>
@@ -778,86 +778,66 @@ function renderScr1(){
 
 // ── Salvamento explícito (botão 💾 Salvar) ────────────────────────────────────
 function salvarAlocExplicito(){
-  var btn = document.getElementById('btn-salvar-aloc');
-  var status = document.getElementById('save-status-arq');
-  if(btn) btn.disabled = true;
-  if(status) status.textContent = 'Salvando…';
+  var btn=document.getElementById('btn-salvar-aloc');
+  var status=document.getElementById('save-status-arq');
+  if(btn)btn.disabled=true;
+  if(status)status.textContent='Salvando…';
 
-  // Garante ESTADO atualizado
-  if(ESTADO&&ESTADO.cfg&&ESTADO.cfg.equipeARQ){
-    ESTADO.cfg.equipeARQ.planoAloc = plano;
-    ESTADO.cfg.equipeARQ.gerentes = eq.gerentes.slice();
-    ESTADO.cfg.equipeARQ.arquitetos = eq.arquitetos.slice();
-    ESTADO.cfg.equipeARQ.colaboradores = (eq.colaboradores||[]).slice();
-  }
-
-  // Mescla no pai imediatamente E atualiza sessionStorage
-  try{
-    if(window.parent&&window.parent.ESTADO&&window.parent.ESTADO.cfg){
-      window.parent.ESTADO.cfg.equipeARQ = ESTADO.cfg&&ESTADO.cfg.equipeARQ;
-    }
-    // Atualiza sessionStorage com o estado completo do iframe
-    // (garante que fecharGestaoArq vai ler dados corretos)
-    sessionStorage.setItem('aw_estado_atual', JSON.stringify({ts:Date.now(), estado:ESTADO}));
-  }catch(e){}
-
-  // Monta equipeARQ diretamente de eq e plano (fontes de verdade do iframe)
-  // Não depende de ESTADO.cfg.equipeARQ que pode não existir
-  var _eqSave = {
-    diretor: (eq&&eq.gerentes&&eq.gerentes[0])||'',
-    gerentes: (eq&&eq.gerentes||[]).slice(),
-    arquitetos: (eq&&eq.arquitetos||[]).slice(),
-    colaboradores: (eq&&eq.colaboradores||[]).slice(),
-    planoAloc: JSON.parse(JSON.stringify(plano||{}))
+  // Monta equipeARQ das fontes de verdade do iframe
+  var _eq={
+    diretor:(eq&&eq.gerentes&&eq.gerentes[0])||'',
+    gerentes:(eq&&eq.gerentes||[]).slice(),
+    arquitetos:(eq&&eq.arquitetos||[]).slice(),
+    colaboradores:(eq&&eq.colaboradores||[]).slice(),
+    planoAloc:JSON.parse(JSON.stringify(plano||{}))
   };
-  console.log('[salvarAlocExplicito] gerentes:', _eqSave.gerentes.length, '| arquitetos:', _eqSave.arquitetos.length, '| planoAloc etapas:', Object.keys(_eqSave.planoAloc).length);
+  console.log('[salvar] gerentes:',_eq.gerentes.length,'| planoAloc:',Object.keys(_eq.planoAloc).length,'etapas');
 
-  // Injeta no ESTADO do pai
-  try{
-    if(window.parent&&window.parent.ESTADO){
-      if(!window.parent.ESTADO.cfg) window.parent.ESTADO.cfg={};
-      window.parent.ESTADO.cfg.equipeARQ = _eqSave;
-      console.log('[salvarAlocExplicito] injetado no pai OK');
-    }
-  }catch(e){ console.error('[salvarAlocExplicito] ERRO ao injetar no pai:', e); }
+  // Busca ESTADO completo do pai e injeta equipeARQ
+  var _pEstado={};
+  try{_pEstado=JSON.parse(JSON.stringify(window.parent.ESTADO||{}));}catch(e){}
+  if(!_pEstado.cfg)_pEstado.cfg={};
+  _pEstado.cfg.equipeARQ=_eq;
 
-  // Salva via pai (que tem o _CRONO_ID correto e o ESTADO completo)
-  try{
-    if(window.parent&&window.parent.salvarDados){
-      window.parent.salvarDados().then(function(){
-        var hora=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-        if(status){
-          status.textContent='✓ Salvo no banco às '+hora;
-          status.style.display='inline-block';
-          status.style.background='#ECFDF5';
-          status.style.color='#065F46';
-          status.style.border='1px solid #6EE7B7';
-        }
-        if(btn){btn.disabled=false;btn.innerHTML='✓ Salvo';}
-        setTimeout(function(){
-          if(btn){btn.innerHTML='💾 Salvar';btn.disabled=false;}
-          if(status){status.style.display='none';}
-        },4000);
-      }).catch(function(){
-        if(status){
-          status.textContent='⚠ Erro ao salvar';
-          status.style.display='inline-block';
-          status.style.background='#FEF2F2';
-          status.style.color='#991B1B';
-          status.style.border='1px solid #FCA5A5';
-        }
-        if(btn)btn.disabled=false;
-      });
-    } else {
-      // Fallback: salva direto via _autoSaveSB
-      _autoSaveSB();
-      if(status) status.textContent = '✓ Salvo localmente';
-      if(btn) btn.disabled = false;
-    }
-  }catch(e){
-    if(status) status.textContent = '⚠ Erro ao salvar';
-    if(btn) btn.disabled = false;
+  // Busca cronoId
+  var _cid=sessionStorage.getItem('aw_crono_id')||'';
+  try{if(!_cid)_cid=window.parent._CRONO_ID||'';}catch(e){}
+
+  var _url='https://ejneanfveoctdlltjnrs.supabase.co';
+  var _key='sb_publishable_vZApDmF_C-heCrm8fXJ_XA_ATmMO3YP';
+  var _payload={ts:Date.now(),estado:_pEstado};
+  var _payStr=JSON.stringify(_payload);
+
+  console.log('[salvar] cronoId:',_cid,'| equipeARQ.planoAloc etapas:',Object.keys(_pEstado.cfg.equipeARQ.planoAloc||{}).length);
+
+  if(!_cid){
+    if(status){status.textContent='⚠ ID do cronograma não encontrado';status.style.display='inline-block';status.style.background='#FEF2F2';status.style.color='#991B1B';status.style.border='1px solid #FCA5A5';}
+    if(btn)btn.disabled=false;
+    return;
   }
+
+  fetch(_url+'/rest/v1/cronogramas?id=eq.'+_cid,{
+    method:'PATCH',
+    headers:{'Content-Type':'application/json','apikey':_key,'Authorization':'Bearer '+_key},
+    body:JSON.stringify({estado_json:_payStr,atualizado_em:new Date().toISOString()})
+  }).then(function(r){
+    console.log('[salvar] resposta:',r.status,r.ok?'OK':'ERRO');
+    if(r.ok){
+      // Atualiza sessionStorage e ESTADO do pai
+      try{sessionStorage.setItem('aw_estado_atual',_payStr);}catch(e){}
+      try{window.parent.ESTADO.cfg.equipeARQ=_eq;}catch(e){}
+      var hora=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+      if(status){status.textContent='✓ Salvo no banco às '+hora;status.style.display='inline-block';status.style.background='#ECFDF5';status.style.color='#065F46';status.style.border='1px solid #6EE7B7';}
+      if(btn){btn.disabled=false;btn.innerHTML='✓ Salvo';}
+      setTimeout(function(){if(btn){btn.innerHTML='💾 Salvar';btn.disabled=false;}if(status)status.style.display='none';},4000);
+    }else{
+      throw new Error('status '+r.status);
+    }
+  }).catch(function(e){
+    console.error('[salvar] ERRO:',e);
+    if(status){status.textContent='⚠ Erro: '+e.message;status.style.display='inline-block';status.style.background='#FEF2F2';status.style.color='#991B1B';status.style.border='1px solid #FCA5A5';}
+    if(btn)btn.disabled=false;
+  });
 }
 
 function goScr(n){
