@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- gestao-arq v6.03.76 build:20260622194947-->
+<!-- gestao-arq v6.03.77 build:20260622194947-->
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"/>
@@ -702,11 +702,14 @@ function renderScr1(){
 
   // SVG principal (label + barras)
   var svgH=AXIS_H+totalRows*ROW_H+4;
-  var _svgW=Math.round((REF_W-LBL_W)*_g1Scale+LBL_W);
-  h+='<svg id="g1-svg" viewBox="0 0 '+REF_W+' '+svgH+'" preserveAspectRatio="none" width="'+_svgW+'" height="'+svgH+'" style="display:block;font-family:Oswald,sans-serif;min-width:'+_svgW+'px">';
+  // Largura física = LBL_W fixo + área de barras escalada
+  var _barW=Math.round((REF_W-LBL_W)*_g1Scale);
+  var _svgW=LBL_W+_barW;
+  // viewBox com mesma largura física → sem distorção
+  h+='<svg id="g1-svg" viewBox="0 0 '+_svgW+' '+svgH+'" width="'+_svgW+'" height="'+svgH+'" style="display:block;font-family:Oswald,sans-serif;min-width:'+_svgW+'px">';
 
   // Define clipPath para as barras
-  h+='<defs><clipPath id="bars-clip"><rect x="'+LBL_W+'" y="0" width="10000" height="'+svgH+'"/></clipPath></defs>';
+  h+='<defs><clipPath id="bars-clip"><rect x="'+LBL_W+'" y="0" width="'+_barW+'" height="'+svgH+'"/></clipPath></defs>';
 
   // Fundo zebra por linha
   rows.forEach(function(row,ri){
@@ -726,7 +729,7 @@ function renderScr1(){
   // Abordagem: calculamos posições como % do espaço disponível
   // Como SVG width=100%, usamos uma largura de referência de 1000px para cálculo
   var REF_W=1000;
-  function toPx(d){return LBL_W+((d-minD)/totalMs)*(REF_W-LBL_W);}
+  function toPx(d){return LBL_W+((d-minD)/totalMs)*_barW;}
 
   // Linhas verticais de semana + labels
   weeks.forEach(function(w){
