@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- gestao-arq v6.03.65 -->
+<!-- gestao-arq v6.03.66 -->
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"/>
@@ -2039,27 +2039,21 @@ function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.c
 // O pai (fecharGestaoArq) lê o sessionStorage e faz o PATCH no Supabase —
 // assim o fetch não é cancelado pela destruição do iframe.
 function sair(){
-  // Cancela qualquer save pendente no iframe — o pai vai salvar no Supabase
   clearTimeout(_saveTimer);
-  // Garante estado completo antes de serializar
-  if(ESTADO&&ESTADO.cfg&&ESTADO.cfg.equipeARQ){
-    ESTADO.cfg.equipeARQ.planoAloc = plano;
-    ESTADO.cfg.equipeARQ.gerentes = eq.gerentes.slice();
-    ESTADO.cfg.equipeARQ.arquitetos = eq.arquitetos.slice();
-    ESTADO.cfg.equipeARQ.colaboradores = (eq.colaboradores||[]).slice();
-  }
-  // Grava no sessionStorage de forma síncrona — o pai vai ler isso
+  // Monta equipeARQ das fontes diretas (eq e plano) — não depende de ESTADO.cfg.equipeARQ
+  var _eqAtual={
+    diretor:(eq&&eq.gerentes&&eq.gerentes[0])||'',
+    gerentes:(eq&&eq.gerentes||[]).slice(),
+    arquitetos:(eq&&eq.arquitetos||[]).slice(),
+    colaboradores:(eq&&eq.colaboradores||[]).slice(),
+    planoAloc:JSON.parse(JSON.stringify(plano||{}))
+  };
+  // Injeta no ESTADO do iframe antes de serializar
+  if(!ESTADO.cfg) ESTADO.cfg={};
+  ESTADO.cfg.equipeARQ=_eqAtual;
+  // Grava no sessionStorage com equipeARQ correto
   try { sessionStorage.setItem('aw_estado_atual', JSON.stringify({ts:Date.now(), estado:ESTADO})); } catch(e){}
-  // Atualiza também o localStorage com o estado mais recente
-  try{
-    var _cid=sessionStorage.getItem('aw_crono_id')||'';
-    if(_cid){
-      var _lid='aw_equipe_arq_'+_cid;
-      localStorage.setItem(_lid,JSON.stringify({ts:Date.now(),cronoId:_cid,equipeARQ:ESTADO.cfg.equipeARQ}));
-      localStorage.setItem('aw_equipe_arq_last_id',_lid);
-    }
-  }catch(e){}
-  // Avisa o pai para fechar (o pai lê o sessionStorage e chama salvarDados())
+  // Avisa o pai para fechar
   try {
     if(window.parent && window.parent.fecharGestaoArq) {
       window.parent.fecharGestaoArq(true);
