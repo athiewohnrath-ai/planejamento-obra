@@ -1,5 +1,858 @@
 <!DOCTYPE html>
-<!-- gestao-arq v6.03.61 -->
+<!-- gestao-arq v6.03.62 -->
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Gestão de Arquitetura · Athié Wohnrath</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--tf:#3FBFB0;--tf-dk:#2A9D8F;--tf-s:#E6F6F4;--black:#111213;--ink:#1F2326;--gray:#6B7280;--gl:#9CA3AF;--border:#E5E7EB;--bg:#F7F8F8;--white:#fff;--font:'Barlow Condensed',sans-serif;--body:'Barlow',sans-serif;}
+*{box-sizing:border-box;margin:0;padding:0}html,body{height:100%;overflow:hidden}
+body{font-family:var(--body);background:var(--bg);color:var(--ink);display:flex;height:100vh;font-size:13px}
+button{font-family:inherit;cursor:pointer}input,select{font-family:inherit}
+aside{width:240px;background:var(--black);color:#fff;display:flex;flex-direction:column;padding:16px 13px;flex-shrink:0;transition:width .22s ease,padding .22s ease;overflow:hidden;position:relative}
+aside.collapsed{width:48px;padding:12px 6px}
+/* Botão collapse: modo mini mostra ›, expandido mostra ‹ */
+aside.collapsed #aside-collapse-btn{align-self:center;margin:0 auto 8px}
+/* Itens que somem na versão mini */
+aside.collapsed .logo-title,aside.collapsed .logo-sub,
+aside.collapsed .ctx,aside.collapsed .divider,aside.collapsed .nav-label,
+aside.collapsed .step-label,aside.collapsed .step-sub,
+aside.collapsed .font-ctrl-label,aside.collapsed .font-pct,
+aside.collapsed .back-btn-label{display:none}
+/* Layout mini */
+aside.collapsed .logo-row{justify-content:center;margin-bottom:20px}
+aside.collapsed .steps{gap:6px}
+aside.collapsed .step-btn{justify-content:center;padding:9px 4px}
+aside.collapsed .step-dot{margin:0}
+aside.collapsed .font-ctrl{flex-direction:column;align-items:center;gap:4px;border-top:1px solid rgba(255,255,255,.08);padding-top:8px}
+aside.collapsed .back-btn{justify-content:center;padding:7px 4px}
+
+.logo-row{display:flex;align-items:center;gap:9px;margin-bottom:16px}
+.logo{width:34px;height:34px;border-radius:8px;background:var(--tf);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo svg{width:17px;height:17px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round}
+.logo-title{font-family:var(--font);font-weight:800;font-size:15px;line-height:1.1}.logo-sub{font-size:10px;color:var(--gl)}
+.ctx{padding:9px 10px;border-radius:8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);margin-bottom:6px}
+.ctx-label{font-size:8.5px;font-weight:700;letter-spacing:.7px;color:var(--gl);text-transform:uppercase;margin-bottom:2px;font-family:var(--font)}
+.ctx-val{font-size:14px;font-weight:800;color:#fff;line-height:1.2;font-family:var(--font)}
+.ctx-code{font-size:12px;color:var(--tf);font-weight:700;margin-bottom:2px;font-family:var(--font)}
+.divider{height:1px;background:rgba(255,255,255,.08);margin:11px 3px}
+.nav-label{font-size:8.5px;font-weight:700;letter-spacing:.7px;color:#444c5a;text-transform:uppercase;margin:2px 0 6px 3px;font-family:var(--font)}
+.steps{display:flex;flex-direction:column;gap:3px}
+.step-btn{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;border:none;background:transparent;text-align:left;width:100%;transition:background .15s}
+.step-btn.active{background:rgba(63,191,176,.16);cursor:pointer}.step-btn.clickable{cursor:pointer}.step-btn.clickable:hover{background:rgba(255,255,255,.06)}.step-btn.locked{opacity:.4;cursor:not-allowed}
+.step-dot{width:22px;height:22px;border-radius:50%;flex-shrink:0;border:2px solid #444c5a;color:var(--gl);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:10px;font-family:var(--font)}
+.step-btn.active .step-dot,.step-btn.done .step-dot{background:var(--tf);border-color:var(--tf);color:#111}
+.step-label{font-size:13px;font-weight:500;color:var(--gl);font-family:var(--font)}.step-btn.active .step-label{font-weight:700;color:#fff}.step-btn.done .step-label{color:#d1d5db}
+.step-sub{font-size:10.5px;color:#444c5a}.spacer{flex:1}
+.font-ctrl{display:flex;align-items:center;gap:6px;padding:8px 3px 4px;border-top:1px solid rgba(255,255,255,.08);margin-top:8px}
+.font-ctrl-label{font-size:11px;color:#444c5a;font-family:var(--font);font-weight:700;flex:1}
+.font-btn{width:26px;height:26px;border-radius:6px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);color:#9CA3AF;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .14s}
+.font-btn:hover{background:rgba(255,255,255,.12)}
+.font-pct{font-size:10px;color:#9CA3AF;font-family:var(--font);font-weight:700;min-width:28px;text-align:center}
+.back-btn{display:flex;align-items:center;gap:5px;width:100%;padding:7px 10px;border-radius:6px;border:1px solid rgba(255,255,255,.12);background:transparent;color:var(--gl);font-size:12px;font-weight:600;font-family:var(--font);transition:all .15s;margin-top:6px}
+.back-btn:hover{background:rgba(255,255,255,.06);color:#fff}
+main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.scr{display:none;flex:1;flex-direction:column;overflow:hidden}.scr.active{display:flex}
+.s1-hdr{padding:14px 20px 0;flex-shrink:0}.s1-hdr h1{font-family:var(--font);font-size:20px;font-weight:800;color:var(--ink)}.s1-sub{font-size:12.5px;color:var(--gray);margin-top:2px}
+.s1-scroll{flex:1;overflow:hidden;display:flex;flex-direction:column}
+.s1-3col{flex:1;display:grid;grid-template-columns:1fr 1fr 1fr;overflow:hidden;border-top:1px solid var(--border)}
+.s1-col{display:flex;flex-direction:column;border-right:1px solid var(--border);overflow:hidden}
+.s1-col:last-child{border-right:none}
+.s1-col-hdr{padding:10px 13px 8px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;gap:6px}
+.s1-col-label{font-family:var(--font);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--gl);flex:1}
+.s1-col-body{flex:1;overflow-y:auto;padding:10px 10px 8px}
+.dir-card{border:1.5px solid var(--border);border-radius:8px;padding:9px 11px;margin-bottom:7px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:8px}
+.dir-card:hover{border-color:var(--tf);background:rgba(63,191,176,.04)}
+.dir-card.active{border-color:var(--tf);background:rgba(63,191,176,.08)}
+.dir-av{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--font);font-size:11px;font-weight:800;flex-shrink:0}
+.dir-info{flex:1}
+.dir-name2{font-family:var(--font);font-size:13px;font-weight:700;color:var(--ink)}
+.dir-role2{font-size:11px;color:var(--gl)}
+.dir-ck{width:16px;height:16px;border-radius:50%;border:1.5px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;transition:all .15s}
+.dir-card.active .dir-ck{background:var(--tf);border-color:var(--tf);color:#111}
+.ga2-card{border:1px solid var(--border);border-radius:8px;padding:8px 10px;margin-bottom:6px;cursor:pointer;transition:all .15s}
+.ga2-card:hover{border-color:var(--tf)}
+.ga2-card.active{border-color:var(--tf);background:rgba(63,191,176,.07)}
+.ga2-hdr{display:flex;align-items:center;gap:5px;margin-bottom:4px}
+.ga2-dot{width:6px;height:6px;border-radius:50%;background:#9CA3AF;flex-shrink:0;transition:background .15s}
+.ga2-card.active .ga2-dot{background:var(--tf)}
+.ga2-name{font-family:var(--font);font-size:12.5px;font-weight:700;color:var(--ink);flex:1}
+.ga2-count{font-size:9px;color:var(--gl);background:var(--bg);padding:1px 6px;border-radius:8px;border:1px solid var(--border)}
+.ga2-pills{display:flex;flex-wrap:wrap;gap:3px}
+.ga2-pill{font-size:9px;padding:1px 6px;border-radius:7px;background:var(--bg);color:var(--gl)}
+.ga2-card.active .ga2-pill{background:rgba(63,191,176,.12);color:var(--tf-dk)}
+.arq2-sec{font-family:var(--font);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--gl);margin:8px 0 4px;padding:0 2px}
+.arq2-sec.ext{color:#D97706;background:#FEF3E2;padding:2px 7px;border-radius:5px;display:inline-block;margin:10px 0 5px}
+.arq2-item{display:flex;align-items:center;gap:7px;padding:5px 7px;border-radius:6px;margin-bottom:3px;cursor:pointer;border:0.5px solid transparent;transition:all .13s}
+.arq2-item:hover{background:var(--bg);border-color:var(--border)}
+.arq2-item.sel{background:rgba(63,191,176,.1);border-color:var(--tf)}
+.arq2-item.ext{opacity:.7}
+.arq2-av{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:var(--font);font-size:9px;font-weight:800;flex-shrink:0}
+.arq2-name{font-family:var(--font);font-size:12px;font-weight:700;color:var(--ink);display:block}
+.arq2-ga{font-size:10.5px;color:var(--gl);display:block}
+.arq2-item.ext .arq2-ga{color:#D97706}
+.arq2-ck{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;transition:all .13s}
+.arq2-item.sel .arq2-ck{background:var(--tf);border-color:var(--tf);color:#111}
+.s1-footer{border-top:1px solid var(--border);background:var(--bg);padding:9px 14px;display:flex;align-items:center;gap:8px;flex-shrink:0;min-height:48px}
+.team-chips2{display:flex;flex-wrap:wrap;gap:4px;flex:1}
+.team-chip2{font-size:11px;padding:2px 8px;border-radius:10px;background:rgba(63,191,176,.15);color:var(--tf-dk);font-family:var(--font);font-weight:700;cursor:pointer;transition:all .13s}
+.team-chip2:hover{background:rgba(220,76,46,.1);color:#DC4C2E}
+.s1-footer-count{font-size:12px;color:var(--gl);font-family:var(--font);font-weight:700;white-space:nowrap}
+.s1-footer-empty{font-size:11px;color:var(--gl);font-style:italic}
+.card{background:#fff;border:1px solid var(--border);border-radius:10px;margin-bottom:14px;overflow:hidden}.card.accent{border-left:3px solid var(--tf)}
+.card-hdr{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.card-ico{width:28px;height:28px;border-radius:6px;background:var(--tf-s);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.card-ico svg{width:14px;height:14px;stroke:var(--tf-dk);fill:none;stroke-width:2;stroke-linecap:round}
+.card-title{font-family:var(--font);font-size:14px;font-weight:700;color:var(--ink)}.card-sub{font-size:11.5px;color:var(--gl);margin-top:1px}.card-body{padding:14px}
+.dir-banner{display:flex;align-items:center;gap:12px;padding:12px 15px;background:linear-gradient(135deg,#0e2340,#1a3a5e);border-radius:8px;margin-bottom:16px}
+.dir-av{width:40px;height:40px;border-radius:8px;background:var(--tf);display:flex;align-items:center;justify-content:center;font-family:var(--font);font-size:14px;font-weight:800;color:#111;flex-shrink:0}
+.dir-name{font-family:var(--font);font-size:14px;font-weight:800;color:#fff}.dir-role{font-size:10px;color:var(--tf);font-weight:600;text-transform:uppercase;letter-spacing:.06em;font-family:var(--font)}
+.dir-badge{padding:3px 8px;border-radius:14px;background:rgba(63,191,176,.2);border:1px solid rgba(63,191,176,.4);font-size:10px;font-weight:700;color:var(--tf);font-family:var(--font)}
+.chip-grid{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:16px;border:1.5px solid var(--border);background:#fff;transition:all .14s;font-family:var(--font);font-size:12.5px;font-weight:600;color:var(--gray)}
+.chip:hover{border-color:var(--tf);color:var(--tf-dk)}.chip.sel{background:var(--tf);border-color:var(--tf);color:#111}
+.chip-ck{width:12px;height:12px;border-radius:50%;background:rgba(0,0,0,.15);display:flex;align-items:center;justify-content:center;font-size:8px;flex-shrink:0}
+.chip .role{font-size:9.5px;font-weight:400;opacity:.7}
+.ga-sec{margin-bottom:12px}.ga-hdr{display:flex;align-items:center;gap:6px;padding:6px 10px;background:#F8F9FA;border-radius:6px;margin-bottom:6px}
+.ga-dot{width:6px;height:6px;border-radius:50%;background:var(--tf-dk);flex-shrink:0}.ga-name{font-family:var(--font);font-size:13px;font-weight:700;color:var(--ink)}
+.ga-tag{font-size:9.5px;padding:1px 6px;border-radius:8px;background:var(--tf-s);color:var(--tf-dk);font-weight:700;font-family:var(--font)}
+.ga-all-btn{margin-left:auto;font-size:10.5px;font-weight:700;font-family:var(--font);padding:3px 8px;border-radius:12px;border:1.5px solid var(--border);background:transparent;transition:all .14s}
+.ga-all-btn.sel{background:var(--tf);border-color:var(--tf);color:#111}.ga-all-btn:not(.sel){color:var(--gray)}
+.eq-resumo{background:linear-gradient(135deg,#f0faf9,#e6f6f4);border:1px solid rgba(63,191,176,.3);border-radius:8px;padding:13px 15px;margin-top:2px}
+.eq-rt{font-family:var(--font);font-size:9.5px;font-weight:700;color:var(--tf-dk);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+.eq-chip{font-size:11px;font-family:var(--font);padding:2px 7px;border-radius:10px;background:rgba(63,191,176,.15);color:var(--tf-dk);font-weight:600}
+.s2-topbar{flex-shrink:0;display:flex;align-items:stretch;background:#EAEBEE;border-bottom:1px solid #D0D1D6;height:44px;padding:0 14px}
+.etapa-tab{height:44px;padding:0 14px;border:none;background:transparent;font-family:var(--font);font-size:13px;font-weight:700;color:var(--gl);border-bottom:2px solid transparent;transition:all .14s;white-space:nowrap}
+.etapa-tab:hover{color:var(--tf-dk)}.etapa-tab.active{color:var(--tf-dk);border-bottom-color:var(--tf)}
+.s2-main{flex:1;display:flex;overflow:hidden;min-height:0}
+.ep{width:216px;flex-shrink:0;border-right:1px solid var(--border);background:#FAFBFC;display:flex;flex-direction:column;overflow:hidden}
+.ep-hdr{padding:10px 12px 7px;border-bottom:1px solid var(--border);flex-shrink:0}
+.ep-hdr-title{font-family:var(--font);font-size:11px;font-weight:700;color:var(--ink)}.ep-hdr-count{font-size:10px;color:var(--gl);margin-top:1px}
+.ep-filters{padding:7px 10px 6px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:5px;flex-shrink:0}
+.ep-filters select{width:100%;padding:4px 7px;border:1px solid var(--border);border-radius:5px;font-size:11px;color:var(--ink);background:#fff;outline:none;height:26px}
+.ep-filters select:focus{border-color:var(--tf)}.ep-body{flex:1;overflow-y:auto;padding:7px}
+.ent-item{display:flex;align-items:center;gap:7px;padding:5px 8px;border-radius:6px;margin-bottom:3px;border:0.5px solid var(--border);background:var(--bg);transition:all .14s;font-size:12px;font-family:var(--font);font-weight:600;color:var(--ink);line-height:1.3;user-select:none}
+.ent-item.clickable{cursor:pointer}.ent-item.clickable:hover{border-color:var(--tf);background:var(--tf-s)}
+.ent-item.dragging{opacity:.4;cursor:grabbing}.ent-item.sel{border-color:var(--tf);background:var(--tf);color:#111;cursor:pointer}
+.ent-item.done{opacity:.35;background:#f3f4f6;text-decoration:line-through}
+.ent-dot{width:7px;height:7px;border-radius:2px;flex-shrink:0;margin-top:2px}
+.ent-andar{font-size:9px;font-weight:700;color:var(--tf-dk);background:var(--tf-s);padding:1px 5px;border-radius:7px;white-space:nowrap;margin-left:auto;align-self:flex-start;flex-shrink:0}
+.ent-item.sel .ent-andar{background:rgba(0,0,0,.15);color:#111}
+.drag-hint{font-size:9.5px;color:var(--gl);text-align:center;padding:8px 10px;font-style:italic}
+.collab-toggle{font-size:9.5px;font-weight:700;font-family:var(--font);padding:2px 8px;border-radius:10px;border:1.5px solid var(--border);background:transparent;cursor:pointer;transition:all .13s;color:var(--gl)}
+.collab-toggle.active{background:rgba(63,191,176,.1);border-color:var(--tf);color:var(--tf-dk)}
+.arq-lbl-collab{background:rgba(63,191,176,.04);border-left:3px solid var(--tf)}
+.collab-sep{height:2px;background:var(--tf);opacity:.25;margin:2px 0}
+.pick-item{padding:5px 8px;border-radius:5px;font-size:12px;font-family:var(--font);font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px;margin-bottom:2px;border:0.5px solid transparent}
+.pick-item:hover{background:var(--bg);border-color:var(--border)}
+/* Painel recolhível */
+.ep{transition:width .22s ease,min-width .22s ease}
+.ep.collapsed{width:0!important;min-width:0!important;overflow:hidden;border-right:none}
+.ep-toggle-btn{position:absolute;right:-14px;top:50%;transform:translateY(-50%);width:14px;height:60px;background:#EAEBEE;border:1px solid var(--border);border-left:none;border-radius:0 6px 6px 0;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:20;color:var(--gl);transition:all .15s;padding:4px 2px}
+.ep-toggle-btn:hover{background:var(--tf-s);color:var(--tf-dk)}
+.ep.collapsed+.ep-toggle-btn,.ep.collapsed .ep-toggle-btn{right:-20px}
+.ep-wrapper{position:relative;display:flex;flex-shrink:0}
+/* Calendário fundo */
+.cal-body{flex:1;overflow:auto;background:#EAEBEE}
+.at{border-collapse:separate;border-spacing:0;min-width:max-content;background:transparent}
+/* Fontes datas maiores */
+.dh-dow{display:block;font-size:10px;text-transform:uppercase;color:var(--gl);font-weight:700;font-family:var(--font)}
+.dh-date{display:block;font-size:16px;font-weight:800;color:var(--ink);font-family:var(--font)}
+.dcol.out .dh-date,.dcol.out .dh-dow{color:#bbb}
+.dcol.today-col .dh-date{color:var(--tf-dk)}
+.ep-grp-toggle{display:flex;gap:0;padding:5px 8px 4px;border-bottom:1px solid var(--border);flex-shrink:0}
+.ep-grp-btn{flex:1;height:24px;border:1px solid var(--border);background:var(--white);font-family:var(--font);font-size:10px;font-weight:700;color:var(--gl);cursor:pointer;transition:all .13s}
+.ep-grp-btn:first-child{border-radius:5px 0 0 5px}
+.ep-grp-btn:last-child{border-radius:0 5px 5px 0;border-left:none}
+.ep-grp-btn.active{background:var(--tf);border-color:var(--tf);color:#111}
+.ent-grp-hdr{display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:6px;margin:6px 0 3px;background:var(--bg);border:1.5px dashed var(--border);cursor:grab;transition:all .14s;user-select:none}
+.ent-grp-hdr:hover{border-color:var(--tf);background:rgba(63,191,176,.06)}
+.ent-grp-hdr.dragging{opacity:.4}
+.ent-grp-label{font-family:var(--font);font-size:12px;font-weight:800;color:var(--ink);flex:1}
+.ent-grp-badge{font-size:9px;font-weight:700;color:#fff;padding:2px 7px;border-radius:8px}
+.ent-grp-hint{font-size:9px;color:var(--gl);font-style:italic}
+.ent-andar-big{font-size:10px;font-weight:500;padding:2px 7px;border-radius:5px;color:#fff;flex-shrink:0}
+.ent-tipo-small{font-size:12px;color:var(--gl);flex:1}
+.cal-wrap{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;padding-left:16px}
+.cal-hdr{display:flex;align-items:center;gap:8px;padding:9px 14px;border-bottom:1px solid #D0D1D6;flex-shrink:0;background:#EAEBEE}
+.cal-badge{font-size:10px;padding:2px 8px;border-radius:7px;background:var(--tf-s);color:var(--tf-dk);font-weight:700;font-family:var(--font)}
+.cal-prog{margin-left:auto;font-size:11px;color:var(--gl);font-family:var(--font)}.cal-body{flex:1;overflow:auto}
+.at{border-collapse:separate;border-spacing:0;min-width:max-content}
+.at thead th{position:sticky;top:0;z-index:10;background:#fff;border-bottom:2px solid var(--border)}
+.at thead th.lbl{position:sticky;left:0;z-index:20;background:#EAEBEE;width:172px;min-width:172px;padding:7px 11px;text-align:left;font-family:var(--font);font-size:9.5px;font-weight:700;color:var(--gl);text-transform:uppercase;letter-spacing:.06em;border-right:2px solid #D0D1D6}
+.at thead th.dcol{text-align:center;width:92px;min-width:92px;padding:5px 2px;border-left:1px solid #eee}
+.dcol.out{background:#F2F3F5}.dcol.today-col{background:rgba(63,191,176,.07)}
+.dh-dow{display:block;font-size:8px;text-transform:uppercase;color:var(--gl);font-weight:700;font-family:var(--font)}
+.dh-date{display:block;font-size:12.5px;font-weight:800;color:var(--ink);font-family:var(--font)}
+.dcol.out .dh-date,.dcol.out .dh-dow{color:#bbb}.dcol.today-col .dh-date{color:var(--tf-dk)}
+.at tbody td.arq-lbl{position:sticky;left:0;z-index:9;background:#EAEBEE;width:172px;min-width:172px;padding:7px 11px;border-right:2px solid #D0D1D6;border-bottom:2px solid #B0B2B8;vertical-align:middle}
+.arq-name{font-family:var(--font);font-size:13px;font-weight:700;color:var(--ink)}.arq-role{font-size:10.5px;color:var(--gl)}
+.acell{width:92px;min-width:92px;border-left:1px solid #eee;border-bottom:1px solid var(--border);vertical-align:top;padding:3px 3px 2px;position:relative;min-height:56px}
+.acell.out{background:#F2F3F5}.acell.today-col{background:rgba(63,191,176,.04)}
+.acell.drag-over{background:rgba(63,191,176,.14);outline:2px dashed var(--tf);outline-offset:-2px}
+.acell.sel-ready{outline:2px dashed rgba(63,191,176,.5);outline-offset:-2px}
+.chips-wrap{display:flex;flex-direction:column;gap:2px}
+.achip{display:flex;align-items:center;gap:4px;padding:3px 6px;border-radius:4px;font-size:10px;font-weight:600;color:var(--ink);line-height:1.3;font-family:var(--font);cursor:pointer;position:relative;width:100%;transition:all .12s;background:var(--white);border:0.5px solid var(--border)}
+.cal-bar{position:absolute;border-radius:4px;display:flex;align-items:center;gap:5px;padding:0 7px;cursor:grab;z-index:3;overflow:visible!important;transition:filter .12s;box-sizing:border-box}
+.cal-bar:hover{filter:brightness(1.1)}
+.cal-bar:active{cursor:grabbing;filter:brightness(.95)}
+body.bar-dragging .cal-bar{pointer-events:none!important}
+body.bar-dragging .cal-bar .bar-del{display:none}
+.bar-del{position:absolute;top:-7px;right:-7px;width:16px;height:16px;border-radius:50%;background:#DC4C2E;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;opacity:0;transition:opacity .15s;cursor:pointer;z-index:10;border:none;line-height:1;flex-shrink:0}
+.cal-bar:hover .bar-del{opacity:1}
+.bar-inner{display:flex;align-items:center;gap:5px;width:100%;overflow:hidden}
+.bar-andar{font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;background:rgba(0,0,0,.2);color:#fff;flex-shrink:0}
+.bar-tipo{font-size:10px;font-weight:600;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;text-shadow:0 1px 2px rgba(0,0,0,.15)}
+.bar-days{font-size:9px;color:rgba(255,255,255,.7);flex-shrink:0}
+.achip:hover{border-color:var(--tf);background:var(--tf-s)}
+.achip.cont{opacity:.6;border-style:dashed}
+.achip.sp-r{border-radius:4px 0 0 4px;margin-right:-1px;border-right:none;z-index:2;position:relative}
+.achip.sp-l{border-radius:0 4px 4px 0;margin-left:-1px;border-left:none}
+.achip.sp-m{border-radius:0;margin-right:-1px;margin-left:-1px;border-left:none;border-right:none;z-index:2;position:relative}
+.achip.all-mode.sp-r,.achip.all-mode.sp-m{filter:brightness(1.05)}
+.achip .chip-del{position:absolute;top:2px;right:2px;width:13px;height:13px;border-radius:50%;background:rgba(220,76,46,.12);color:#DC4C2E;display:flex;align-items:center;justify-content:center;font-size:8px;opacity:0;transition:opacity .12s;line-height:1;flex-shrink:0}
+.achip:hover .chip-del{opacity:1}
+.achip .chip-days{font-size:8px;color:var(--gl);font-weight:400;white-space:nowrap}
+.achip-floor{font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;color:#fff;flex-shrink:0;line-height:1.4}
+.achip-tipo{font-size:10px;color:var(--ink);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.achip.all-mode{background:#111;border-color:#111}
+.achip.all-mode .achip-tipo{color:#fff}
+.achip.all-mode .days-badge{color:rgba(255,255,255,.6)}
+.achip-all-badge{font-size:8px;font-weight:700;padding:1px 5px;border-radius:4px;background:#fff;color:#111;flex-shrink:0}
+.achip.span-chip{border-radius:5px;width:100%}
+.ent-item .na-btn{display:none;margin-left:auto;font-size:10px;color:var(--gl);cursor:pointer;padding:1px 4px;border-radius:3px;border:none;background:transparent;flex-shrink:0}
+.ent-item:hover .na-btn{display:block}
+.ent-item.na{opacity:.45;border-style:dashed}
+.ent-item.na .ent-tipo-small{text-decoration:line-through;color:var(--gl)}
+.ent-item.na .ent-andar-big{background:#9CA3AF}
+.kit-toggle{display:flex;align-items:center;gap:6px;margin-left:auto}
+.kit-btn{height:22px;padding:0 9px;border-radius:5px;border:1px solid var(--border);background:var(--white);font-family:var(--font);font-size:10px;font-weight:700;color:var(--gl);cursor:pointer;transition:all .13s}
+.kit-btn.active{background:var(--ink);border-color:var(--ink);color:#fff}
+.add-cell-btn{width:100%;height:44px;display:flex;align-items:center;justify-content:center;color:#d1d5db;font-size:16px;border-radius:4px;transition:all .14s}
+.add-cell-btn:hover{background:var(--tf-s);color:var(--tf-dk)}.has-chips .add-cell-btn{height:18px;font-size:13px;margin-top:1px}
+.aloc-pop{position:fixed;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 12px 32px rgba(0,0,0,.18);z-index:700;width:260px;overflow:hidden}
+.aloc-pop-hdr{padding:10px 13px;border-bottom:1px solid var(--border);font-family:var(--font);font-size:13px;font-weight:700;color:var(--ink)}
+.aloc-pop-body{padding:12px 13px}.aloc-pop-label{font-size:12px;color:var(--gl);margin-bottom:7px;font-family:var(--font)}
+.aloc-pop-dias{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.dias-btn{width:28px;height:28px;border-radius:6px;border:1.5px solid var(--border);background:#fff;font-size:16px;font-weight:600;color:var(--ink);display:flex;align-items:center;justify-content:center;transition:all .14s}
+.dias-btn:hover{border-color:var(--tf);background:var(--tf-s)}
+.dias-val{font-family:var(--font);font-size:22px;font-weight:800;color:var(--tf-dk);min-width:32px;text-align:center}
+.dias-label{font-size:11px;color:var(--gl);font-family:var(--font)}
+.aloc-pop-ent{padding:6px 8px;border-radius:6px;font-size:11.5px;font-family:var(--font);font-weight:700;display:flex;align-items:center;gap:6px;margin-bottom:12px}
+.aloc-pop-btns{display:flex;gap:7px}
+.pop-btn-ok{flex:1;height:30px;background:var(--tf);border:none;border-radius:6px;font-family:var(--font);font-size:11.5px;font-weight:700;color:#111;transition:all .14s}
+.pop-btn-ok:hover{background:var(--tf-dk);color:#fff}
+.pop-btn-cancel{height:30px;padding:0 12px;border:1.5px solid var(--border);border-radius:6px;background:transparent;font-family:var(--font);font-size:11px;font-weight:600;color:var(--gray)}
+.rpt-scroll{flex:1;overflow-y:auto;padding:0;background:#fff}
+.rpt-doc{background:#fff;border-radius:0;padding:24px 32px;max-width:none;margin:0}
+.rpt-doc-hdr{border-bottom:3px solid #1A2535;padding-bottom:14px;margin-bottom:28px;display:flex;align-items:flex-end;justify-content:space-between}
+.rpt-doc-title{font-family:var(--font);font-size:22px;font-weight:800;color:#1A2535;text-transform:uppercase}
+.rpt-doc-sub{font-size:12px;color:var(--gl);margin-top:3px}
+.rpt-doc-meta{text-align:right;font-size:11px;color:var(--gl);line-height:1.9}
+.rpt-sec{margin-bottom:32px}
+.rpt-sec-title{font-family:var(--font);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--gl);margin-bottom:12px;display:flex;align-items:center;gap:10px}
+.rpt-sec-title::after{content:'';flex:1;height:1px;background:var(--border)}
+.rpt-prof-block{margin-bottom:18px;border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.rpt-prof-hdr{padding:10px 16px;background:#F8F9FA;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.rpt-prof-av{width:30px;height:30px;border-radius:7px;background:var(--tf);display:flex;align-items:center;justify-content:center;font-family:var(--font);font-size:11px;font-weight:800;color:#111;flex-shrink:0}
+.rpt-prof-name{font-family:var(--font);font-size:13px;font-weight:700;color:var(--ink);flex:1}
+.rpt-prof-role{font-size:10px;color:var(--gl)}
+.rpt-tl-row{display:flex;align-items:flex-start;padding:8px 16px;border-bottom:1px solid #F5F6F7;gap:12px}
+.rpt-tl-row:last-child{border-bottom:none}
+.rpt-tl-date{font-family:var(--font);font-size:11px;color:var(--gl);min-width:100px;flex-shrink:0;padding-top:2px}
+.rpt-tl-bar{width:3px;border-radius:2px;flex-shrink:0;margin-top:3px;align-self:stretch;min-height:16px}
+.rpt-tl-tipo{font-family:var(--font);font-size:12px;font-weight:700;color:var(--ink)}
+.rpt-tl-notas{font-size:11px;color:var(--gl);margin-top:3px;font-style:italic}
+.rpt-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:4px}
+.rpt-table th{text-align:left;padding:8px 10px;font-family:var(--font);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--gl);border-bottom:2px solid var(--border);white-space:nowrap}
+.rpt-table td{padding:8px 10px;border-bottom:1px solid #F3F4F6;vertical-align:top;font-size:12px}
+.rpt-table tbody tr:hover td{background:#FAFBFC}
+.rpt-badge{display:inline-block;padding:2px 7px;border-radius:5px;font-size:10px;font-weight:700;font-family:var(--font);color:#fff}
+@media print{
+  aside,.ep-wrapper,.cta-bar,.s2-topbar,.scr:not(#scr4){display:none!important}
+  #scr4{display:flex!important;flex-direction:column;height:auto}
+  .rpt-scroll{background:#fff;padding:0;overflow:visible;height:auto;flex:none}
+  .rpt-doc{box-shadow:none;border-radius:0;padding:12mm 16mm;max-width:none}
+  @page{size:A4 portrait;margin:0}
+}
+.cta-bar{padding:12px 26px;border-top:1px solid var(--border);background:#fff;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.cta-info{font-size:13px;color:var(--gray)}.cta-info strong{color:var(--ink)}
+.btn-p{height:34px;padding:0 18px;background:var(--tf);border:none;border-radius:7px;font-family:var(--font);font-size:12px;font-weight:700;color:#111;display:flex;align-items:center;gap:5px;transition:all .15s}
+.btn-p:hover{background:var(--tf-dk);color:#fff}.btn-p:disabled{opacity:.4;cursor:not-allowed}
+.btn-s{height:34px;padding:0 14px;background:transparent;border:1.5px solid var(--border);border-radius:7px;font-family:var(--font);font-size:11.5px;font-weight:700;color:var(--gray);transition:all .15s}
+.btn-s:hover{border-color:var(--tf);color:var(--tf-dk)}
+.empty{text-align:center;padding:36px 16px;color:var(--gl)}.empty-icon{font-size:30px;margin-bottom:8px;opacity:.5}.empty-txt{font-size:12.5px;line-height:1.6}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(10px);background:#111;color:#fff;padding:7px 16px;border-radius:16px;font-family:var(--font);font-size:12.5px;font-weight:600;opacity:0;transition:all .24s;z-index:9999;pointer-events:none}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@keyframes fi{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}.fi{animation:fi .2s ease both}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:800;align-items:center;justify-content:center}
+</style>
+</head>
+<body>
+<aside id="sidebar" class="collapsed">
+  <div style="display:flex;justify-content:flex-end;margin-bottom:4px;flex-shrink:0">
+    <button onclick="togSidebar()" title="Recolher/expandir menu" style="width:24px;height:24px;border-radius:5px;border:none;background:rgba(255,255,255,.08);color:rgba(255,255,255,.5);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .15s" id="aside-collapse-btn" onmouseover="this.style.background='rgba(255,255,255,.15)'" onmouseout="this.style.background='rgba(255,255,255,.08)'">‹</button>
+  </div>
+  <div class="logo-row">
+    <div class="logo"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+    <div><div class="logo-title">Gestão de Arquitetura</div><div class="logo-sub">Athié Wohnrath</div></div>
+  </div>
+  <div class="ctx"><div class="ctx-label">Projeto</div><div class="ctx-code" id="ctx-cod">—</div><div class="ctx-val" id="ctx-nome" style="font-size:12.5px">Carregando…</div></div>
+  <div class="ctx"><div class="ctx-label">Diretoria</div><div class="ctx-val" id="ctx-dir" style="font-size:12px">—</div></div>
+  <div class="divider"></div>
+  <div class="nav-label">Etapas</div>
+  <div class="steps">
+    <button class="step-btn active clickable" id="sb1" onclick="goScr(1)" title="Plano"><div class="step-dot" id="sd1">1</div><div><div class="step-label">Plano</div><div class="step-sub">Cronograma congelado</div></div></button>
+    <button class="step-btn clickable" id="sb2" onclick="goScr(2)" title="Equipe"><div class="step-dot" id="sd2">2</div><div><div class="step-label">Equipe</div><div class="step-sub">Gerentes e arquitetos</div></div></button>
+    <button class="step-btn clickable" id="sb3" onclick="goScr(3)" title="Alocação"><div class="step-dot" id="sd3">3</div><div><div class="step-label">Alocação</div><div class="step-sub">Calendário dia a dia</div></div></button>
+    <button class="step-btn locked" id="sb4" onclick="goScr(4)" title="Relatório"><div class="step-dot" id="sd4">4</div><div><div class="step-label">Relatório</div><div class="step-sub">Visão geral + impressão</div></div></button>
+  </div>
+  <div class="spacer"></div>
+  <div class="font-ctrl">
+    <span class="font-ctrl-label">Tamanho do texto</span>
+    <button class="font-btn" onclick="adjFont(-0.1)">−</button>
+    <span class="font-pct" id="fscale-lbl">100%</span>
+    <button class="font-btn" onclick="adjFont(0.1)">+</button>
+  </div>
+  <div id="ga-save-status" style="font-size:9.5px;color:#444c5a;text-align:center;padding:4px 0;font-family:var(--font);min-height:16px;transition:color .3s"></div>
+  <button class="back-btn" onclick="sair()" title="Voltar ao planejamento"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg><span class="back-btn-label">Voltar ao planejamento</span></button>
+</aside>
+
+<main id="main-area">
+  <div class="scr active" id="scr1">
+    <div class="s1-hdr">
+      <h1>Plano de Arquitetura — Cronograma Congelado</h1>
+      <p class="s1-sub">Visão das etapas de Arquitetura e Projetos Técnicos definidas no cronograma congelado.</p>
+    </div>
+    <div style="flex:1;overflow:auto;padding:16px 20px" id="scr1-body">
+      <div style="color:var(--gl);font-size:12px;padding:20px;text-align:center">Carregando…</div>
+    </div>
+    <div class="cta-bar">
+      <div class="cta-info" id="cta1-info"></div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn-p" onclick="goScr(2)">Próximo: Equipe ›</button>
+        <button onclick="sair()" title="Fechar" style="background:none;border:1px solid #D0D5DD;border-radius:7px;cursor:pointer;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:16px;color:#6B7280;flex-shrink:0">✕</button>
+      </div>
+    </div>
+  </div>
+  <div class="scr" id="scr2">
+    <div class="s1-hdr"><h1>Equipe de Arquitetura</h1><p class="s1-sub">Selecione a diretoria, os gerentes e os arquitetos para este projeto</p></div>
+    <div class="s1-scroll">
+      <div class="s1-3col">
+        <div class="s1-col">
+          <div class="s1-col-hdr"><span class="s1-col-label">Diretoria</span></div>
+          <div class="s1-col-body" id="col-dir">
+            <div class="empty fi"><div class="empty-txt">Carregando…</div></div>
+          </div>
+        </div>
+        <div class="s1-col">
+          <div class="s1-col-hdr"><span class="s1-col-label">Gerentes</span></div>
+          <div class="s1-col-body" id="col-ga">
+            <div class="empty fi" style="padding:20px 8px"><div class="empty-txt">Selecione uma diretoria</div></div>
+          </div>
+        </div>
+        <div class="s1-col">
+          <div class="s1-col-hdr">
+            <span class="s1-col-label">Arquitetos</span>
+            <span id="arq-sel-badge" style="display:none;font-size:9px;background:rgba(63,191,176,.15);color:var(--tf-dk);padding:1px 7px;border-radius:8px;font-weight:700;font-family:var(--font)">0</span>
+          </div>
+          <div class="s1-col-body" id="col-arq">
+            <div class="empty fi" style="padding:20px 8px"><div class="empty-txt">Selecione gerentes primeiro</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="s1-footer">
+        <div class="team-chips2" id="team-chips2">
+          <span class="s1-footer-empty">Nenhum arquiteto selecionado ainda</span>
+        </div>
+        <span class="s1-footer-count" id="footer-count" style="display:none">0 na equipe</span>
+        <button class="btn-p" id="btn-prox" disabled onclick="goScr(3)" style="flex-shrink:0;height:32px;font-size:11px">Próximo: Alocação ›</button>
+      </div>
+    </div>
+  </div>
+  <div class="scr" id="scr3">
+    <div class="s2-topbar" id="etapa-tabs"></div>
+    <div class="s2-main">
+      <div class="ep-wrapper">
+        <div class="ep" id="ep-panel">
+        <button class="ep-toggle-btn" id="ep-toggle" onclick="togEpanel()" title="Recolher/expandir">
+  <span id="ep-toggle-label" style="font-size:13px">‹</span>
+</button>
+        <div class="ep-hdr">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px">
+            <div class="ep-hdr-title">Entregas a alocar</div>
+            <button onclick="abrirAddEnt()" style="width:22px;height:22px;border-radius:5px;border:1px solid var(--border);background:#fff;color:var(--tf-dk);font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0" title="Adicionar entrega personalizada">+</button>
+          </div>
+          <div class="ep-hdr-count" id="ep-count">—</div>
+        </div>
+        <div class="ep-grp-toggle">
+          <button class="ep-grp-btn active" id="grp-btn-andar" onclick="setGrpMode('andar')">Por andar</button>
+          <button class="ep-grp-btn" id="grp-btn-tema" onclick="setGrpMode('tema')">Por tema</button>
+        </div>
+        <div class="ep-filters" id="ep-filters-wrap">
+          <select id="filt-andar" onchange="renderEnt()"><option value="">Todos os andares</option></select>
+          <select id="filt-tipo" onchange="renderEnt()"><option value="">Todos os tipos</option></select>
+        </div>
+        <div class="ep-body" id="ep-body"></div>
+        <div class="drag-hint">💡 Clique ou arraste para o calendário</div>
+        </div>
+      </div>
+      <div class="cal-wrap">
+        <div class="cal-hdr"><span class="cal-badge" id="cal-badge">—</span><div class="cal-prog" id="cal-prog"></div><div class="kit-toggle"><span style="font-size:10px;color:var(--gl);font-family:var(--font)">Vista:</span><button class="kit-btn" id="kit-btn-ind" onclick="setKitMode(false)">Individual</button><button class="kit-btn active" id="kit-btn-kit" onclick="setKitMode(true)">Kit ALL</button></div></div>
+        <div class="cal-body"><table class="at" id="at"></table></div>
+      </div>
+    </div>
+    <div class="cta-bar">
+      <div class="cta-info" id="cta2-info">Aloque as entregas no calendário</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span id="save-status-arq" style="font-size:11px;font-family:var(--font);font-weight:700;padding:4px 10px;border-radius:6px;display:none"></span>
+        <button class="btn-s" onclick="goScr(2)">‹ Equipe</button>
+        <button class="btn-s" id="btn-salvar-aloc" onclick="salvarAlocExplicito()" style="border-color:#00DEDB;color:#008A87;font-weight:700">💾 Salvar</button>
+        <button class="btn-p" onclick="confirmar()">Confirmar equipe <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></button>
+        <button onclick="sair()" title="Fechar" style="background:none;border:1px solid #D0D5DD;border-radius:7px;cursor:pointer;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:16px;color:#6B7280;flex-shrink:0">✕</button>
+      </div>
+    </div>
+  </div>
+  <div class="scr" id="scr4">
+    <div class="rpt-scroll" id="rpt-body"></div>
+    <div class="cta-bar">
+      <div class="cta-info" id="cta3-info">—</div>
+      <div style="display:flex;gap:8px">
+        <button class="btn-s" onclick="goScr(3)">‹ Alocação</button>
+        <button class="btn-s" onclick="imprimirRpt()" style="border-color:var(--tf);color:var(--tf-dk)">🖨 Imprimir</button>
+        <button class="btn-p" onclick="confirmar()">Confirmar equipe <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></button>
+      </div>
+    </div>
+  </div>
+</main>
+<div class="modal-overlay" id="modal-add-ent">
+  <div style="background:#fff;border-radius:12px;box-shadow:0 16px 48px rgba(0,0,0,.22);width:340px;overflow:hidden">
+    <div style="padding:14px 18px;border-bottom:1px solid var(--border);font-family:var(--font);font-size:13px;font-weight:700;color:var(--ink);display:flex;align-items:center;justify-content:space-between">Nova entrega personalizada<button onclick="fecharAddEnt()" style="background:none;border:none;font-size:16px;color:var(--gl);cursor:pointer">✕</button></div>
+    <div style="padding:16px 18px;display:flex;flex-direction:column;gap:12px">
+      <div><label style="font-size:10.5px;font-weight:700;color:var(--gl);text-transform:uppercase;letter-spacing:.06em;font-family:var(--font);display:block;margin-bottom:5px">Nome da entrega</label>
+      <input id="new-ent-nome" type="text" placeholder="ex: Perspectiva 3D…" style="width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:12.5px;outline:none" onfocus="this.style.borderColor='var(--tf)'" onblur="this.style.borderColor='var(--border)'" onkeydown="if(event.key==='Enter')confirmarAddEnt()"></div>
+      <div><label style="font-size:10.5px;font-weight:700;color:var(--gl);text-transform:uppercase;letter-spacing:.06em;font-family:var(--font);display:block;margin-bottom:7px">Vinculação</label>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;font-family:var(--font);font-weight:600;color:var(--ink)"><input type="radio" name="opt-andar" id="opt-geral" value="geral" checked onchange="updAndOpt()" style="accent-color:var(--tf)"> Geral do projeto</label>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;font-family:var(--font);font-weight:600;color:var(--ink)"><input type="radio" name="opt-andar" id="opt-andar" value="andar" onchange="updAndOpt()" style="accent-color:var(--tf)"> Vinculado a andares</label>
+          <div id="and-chks-wrap" style="display:none;margin-left:22px"><div style="font-size:10.5px;color:var(--gl);margin-bottom:5px">Selecione os andares:</div><div id="and-chks" style="display:flex;flex-wrap:wrap;gap:6px"></div></div>
+        </div>
+      </div>
+    </div>
+    <div style="padding:12px 18px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px">
+      <button onclick="fecharAddEnt()" style="height:32px;padding:0 14px;border:1.5px solid var(--border);border-radius:7px;background:transparent;font-family:var(--font);font-size:11.5px;font-weight:700;color:var(--gray);cursor:pointer">Cancelar</button>
+      <button onclick="confirmarAddEnt()" style="height:32px;padding:0 18px;background:var(--tf);border:none;border-radius:7px;font-family:var(--font);font-size:11.5px;font-weight:700;color:#111;cursor:pointer">Adicionar</button>
+    </div>
+  </div>
+</div>
+<div id="toast"></div>
+<script>
+var EDB={"Pedro Coivo":{gerentes:[{nome:"Paula Torres",cargo:"GA",arquitetos:[{nome:"Andre Milhomens",cargo:"Arquiteto"},{nome:"Caroline Rodrigues",cargo:"Arquiteto"},{nome:"Gabriela Pugliese",cargo:"Arquiteto"},{nome:"Ana Rodrigues",cargo:"Arquiteto"},{nome:"Alice Souza",cargo:"Arquiteto"}]},{nome:"Ana Pollizello",cargo:"GA",arquitetos:[{nome:"Rafaela Justo",cargo:"Arquiteto"},{nome:"Thiago Oliveira",cargo:"Arquiteto"},{nome:"Emilio Bertolini",cargo:"Arquiteto"},{nome:"Franciela Gehrke",cargo:"Arquiteto"},{nome:"Carolina Plascak",cargo:"Arquiteto"},{nome:"Caroline Guerrero",cargo:"Arquiteto"}]}]},"Daniel Ingarano":{gerentes:[{nome:"Nathalia Gomes",cargo:"GA",arquitetos:[{nome:"Sergio Sampaio",cargo:"Arquiteto"},{nome:"Aline Leal",cargo:"Arquiteto"}]},{nome:"Tais Neiva",cargo:"GA",arquitetos:[{nome:"Rafaella Silva",cargo:"Arquiteto"},{nome:"Vinicius Bressan",cargo:"Arquiteto"}]}]},"Virginia Nehmi":{gerentes:[{nome:"Giulia Previato",cargo:"GA",arquitetos:[{nome:"Itamara Lima",cargo:"Arquiteto"},{nome:"Leo Teruo",cargo:"Arquiteto"}]},{nome:"Priscila Pary",cargo:"GA",arquitetos:[{nome:"Sabryna Ribeiro",cargo:"Arquiteto"},{nome:"Guilherme Fazano",cargo:"Arquiteto"},{nome:"Kazuo Daido",cargo:"Arquiteto"}]}]}};
+var EDEF={lev:["Levantamento físico"],ep1:["Layout","Kit de mobiliário","Ampliação áreas técnicas"],ep2:["Layout","Forro","Indicação de pontos","Def. acabamentos","Especificações","Maquetes"],ap:["Layout","Mobiliário","Arquitetura","Forro","Piso","Indicação de pontos","Marcenaria","Detalhamento"],ex:["Layout","Mobiliário","Arquitetura","Forro","Piso","Indicação de pontos","Marcenaria","Detalhamento"],baseAP:["Base AP"],baseEX:["Base EX"],compatAP:["Compat. AP"],compatEX:["Compat. EX"],aprovCond:["Aprov. Condômino"]};
+var COLORS=["#3FBFB0","#2563EB","#7C3AED","#D97706","#059669","#DC4C2E","#0891B2","#65A30D","#9333EA","#CA8A04","#1D4ED8","#B45309","#0F766E","#9F1239"];
+var ESTADO=null,CTX=null;
+var eq={diretor:'',gerentes:[],arquitetos:[],colaboradores:[]};
+var plano={};var customEnts={};
+var selEnt=null,curEt=null,dragItem=null;window._outrasOpen=false;
+var notNeeded={};var _kitMode=true;
+var curScr=1,curRTab=1,_fscale=1;
+var _pop=null,_popDias=1,_popEnt=null,_popArq=null,_popIso=null;
+
+function pD(iso){var p=iso.split('-');return new Date(+p[0],+p[1]-1,+p[2],12);}
+function fISO(d){return d.getFullYear()+'-'+pd(d.getMonth()+1)+'-'+pd(d.getDate());}
+function fBR(d){return pd(d.getDate())+'/'+pd(d.getMonth()+1);}
+function pd(n){return String(n).padStart(2,'0');}
+function addD(d,n){var r=new Date(d);r.setDate(r.getDate()+n);return r;}
+function isWork(d){var w=d.getDay();return w!==0&&w!==6;}
+function prevWork(d){var r=addD(d,-1);while(!isWork(r))r=addD(r,-1);return r;}
+function nextWork(d){var r=addD(d,1);while(!isWork(r))r=addD(r,1);return r;}
+var DOWS=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+function computeDatas(isoStart,dias){var r=[],cur=pD(isoStart),cnt=0;while(cnt<dias){if(isWork(cur)){r.push(fISO(cur));cnt++;}cur=addD(cur,1);}return r;}
+
+(function(){
+  // Garante que aw_crono_id está disponível no sessionStorage do iframe
+  // (compartilhado por aba, mas verificamos e sincronizamos com o pai se necessário)
+  if(!sessionStorage.getItem('aw_crono_id')){
+    try{
+      var _pid=window.parent&&window.parent._CRONO_ID;
+      if(_pid){sessionStorage.setItem('aw_crono_id',_pid);console.log('[GestaoARQ] aw_crono_id recuperado do pai:',_pid);}
+    }catch(e){}
+  }
+  var _dbgId=sessionStorage.getItem('aw_crono_id')||'(não encontrado)';
+  var _dbgSt=sessionStorage.getItem('aw_estado_atual')?'presente':'ausente';
+  console.log('[GestaoARQ init] aw_crono_id='+_dbgId+' | aw_estado_atual='+_dbgSt);
+  try{var r=sessionStorage.getItem('aw_estado_atual');if(r){var p=JSON.parse(r);ESTADO=p.estado||p;}}catch(e){}
+  try{var c=sessionStorage.getItem('aw_gestao_ctx');if(c)CTX=JSON.parse(c);}catch(e){}
+  if(!ESTADO){
+    // col-dir existe no novo layout de 3 colunas
+    var colDir=document.getElementById('col-dir');
+    if(colDir)colDir.innerHTML='<div class="empty fi" style="padding:20px 8px"><div class="empty-txt" style="color:#DC4C2E">Abra a partir do planejamento de obra.</div></div>';
+    return;
+  }
+  var meta=ESTADO.meta||{};
+  document.getElementById('ctx-cod').textContent=meta.codigo||'';
+  document.getElementById('ctx-nome').textContent=meta.nome||'Sem título';
+  var ea=(ESTADO.cfg&&ESTADO.cfg.equipeARQ)||{};
+  document.getElementById('ctx-dir').textContent=ea.diretor||'—';
+  eq.diretor=ea.diretor||'';eq.gerentes=(ea.gerentes||[]).slice();eq.colaboradores=(ea.colaboradores||[]).slice();
+  // Só restaurar arquitetos se houver alocações salvas (evita manter seleção automática antiga)
+  var temAloc=ea.planoAloc&&Object.keys(ea.planoAloc).length>0;
+  eq.arquitetos=temAloc?(ea.arquitetos||[]).slice():[];
+  if(ea.planoAloc)plano=ea.planoAloc;
+  renderColDir();renderColGA();renderColArq();renderFooter();updSB();
+  // Renderiza o passo 1 com o plano congelado
+  setTimeout(function(){renderScr1();},50);
+  // Zoom inicial
+  _fscale=1.15;
+  var _ma=document.getElementById('main-area');if(_ma)_ma.style.zoom=_fscale;
+  var _fl=document.getElementById('fscale-lbl');if(_fl)_fl.textContent=Math.round(_fscale*100)+'%';
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'){closePop();sair();}});
+  document.addEventListener('click',function(e){if(!e.target.closest('.aloc-pop')){closePop();closeGrpPop();closeBarEdit();}});
+})();
+
+function adjFont(d){_fscale=Math.max(0.7,Math.min(1.8,Math.round((_fscale+d)*10)/10));document.getElementById('main-area').style.zoom=_fscale;document.getElementById('fscale-lbl').textContent=Math.round(_fscale*100)+'%';}
+// Zoom inicial aplicado pelo init
+
+
+
+// ── Numeração global de kits de entrega ───────────────────────────────────────
+// Agrupa todas as alocações de todos os profissionais por data de fim.
+// Cada data única recebe um número sequencial (kit). Retorna {isoDate: kitNum}.
+function computeKitMap(){
+  var fimSet={};
+  Object.keys(plano).forEach(function(etId){
+    (plano[etId]||[]).forEach(function(item){
+      var datas=computeDatas(item.dataInicio,item.dias);
+      var fim=datas[datas.length-1]||item.dataInicio;
+      if(fim)fimSet[fim]=true;
+    });
+  });
+  var fims=Object.keys(fimSet).sort();
+  var kitMap={};
+  fims.forEach(function(d,i){kitMap[d]=i+1;});
+  return kitMap;
+}
+
+// ── Passo 1: Gantt read-only do cronograma congelado ─────────────────────────
+function renderScr1(){
+  var el=document.getElementById('scr1-body');
+  if(!el)return;
+  if(!CTX){
+    el.innerHTML='<div style="padding:32px;text-align:center;color:var(--gl);font-size:13px">Nenhum dado disponível. Abra a partir do planejamento de obra.</div>';
+    return;
+  }
+  // Calcula mapa global de kits antes de renderizar
+  var kitMap=computeKitMap();
+
+  var arqEtapas=CTX.etapas||[];
+  var tecEtapas=CTX.etapasTec||[];
+  var obraEtapas=CTX.etapasObra||[];
+
+  // Se etapasTec ou etapasObra vieram vazios (CTX antigo), busca do parent.gSt
+  try{
+    var _gSt=window.parent&&window.parent.gSt;
+    if(_gSt){
+      var _TEC_IDS=['koTec','epTec','apTec','exTec'];
+      var _TEC_NAMES={koTec:'Kickoff Proj. Téc.',epTec:'EP Técnicos',apTec:'AP Técnicos',exTec:'EX Técnicos'};
+      if(!tecEtapas.length&&_gSt.projFases){
+        _gSt.projFases.forEach(function(fase){
+          var tecSubs=fase.rows&&fase.rows.tec&&fase.rows.tec.subs||{};
+          _TEC_IDS.forEach(function(id){
+            var t=tecSubs[id];if(!t)return;
+            var s0=t.start instanceof Date?t.start:pD(String(t.start));
+            var e0=t.end   instanceof Date?t.end  :pD(String(t.end));
+            tecEtapas.push({id:'tec_'+id,label:_TEC_NAMES[id]||id,tipo:'tec',
+              start:fISO(s0),end:fISO(e0)});
+          });
+        });
+      }
+      if(!obraEtapas.length&&_gSt.obraFases){
+        _gSt.obraFases.forEach(function(of,fi){
+          if(!of.obra||!of.obra.start||!of.obra.end)return;
+          var obraS=of.obra.start instanceof Date?of.obra.start:pD(String(of.obra.start));
+          var obraE=of.obra.end   instanceof Date?of.obra.end  :pD(String(of.obra.end));
+          // Calcula início da pré-obra (se ativa)
+          var poCfg=ESTADO&&ESTADO.cfg&&ESTADO.cfg.obraFases&&ESTADO.cfg.obraFases[fi]&&ESTADO.cfg.obraFases[fi].preObra;
+          var poStart=null,poEnd=null;
+          if(poCfg&&poCfg.ativo){
+            var poDu=poCfg.du||5;
+            // Pré-obra termina 1 dia antes do início da obra
+            var poE=new Date(obraS);poE=addD(poE,-1);
+            while(isWork&&!isWork(poE))poE=addD(poE,-1);
+            // Pré-obra começa poDu dias úteis antes
+            var cnt=0,cur=new Date(poE);
+            while(cnt<poDu-1){cur=addD(cur,-1);if(isWork&&isWork(cur))cnt++;}
+            poStart=fISO(cur);poEnd=fISO(poE);
+          }
+          obraEtapas.push({
+            id:'obra_'+fi,
+            label:'Obra'+((_gSt.obraFases.length>1)?' F'+(fi+1):''),
+            tipo:'obra',
+            start: poStart||fISO(obraS), end: fISO(obraE),
+            obraStart:fISO(obraS), obraEnd:fISO(obraE),
+            poStart:poStart, poEnd:poEnd
+          });
+        });
+      }
+    }
+  }catch(_e){}
+  if(!arqEtapas.length&&!tecEtapas.length&&!obraEtapas.length){
+    el.innerHTML='<div style="padding:32px;text-align:center;color:var(--gl);font-size:13px">Cronograma sem etapas definidas.</div>';
+    return;
+  }
+
+  // Paletas
+  var ARQ_COL='#7A8898'; var TEC_COL='#7A9488'; var OBRA_COL='#8B8070';
+  var arqPal=['#7A8898','#6B7A88','#7E8E9C','#8A9BAA','#6E7E8C','#7C8C9A','#697888','#8898A6','#72838F','#80909E'];
+
+  // Todas as linhas
+  var rows=[];
+  rows.push({tipo:'hdr',label:'ARQUITETURA'});
+  arqEtapas.forEach(function(e,i){rows.push({tipo:'arq',e:e,col:arqPal[i%arqPal.length]});});
+  if(tecEtapas.length){
+    rows.push({tipo:'hdr',label:'PROJETOS TÉCNICOS'});
+    tecEtapas.forEach(function(e){rows.push({tipo:'tec',e:e,col:TEC_COL});});
+  }
+  if(obraEtapas.length){
+    rows.push({tipo:'hdr',label:'OBRA'});
+    obraEtapas.forEach(function(e){rows.push({tipo:'obra',e:e,col:OBRA_COL});});
+  }
+
+  // Range de datas (todas as etapas)
+  var allDates=[];
+  [arqEtapas,tecEtapas,obraEtapas].forEach(function(arr){
+    arr.forEach(function(e){allDates.push(pD(e.start),pD(e.end));});
+  });
+  if(!allDates.length)return;
+  var minD=allDates.reduce(function(a,b){return a<b?a:b;});
+  var maxD=allDates.reduce(function(a,b){return a>b?a:b;});
+  // Arredonda para semanas (segunda)
+  var padMs=7*24*3600*1000;
+  minD=new Date(minD.getTime()-padMs);
+  maxD=new Date(maxD.getTime()+padMs);
+  var totalMs=maxD-minD||1;
+
+  // Gera semanas para cabeçalho
+  var weeks=[];
+  var cur=new Date(minD);
+  // avança para a próxima segunda
+  while(cur.getDay()!==1)cur=addD(cur,1);
+  while(cur<=maxD){weeks.push(new Date(cur));cur=addD(cur,7);}
+
+  // Dimensões
+  var LBL_W=130; // largura do label
+  var ROW_H=30; // aumentado para acomodar barra + bolinha de kit
+  var HDR_H=18;
+  var AXIS_H=36;
+  var totalRows=rows.length;
+  var BAR_H=14;
+  var svgW='100%';
+
+  // Monta HTML
+  var h='<div style="font-size:11px;color:var(--gl);padding:0 0 8px;display:flex;align-items:center;gap:6px">'
+    +'<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>'
+    +'Cronograma congelado · Todas as etapas são read-only</div>';
+
+  // Container com overflow horizontal
+  h+='<div style="overflow-x:auto;overflow-y:visible;border:1px solid var(--border);border-radius:6px;background:#fff">';
+  h+='<div style="min-width:700px">';
+
+  // SVG principal (label + barras)
+  var svgH=AXIS_H+totalRows*ROW_H+4;
+  h+='<svg id="g1-svg" viewBox="0 0 '+REF_W+' '+svgH+'" preserveAspectRatio="none" width="100%" height="'+svgH+'" style="display:block;font-family:Oswald,sans-serif">';
+
+  // Define clipPath para as barras
+  h+='<defs><clipPath id="bars-clip"><rect x="'+LBL_W+'" y="0" width="10000" height="'+svgH+'"/></clipPath></defs>';
+
+  // Fundo zebra por linha
+  rows.forEach(function(row,ri){
+    var y=AXIS_H+ri*ROW_H;
+    var bg=row.tipo==='hdr'?'#F0F2F5':ri%2===1?'#FAFBFC':'#fff';
+    h+='<rect x="0" y="'+y+'" width="10000" height="'+ROW_H+'" fill="'+bg+'"/>';
+  });
+
+  // Cabeçalho eixo de tempo: semanas
+  h+='<rect x="'+LBL_W+'" y="0" width="10000" height="'+AXIS_H+'" fill="#F8F9FA"/>';
+  h+='<line x1="0" y1="'+AXIS_H+'" x2="10000" y2="'+AXIS_H+'" stroke="#D0D3D8" stroke-width="1"/>';
+  h+='<rect x="0" y="0" width="'+LBL_W+'" height="'+AXIS_H+'" fill="#F3F4F6"/>';
+  h+='<line x1="'+LBL_W+'" y1="0" x2="'+LBL_W+'" y2="'+svgH+'" stroke="#D0D3D8" stroke-width="1.5"/>';
+
+  // Função para converter data em posição X (relativa à área de barras)
+  // Usa % do total — calculado em JS inline via foreignObject não dá, então usamos viewBox proporcional
+  // Abordagem: calculamos posições como % do espaço disponível
+  // Como SVG width=100%, usamos uma largura de referência de 1000px para cálculo
+  var REF_W=1000;
+  function toPx(d){return LBL_W+((d-minD)/totalMs)*(REF_W-LBL_W);}
+
+  // Linhas verticais de semana + labels
+  weeks.forEach(function(w){
+    var x=toPx(w);
+    if(x<LBL_W||x>REF_W)return;
+    h+='<line x1="'+x.toFixed(1)+'" y1="0" x2="'+x.toFixed(1)+'" y2="'+svgH+'" stroke="#E5E7EB" stroke-width="1" stroke-dasharray="3,3"/>';
+    // Label da semana (dia/mês)
+    var lbl=(w.getDate()<10?'0':'')+w.getDate()+'/'+(w.getMonth()<9?'0':'')+(w.getMonth()+1);
+    h+='<text x="'+(x+2).toFixed(1)+'" y="13" font-size="8" fill="#9CA3AF" font-family="Barlow,sans-serif">'+lbl+'</text>';
+    // Mês se for dia 1
+    if(w.getDate()<=7){
+      var meses=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+      h+='<text x="'+(x+2).toFixed(1)+'" y="25" font-size="9" font-weight="700" fill="#6B7280" font-family="Barlow,sans-serif">'+meses[w.getMonth()]+'</text>';
+    }
+  });
+
+  // Linha separadora do label
+  h+='<rect x="0" y="0" width="'+LBL_W+'" height="'+AXIS_H+'" fill="#F3F4F6"/>';
+  h+='<text x="8" y="22" font-size="9" font-weight="700" fill="#9CA3AF" font-family="Barlow,sans-serif" text-transform="uppercase">ETAPA</text>';
+
+  // Linhas de conteúdo
+  rows.forEach(function(row,ri){
+    var y=AXIS_H+ri*ROW_H;
+    if(row.tipo==='hdr'){
+      h+='<text x="8" y="'+(y+ROW_H/2+4)+'" font-size="8.5" font-weight="700" fill="#6B7280" font-family="Oswald,sans-serif" letter-spacing="1">'+row.label+'</text>';
+      h+='<line x1="'+LBL_W+'" y1="'+(y+ROW_H-1)+'" x2="10000" y2="'+(y+ROW_H-1)+'" stroke="#D0D3D8" stroke-width="1"/>';
+      return;
+    }
+    var e=row.e;
+    var col=row.col;
+    // Posição e largura da barra
+    var barX=Math.max(LBL_W+1, toPx(pD(e.start)));
+    var barXend=Math.min(REF_W-1, toPx(addD(pD(e.end),1)));
+    var barW=Math.max(3, barXend-barX);
+    var barY=y+(ROW_H-BAR_H)/2;
+    if(row.tipo==='obra'&&e.poStart&&e.obraStart){
+      // Barra DUPLA: pré-obra (tom claro) + obra (tom escuro), mesma linha
+      var OBRA_DK='#787068'; // cinza-bege escuro para obra
+      var OBRA_LT='#A09888'; // cinza-bege claro para pré-obra
+      var poBarX=Math.max(LBL_W+1,toPx(pD(e.poStart)));
+      var poBarEnd=Math.min(REF_W-1,toPx(addD(pD(e.poEnd),1)));
+      var poBarW=Math.max(2,poBarEnd-poBarX);
+      var obBarX=Math.max(LBL_W+1,toPx(pD(e.obraStart)));
+      var obBarEnd=Math.min(REF_W-1,toPx(addD(pD(e.obraEnd),1)));
+      var obBarW=Math.max(2,obBarEnd-obBarX);
+      // Pré-obra (mais claro)
+      h+='<rect x="'+poBarX.toFixed(1)+'" y="'+barY.toFixed(1)+'" width="'+poBarW.toFixed(1)+'" height="'+BAR_H+'" rx="3" fill="'+OBRA_LT+'" fill-opacity="0.9" clip-path="url(#bars-clip)"/>';
+      // Obra (mais escuro)
+      h+='<rect x="'+obBarX.toFixed(1)+'" y="'+barY.toFixed(1)+'" width="'+obBarW.toFixed(1)+'" height="'+BAR_H+'" rx="3" fill="'+OBRA_DK+'" fill-opacity="0.9" clip-path="url(#bars-clip)"/>';
+      // Separador entre as duas
+      h+='<line x1="'+obBarX.toFixed(1)+'" y1="'+barY.toFixed(1)+'" x2="'+obBarX.toFixed(1)+'" y2="'+(barY+BAR_H).toFixed(1)+'" stroke="#fff" stroke-width="2" clip-path="url(#bars-clip)"/>';
+      // Rótulo à direita: pré-obra · obra
+      var duPo=0;var cPo=new Date(pD(e.poStart));while(cPo<=pD(e.poEnd)){if(isWork(cPo))duPo++;cPo=addD(cPo,1);}
+      var duOb=0;var cOb=new Date(pD(e.obraStart));while(cOb<=pD(e.obraEnd)){if(isWork(cOb))duOb++;cOb=addD(cOb,1);}
+      var lblX2=(Math.max(poBarX,obBarX)+Math.max(poBarW,obBarW)+4).toFixed(1);
+      var lblY2=(barY+BAR_H/2+3.5).toFixed(1);
+      h+='<text x="'+lblX2+'" y="'+lblY2+'" font-size="8.5" fill="#2D3748" font-family="Oswald,sans-serif" font-weight="700">Pré: '+fBR2(e.poStart)+' – '+fBR2(e.poEnd)+' · '+duPo+'du  |  Obra: '+fBR2(e.obraStart)+' – '+fBR2(e.obraEnd)+' · '+duOb+'du</text>';
+    } else {
+      // Barra simples
+      h+='<rect x="'+barX.toFixed(1)+'" y="'+barY.toFixed(1)+'" width="'+barW.toFixed(1)+'" height="'+BAR_H+'" rx="3" fill="'+col+'" fill-opacity="0.85" clip-path="url(#bars-clip)"/>';
+      // Rótulo à DIREITA da barra, em fonte escura
+      var du=0;var c=new Date(pD(e.start));while(c<=pD(e.end)){if(isWork(c))du++;c=addD(c,1);}
+      var lblX=(barX+barW+4).toFixed(1);
+      var lblY=(barY+BAR_H/2+3.5).toFixed(1);
+      h+='<text x="'+lblX+'" y="'+lblY+'" font-size="8.5" fill="#2D3748" font-family="Oswald,sans-serif" font-weight="700">'+fBR2(e.start)+' – '+fBR2(e.end)+' · '+du+'du</text>';
+    }
+    // Label na coluna esquerda
+    h+='<text x="'+(LBL_W-6)+'" y="'+(y+ROW_H/2+4)+'" font-size="10" fill="#374151" font-family="Oswald,sans-serif" font-weight="700" text-anchor="end">'+((e.label||e.id).substring(0,16))+'</text>';
+    // Bolinhas de kits de entrega: apenas nas linhas de ARQ
+    if(row.tipo==='arq'&&kitMap&&e.start&&e.end){
+      var etS=pD(e.start),etE=pD(e.end);
+      Object.keys(kitMap).forEach(function(isoFim){
+        var kd=pD(isoFim);
+        if(kd>=etS&&kd<=etE){
+          var kx=toPx(kd);
+          var ky=y+ROW_H-4; // centro da bolinha na parte inferior da linha
+          var kn=kitMap[isoFim];
+          h+='<circle cx="'+kx.toFixed(1)+'" cy="'+ky+'" r="7" fill="#1A2535" clip-path="url(#bars-clip)"/>';
+          h+='<text x="'+kx.toFixed(1)+'" y="'+(ky+3)+'" font-size="7" fill="#fff" text-anchor="middle" font-weight="700" font-family="Oswald,sans-serif" clip-path="url(#bars-clip)">'+kn+'</text>';
+        }
+      });
+    }
+    // Separador horizontal
+    h+='<line x1="0" y1="'+(y+ROW_H)+'" x2="10000" y2="'+(y+ROW_H)+'" stroke="#F0F1F2" stroke-width="0.5"/>';
+  });
+
+  h+='</svg></div></div>';
+  el.innerHTML=h;
+}
+
+
+// ── Salvamento explícito (botão 💾 Salvar) ────────────────────────────────────
+function salvarAlocExplicito(){
+  var btn = document.getElementById('btn-salvar-aloc');
+  var status = document.getElementById('save-status-arq');
+  if(btn) btn.disabled = true;
+  if(status) status.textContent = 'Salvando…';
+
+  // Garante ESTADO atualizado
+  if(ESTADO&&ESTADO.cfg&&ESTADO.cfg.equipeARQ){
+    ESTADO.cfg.equipeARQ.planoAloc = plano;
+    ESTADO.cfg.equipeARQ.gerentes = eq.gerentes.slice();
+    ESTADO.cfg.equipeARQ.arquitetos = eq.arquitetos.slice();
+    ESTADO.cfg.equipeARQ.colaboradores = (eq.colaboradores||[]).slice();
+  }
+
+  // Mescla no pai imediatamente E atualiza sessionStorage
+  try{
+    if(window.parent&&window.parent.ESTADO&&window.parent.ESTADO.cfg){
+      window.parent.ESTADO.cfg.equipeARQ = ESTADO.cfg&&ESTADO.cfg.equipeARQ;
+    }
+    // Atualiza sessionStorage com o estado completo do iframe
+    // (garante que fecharGestaoArq vai ler dados corretos)
+    sessionStorage.setItem('aw_estado_atual', JSON.stringify({ts:Date.now(), estado:ESTADO}));
+  }catch(e){}
+
+  // Monta equipeARQ diretamente de eq e plano (fontes de verdade do iframe)
+  // Não depende de ESTADO.cfg.equipeARQ que pode não existir
+  var _eqSave = {
+    diretor: (eq&&eq.gerentes&&eq.gerentes[0])||'',
+    gerentes: (eq&&eq.gerentes||[]).slice(),
+    arquitetos: (eq&&eq.arquitetos||[]).slice(),
+    colaboradores: (eq&&eq.colaboradores||[]).slice(),
+    planoAloc: JSON.parse(JSON.stringify(plano||{}))
+  };
+  console.log('[salvarAlocExplicito] gerentes:', _eqSave.gerentes.length, '| arquitetos:', _eqSave.arquitetos.length, '| planoAloc etapas:', Object.keys(_eqSave.planoAloc).length);
+
+  // PATCH direto no Supabase com ESTADO do pai + equipeARQ do iframe
+  try{
+    var _pEstado = {};
+    try{ _pEstado = JSON.parse(JSON.stringify(window.parent.ESTADO||{})); }catch(e){}
+    if(!_pEstado.cfg) _pEstado.cfg={};
+    _pEstado.cfg.equipeARQ = _eqSave;
+
+    var _cronoId = sessionStorage.getItem('aw_crono_id')||'';
+    if(!_cronoId){ try{_cronoId=window.parent._CRONO_ID||'';}catch(e){} }
+    var _sbUrl='https://ejneanfveoctdlltjnrs.supabase.co';
+    var _sbKey='sb_publishable_vZApDmF_C-heCrm8fXJ_XA_ATmMO3YP';
+    var _payload={ts:Date.now(),estado:_pEstado};
+
+    console.log('[salvar] cronoId:',_cronoId,'| planoAloc etapas:',Object.keys(_eqSave.planoAloc).length);
+    if(!_cronoId) throw new Error('cronoId vazio');
+
+    fetch(_sbUrl+'/rest/v1/cronogramas?id=eq.'+_cronoId,{
+      method:'PATCH',
+      headers:{'Content-Type':'application/json','apikey':_sbKey,'Authorization':'Bearer '+_sbKey},
+      body:JSON.stringify({estado_json:JSON.stringify(_payload),atualizado_em:new Date().toISOString()})
+    }).then(function(r){
+      console.log('[salvar] resposta:',r.status,r.ok?'OK':'ERRO');
+      if(r.ok){
+        try{window.parent.ESTADO.cfg.equipeARQ=_eqSave;}catch(e){}
+        sessionStorage.setItem('aw_estado_atual',JSON.stringify(_payload));
+        var hora=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+        if(status){status.textContent='✓ Salvo no banco às '+hora;status.style.display='inline-block';status.style.background='#ECFDF5';status.style.color='#065F46';status.style.border='1px solid #6EE7B7';}
+        if(btn){btn.disabled=false;btn.innerHTML='✓ Salvo';}
+        setTimeout(function(){if(btn){btn.innerHTML='💾 Salvar';btn.disabled=false;}if(status)status.style.display='none';},4000);
+      } else { throw new Error('status '+r.status); }
+    }).catch(function(e){
+      console.error('[salvar] ERRO:',e);
+      if(status){status.textContent='⚠ Erro ao salvar';status.style.display='inline-block';status.style.background='#FEF2F2';status.style.color='#991B1B';status.style.border='1px solid #FCA5A5';}
+      if(btn)btn.disabled=false;
+    });
+  }catch(e){
+    console.error('[salvar] ERRO geral:',e);
+    if(status)status.textContent='⚠ Erro: '+e.message;
+    if(btn)btn.disabled=false;
+  }!DOCTYPE html>
+<!-- gestao-arq v6.03.62 -->
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"/>
