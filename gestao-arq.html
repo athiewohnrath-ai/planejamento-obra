@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- gestao-arq v6.03.56 -->
+<!-- gestao-arq v6.03.57 -->
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"/>
@@ -331,8 +331,9 @@ body.bar-dragging .cal-bar .bar-del{display:none}
     </div>
     <div class="cta-bar">
       <div class="cta-info" id="cta1-info"></div>
-      <div style="display:flex;gap:8px">
+      <div style="display:flex;gap:8px;align-items:center">
         <button class="btn-p" onclick="goScr(2)">Próximo: Equipe ›</button>
+        <button onclick="sair()" title="Fechar" style="background:none;border:1px solid #D0D5DD;border-radius:7px;cursor:pointer;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:16px;color:#6B7280;flex-shrink:0">✕</button>
       </div>
     </div>
   </div>
@@ -406,10 +407,11 @@ body.bar-dragging .cal-bar .bar-del{display:none}
     <div class="cta-bar">
       <div class="cta-info" id="cta2-info">Aloque as entregas no calendário</div>
       <div style="display:flex;gap:8px;align-items:center">
-        <span id="save-status-arq" style="font-size:10px;color:var(--gl);font-family:var(--font)"></span>
+        <span id="save-status-arq" style="font-size:11px;font-family:var(--font);font-weight:700;padding:4px 10px;border-radius:6px;display:none"></span>
         <button class="btn-s" onclick="goScr(2)">‹ Equipe</button>
         <button class="btn-s" id="btn-salvar-aloc" onclick="salvarAlocExplicito()" style="border-color:#00DEDB;color:#008A87;font-weight:700">💾 Salvar</button>
         <button class="btn-p" onclick="confirmar()">Confirmar equipe <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></button>
+        <button onclick="sair()" title="Fechar" style="background:none;border:1px solid #D0D5DD;border-radius:7px;cursor:pointer;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:16px;color:#6B7280;flex-shrink:0">✕</button>
       </div>
     </div>
   </div>
@@ -800,12 +802,28 @@ function salvarAlocExplicito(){
   try{
     if(window.parent&&window.parent.salvarDados){
       window.parent.salvarDados().then(function(){
-        if(status) status.textContent = '✓ Salvo às ' + new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-        if(btn) btn.disabled = false;
-        toast('Alocações salvas ✓');
+        var hora=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+        if(status){
+          status.textContent='✓ Salvo no banco às '+hora;
+          status.style.display='inline-block';
+          status.style.background='#ECFDF5';
+          status.style.color='#065F46';
+          status.style.border='1px solid #6EE7B7';
+        }
+        if(btn){btn.disabled=false;btn.innerHTML='✓ Salvo';}
+        setTimeout(function(){
+          if(btn){btn.innerHTML='💾 Salvar';btn.disabled=false;}
+          if(status){status.style.display='none';}
+        },4000);
       }).catch(function(){
-        if(status) status.textContent = '⚠ Erro ao salvar';
-        if(btn) btn.disabled = false;
+        if(status){
+          status.textContent='⚠ Erro ao salvar';
+          status.style.display='inline-block';
+          status.style.background='#FEF2F2';
+          status.style.color='#991B1B';
+          status.style.border='1px solid #FCA5A5';
+        }
+        if(btn)btn.disabled=false;
       });
     } else {
       // Fallback: salva direto via _autoSaveSB
