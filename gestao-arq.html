@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- gestao-arq v6.03.55 -->
+<!-- gestao-arq v6.03.56 -->
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"/>
@@ -405,8 +405,10 @@ body.bar-dragging .cal-bar .bar-del{display:none}
     </div>
     <div class="cta-bar">
       <div class="cta-info" id="cta2-info">Aloque as entregas no calendário</div>
-      <div style="display:flex;gap:8px">
+      <div style="display:flex;gap:8px;align-items:center">
+        <span id="save-status-arq" style="font-size:10px;color:var(--gl);font-family:var(--font)"></span>
         <button class="btn-s" onclick="goScr(2)">‹ Equipe</button>
+        <button class="btn-s" id="btn-salvar-aloc" onclick="salvarAlocExplicito()" style="border-color:#00DEDB;color:#008A87;font-weight:700">💾 Salvar</button>
         <button class="btn-p" onclick="confirmar()">Confirmar equipe <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></button>
       </div>
     </div>
@@ -769,6 +771,52 @@ function renderScr1(){
 
   h+='</svg></div></div>';
   el.innerHTML=h;
+}
+
+
+// ── Salvamento explícito (botão 💾 Salvar) ────────────────────────────────────
+function salvarAlocExplicito(){
+  var btn = document.getElementById('btn-salvar-aloc');
+  var status = document.getElementById('save-status-arq');
+  if(btn) btn.disabled = true;
+  if(status) status.textContent = 'Salvando…';
+
+  // Garante ESTADO atualizado
+  if(ESTADO&&ESTADO.cfg&&ESTADO.cfg.equipeARQ){
+    ESTADO.cfg.equipeARQ.planoAloc = plano;
+    ESTADO.cfg.equipeARQ.gerentes = eq.gerentes.slice();
+    ESTADO.cfg.equipeARQ.arquitetos = eq.arquitetos.slice();
+    ESTADO.cfg.equipeARQ.colaboradores = (eq.colaboradores||[]).slice();
+  }
+
+  // Mescla no pai imediatamente
+  try{
+    if(window.parent&&window.parent.ESTADO&&window.parent.ESTADO.cfg){
+      window.parent.ESTADO.cfg.equipeARQ = ESTADO.cfg&&ESTADO.cfg.equipeARQ;
+    }
+  }catch(e){}
+
+  // Salva via pai (que tem o _CRONO_ID correto e o ESTADO completo)
+  try{
+    if(window.parent&&window.parent.salvarDados){
+      window.parent.salvarDados().then(function(){
+        if(status) status.textContent = '✓ Salvo às ' + new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+        if(btn) btn.disabled = false;
+        toast('Alocações salvas ✓');
+      }).catch(function(){
+        if(status) status.textContent = '⚠ Erro ao salvar';
+        if(btn) btn.disabled = false;
+      });
+    } else {
+      // Fallback: salva direto via _autoSaveSB
+      _autoSaveSB();
+      if(status) status.textContent = '✓ Salvo localmente';
+      if(btn) btn.disabled = false;
+    }
+  }catch(e){
+    if(status) status.textContent = '⚠ Erro ao salvar';
+    if(btn) btn.disabled = false;
+  }
 }
 
 function goScr(n){
