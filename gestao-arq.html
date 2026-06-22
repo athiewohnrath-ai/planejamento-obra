@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- gestao-arq v6.03.73 build:20260622194947-->
+<!-- gestao-arq v6.03.74 build:20260622194947-->
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"/>
@@ -1150,6 +1150,7 @@ function renderEntByTema(items){
   tipos.forEach(function(tipo){
     var group=items.filter(function(it){return it.tipo===tipo;});
     var naoAloc=group.filter(function(it){return!isAloc(curEt,it.id);});
+    if(naoAloc.length===0) return; // grupo vazio — oculta inclusive o header
     var c='#4B5563'; // neutro por tema
     var grpData={tipo:tipo,items:naoAloc,colorIdx:group[0]?group[0].colorIdx:0};
     var grpJson=JSON.stringify(grpData).replace(/'/g,"&#39;");
