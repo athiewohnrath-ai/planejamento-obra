@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- gestao-arq v6.03.74 build:20260622194947-->
+<!-- gestao-arq v6.03.75 build:20260622194947-->
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"/>
@@ -11,7 +11,7 @@
 *{box-sizing:border-box;margin:0;padding:0}html,body{height:100%;overflow:hidden}
 body{font-family:var(--body);background:var(--bg);color:var(--ink);display:flex;height:100vh;font-size:13px}
 button{font-family:inherit;cursor:pointer}input,select{font-family:inherit}
-aside{width:240px;background:var(--black);color:#fff;display:flex;flex-direction:column;padding:16px 13px;flex-shrink:0;transition:width .22s ease,padding .22s ease;overflow:hidden;position:relative}
+aside{width:192px;background:var(--black);color:#fff;display:flex;flex-direction:column;padding:16px 13px;flex-shrink:0;transition:width .22s ease,padding .22s ease;overflow:hidden;position:relative}
 aside.collapsed{width:48px;padding:12px 6px}
 /* Botão collapse: modo mini mostra ›, expandido mostra ‹ */
 aside.collapsed #aside-collapse-btn{align-self:center;margin:0 auto 8px}
@@ -291,7 +291,7 @@ body.bar-dragging .cal-bar .bar-del{display:none}
 </style>
 </head>
 <body>
-<aside id="sidebar" class="collapsed">
+<aside id="sidebar">
   <div style="display:flex;justify-content:flex-end;margin-bottom:4px;flex-shrink:0">
     <button onclick="togSidebar()" title="Recolher/expandir menu" style="width:24px;height:24px;border-radius:5px;border:none;background:rgba(255,255,255,.08);color:rgba(255,255,255,.5);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .15s" id="aside-collapse-btn" onmouseover="this.style.background='rgba(255,255,255,.15)'" onmouseout="this.style.background='rgba(255,255,255,.08)'">‹</button>
   </div>
