@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- gestao-arq v6.03.59 -->
+<!-- gestao-arq v6.03.60 -->
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"/>
@@ -802,15 +802,23 @@ function salvarAlocExplicito(){
   }catch(e){}
 
   // Garante que o ESTADO do PAI tem o equipeARQ antes de chamar salvarDados()
+  console.log('[salvarAlocExplicito] plano no iframe:', Object.keys(plano||{}).length, 'etapas');
+  console.log('[salvarAlocExplicito] ESTADO.cfg.equipeARQ existe?', !!(ESTADO&&ESTADO.cfg&&ESTADO.cfg.equipeARQ));
   try{
     if(window.parent&&window.parent.ESTADO){
       if(!window.parent.ESTADO.cfg) window.parent.ESTADO.cfg={};
-      // Cópia profunda para evitar problemas de referência
-      window.parent.ESTADO.cfg.equipeARQ = JSON.parse(JSON.stringify(ESTADO.cfg.equipeARQ));
-      console.log('[salvarAlocExplicito] equipeARQ mesclado no pai | planoAloc etapas:',
-        Object.keys(window.parent.ESTADO.cfg.equipeARQ.planoAloc||{}).length);
+      // Monta equipeARQ manualmente para garantir planoAloc
+      var _eq = {
+        diretor: ESTADO.cfg&&ESTADO.cfg.equipeARQ&&ESTADO.cfg.equipeARQ.diretor || '',
+        gerentes: (eq&&eq.gerentes||[]).slice(),
+        arquitetos: (eq&&eq.arquitetos||[]).slice(),
+        colaboradores: (eq&&eq.colaboradores||[]).slice(),
+        planoAloc: JSON.parse(JSON.stringify(plano||{}))
+      };
+      window.parent.ESTADO.cfg.equipeARQ = _eq;
+      console.log('[salvarAlocExplicito] mesclado | gerentes:', _eq.gerentes.length, '| planoAloc etapas:', Object.keys(_eq.planoAloc).length);
     }
-  }catch(e){ console.error('erro ao mesclar equipeARQ:', e); }
+  }catch(e){ console.error('[salvarAlocExplicito] ERRO na mescla:', e, e&&e.stack); }
 
   // Salva via pai (que tem o _CRONO_ID correto e o ESTADO completo)
   try{
