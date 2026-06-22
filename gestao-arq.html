@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- gestao-arq v6.03.77 build:20260622194947-->
+<!-- gestao-arq v6.03.78 build:20260622194947-->
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"/>
@@ -333,6 +333,12 @@ body.bar-dragging .cal-bar .bar-del{display:none}
       <button onclick="g1ScaleAdj(1)" style="width:24px;height:24px;border:1px solid var(--bd);border-radius:5px;background:var(--bg);cursor:pointer;font-size:14px;color:var(--txt);display:flex;align-items:center;justify-content:center;flex-shrink:0">+</button>
       <span id="g1-scale-lbl" style="font-size:10px;font-weight:700;color:var(--txt);font-family:var(--font);min-width:72px">Normal</span>
       <span style="font-size:10px;color:var(--gl);margin-left:4px">← scroll horizontal →</span>
+      <div style="width:1px;height:16px;background:var(--bd);margin:0 4px"></div>
+      <span style="font-size:10px;color:var(--gl);font-family:var(--font);font-weight:700;letter-spacing:.04em;text-transform:uppercase">Linhas</span>
+      <button onclick="g1RowAdj(-1)" style="width:24px;height:24px;border:1px solid var(--bd);border-radius:5px;background:var(--bg);cursor:pointer;font-size:14px;color:var(--txt);display:flex;align-items:center;justify-content:center;flex-shrink:0">−</button>
+      <input type="range" id="g1-row-slider" min="0" max="4" value="2" step="1" oninput="g1RowSet(+this.value)" style="width:100px">
+      <button onclick="g1RowAdj(1)" style="width:24px;height:24px;border:1px solid var(--bd);border-radius:5px;background:var(--bg);cursor:pointer;font-size:14px;color:var(--txt);display:flex;align-items:center;justify-content:center;flex-shrink:0">+</button>
+      <span id="g1-row-lbl" style="font-size:10px;font-weight:700;color:var(--txt);font-family:var(--font);min-width:56px">Normal</span>
     </div>
     <div style="flex:1;overflow:auto;padding:16px 20px" id="scr1-body">
       <div style="color:var(--gl);font-size:12px;padding:20px;text-align:center">Carregando…</div>
@@ -544,6 +550,10 @@ var _g1Scale = 1.0; // escala atual (1.0 = normal)
 var _g1ScaleLvl = 2; // índice atual
 var _g1ScaleSteps = [0.45, 0.7, 1.0, 1.5, 2.2];
 var _g1ScaleLabels = ['Compacto','Médio','Normal','Largo','Extra largo'];
+var _g1RowH = 30; // altura base das linhas
+var _g1RowLvl = 2;
+var _g1RowSteps = [16, 22, 30, 40, 52];
+var _g1RowLabels = ['Mínimo','Compacto','Normal','Largo','Extra'];
 
 function g1ScaleSet(lvl){
   _g1ScaleLvl = Math.max(0, Math.min(_g1ScaleSteps.length-1, lvl));
@@ -556,6 +566,16 @@ function g1ScaleSet(lvl){
   renderScr1();
 }
 function g1ScaleAdj(dir){ g1ScaleSet(_g1ScaleLvl + dir); }
+function g1RowSet(lvl){
+  _g1RowLvl = Math.max(0, Math.min(_g1RowSteps.length-1, lvl));
+  _g1RowH = _g1RowSteps[_g1RowLvl];
+  var sl = document.getElementById('g1-row-slider');
+  var lb = document.getElementById('g1-row-lbl');
+  if(sl) sl.value = _g1RowLvl;
+  if(lb) lb.textContent = _g1RowLabels[_g1RowLvl];
+  renderScr1();
+}
+function g1RowAdj(dir){ g1RowSet(_g1RowLvl + dir); }
 
 // ── Numeração global de kits de entrega ───────────────────────────────────────
 // Agrupa todas as alocações de todos os profissionais por data de fim.
@@ -683,7 +703,7 @@ function renderScr1(){
 
   // Dimensões
   var LBL_W=130; // largura do label
-  var ROW_H=30; // aumentado para acomodar barra + bolinha de kit
+  var ROW_H=_g1RowH; // controlado pelo slider de linhas
   var HDR_H=18;
   var AXIS_H=36;
   var REF_W=1000;
