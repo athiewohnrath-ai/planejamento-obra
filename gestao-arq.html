@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- gestao-arq v6.03.63 -->
+<!-- gestao-arq v6.03.64 -->
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"/>
@@ -824,7 +824,13 @@ function salvarAlocExplicito(){
     console.log('[salvar] resposta:',r.status,r.ok?'OK':'ERRO');
     if(r.ok){
       // Atualiza sessionStorage e ESTADO do pai
-      try{sessionStorage.setItem('aw_estado_atual',_payStr);}catch(e){}
+      try{
+        // Verifica que o _payStr tem o equipeARQ antes de gravar
+        var _check=JSON.parse(_payStr);
+        var _hasEq=_check&&_check.estado&&_check.estado.cfg&&_check.estado.cfg.equipeARQ&&Object.keys(_check.estado.cfg.equipeARQ.planoAloc||{}).length>0;
+        console.log('[salvar] sessionStorage planoAloc etapas:', _hasEq?Object.keys(_check.estado.cfg.equipeARQ.planoAloc).length:'VAZIO');
+        sessionStorage.setItem('aw_estado_atual',_payStr);
+      }catch(e){console.error('[salvar] erro sessionStorage:',e);}
       try{window.parent.ESTADO.cfg.equipeARQ=_eq;}catch(e){}
       var hora=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
       if(status){status.textContent='✓ Salvo no banco às '+hora;status.style.display='inline-block';status.style.background='#ECFDF5';status.style.color='#065F46';status.style.border='1px solid #6EE7B7';}
