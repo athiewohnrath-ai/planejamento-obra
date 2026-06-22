@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- gestao-arq v6.03.54 -->
+<!-- gestao-arq v6.03.55 -->
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"/>
@@ -1536,10 +1536,18 @@ function salvAloc(){
   ESTADO.cfg.equipeARQ.gerentes=eq.gerentes.slice();
   ESTADO.cfg.equipeARQ.arquitetos=eq.arquitetos.slice();
   ESTADO.cfg.equipeARQ.colaboradores=(eq.colaboradores||[]).slice();
+  var cronoId=sessionStorage.getItem('aw_crono_id')||'';
   var payload={ts:Date.now(),estado:ESTADO};
   var payloadStr=JSON.stringify(payload);
-  // Grava no sessionStorage do iframe (síncrono)
+  // Grava no sessionStorage (síncrono)
   try{sessionStorage.setItem('aw_estado_atual',payloadStr);}catch(e){}
+  // Grava também no localStorage com a chave do cronograma (persiste no F5)
+  try{
+    var _lid='aw_equipe_arq_'+cronoId;
+    var _ldata=JSON.stringify({ts:Date.now(),cronoId:cronoId,equipeARQ:ESTADO.cfg.equipeARQ});
+    localStorage.setItem(_lid,_ldata);
+    localStorage.setItem('aw_equipe_arq_last_id',_lid);
+  }catch(e){}
   // Também notifica o pai para mesclar o estado imediatamente no ESTADO dele
   // (assim se o usuário der F5 no pai, o ESTADO do pai já tem os dados)
   try{
@@ -1967,6 +1975,15 @@ function sair(){
   }
   // Grava no sessionStorage de forma síncrona — o pai vai ler isso
   try { sessionStorage.setItem('aw_estado_atual', JSON.stringify({ts:Date.now(), estado:ESTADO})); } catch(e){}
+  // Atualiza também o localStorage com o estado mais recente
+  try{
+    var _cid=sessionStorage.getItem('aw_crono_id')||'';
+    if(_cid){
+      var _lid='aw_equipe_arq_'+_cid;
+      localStorage.setItem(_lid,JSON.stringify({ts:Date.now(),cronoId:_cid,equipeARQ:ESTADO.cfg.equipeARQ}));
+      localStorage.setItem('aw_equipe_arq_last_id',_lid);
+    }
+  }catch(e){}
   // Avisa o pai para fechar (o pai lê o sessionStorage e chama salvarDados())
   try {
     if(window.parent && window.parent.fecharGestaoArq) {
