@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- gestao-arq v6.03.79 build:20260622194947-->
+<!-- gestao-arq v6.03.80 build:20260622194947-->
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"/>
@@ -1897,69 +1897,83 @@ function renderRptNova(){
   var porFim={},fimsOrdem=[];
   ordenados.forEach(function(r){if(!porFim[r.fim]){porFim[r.fim]=[];fimsOrdem.push(r.fim);}porFim[r.fim].push(r);});
 
-  // Renderiza cada data de entrega como um box separado
-  fimsOrdem.forEach(function(fim,fi){
+  // Opção C: etapa como separador, andares agrupados em coluna, início–fim
+  var _kitMap3=computeKitMap();
+
+  // Agrupa kits por etapa
+  var porEtapa={},etapasOrdem=[];
+  fimsOrdem.forEach(function(fim){
     var grupo=porFim[fim];
-
-    // Agrupa por tipo dentro da mesma data (título único para mesmo tipo)
-    var porTipo={},tiposOrdem=[];
     grupo.forEach(function(r){
-      if(!porTipo[r.tipo]){porTipo[r.tipo]=[];tiposOrdem.push(r.tipo);}
-      porTipo[r.tipo].push(r);
+      var etKey=r.etId||r.et||'—';
+      if(!porEtapa[etKey]){porEtapa[etKey]={label:r.et,fims:{}};etapasOrdem.push(etKey);}
+      if(!porEtapa[etKey].fims[fim]){porEtapa[etKey].fims[fim]=[];}
+      porEtapa[etKey].fims[fim].push(r);
     });
+  });
+  // Remove duplicatas de etapasOrdem
+  var etapasVistas={};
+  etapasOrdem=etapasOrdem.filter(function(k){if(etapasVistas[k])return false;etapasVistas[k]=true;return true;});
 
-    // Número do kit
-    var _globalKitMap2=computeKitMap();
-    var kitNum=_globalKitMap2[fim]||'';
+  etapasOrdem.forEach(function(etKey){
+    var etInfo=porEtapa[etKey];
+    var fimsDestaEtapa=Object.keys(etInfo.fims).sort();
 
-    // Box do kit
-    h+='<div style="border:1.5px solid #D0D5DF;border-radius:8px;margin-bottom:16px;overflow:hidden;page-break-inside:avoid">';
+    // Separador de etapa
+    h+='<div style="font-family:var(--font);font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#6B7280;padding:14px 2px 6px;border-bottom:1.5px solid #E5E7EB;margin-bottom:12px">'+etInfo.label+'</div>';
 
-    // Header do box
-    h+='<div style="display:flex;align-items:center;gap:10px;padding:8px 14px;background:#F4F5F8;border-bottom:1px solid #D0D5DF">';
-    if(kitNum)h+='<span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:#1A2535;color:#fff;font-family:var(--font);font-size:11px;font-weight:700;flex-shrink:0">'+kitNum+'</span>';
-    h+='<span style="font-family:var(--font);font-size:13px;font-weight:700;color:#1A1D23">Entrega · '+fBR2(fim)+'</span>';
-    h+='<span style="margin-left:auto;font-size:10px;color:#9AA0B0;font-family:var(--font)">'+grupo.length+' item'+(grupo.length>1?'s':'')+'</span>';
-    // Coluna de status futura
-    h+='<div style="width:80px;text-align:right;font-size:10px;color:#9AA0B0;font-family:var(--font);letter-spacing:.04em">STATUS</div>';
-    h+='</div>';
+    fimsDestaEtapa.forEach(function(fim){
+      var grupo=etInfo.fims[fim];
+      var kitNum=_kitMap3[fim]||'';
 
-    // Tabela interna
-    h+='<table style="width:100%;border-collapse:collapse">';
-    h+='<thead><tr style="background:#F8F9FA">';
-    h+='<th style="'+TH+'">Entregável</th>';
-    h+='<th style="'+TH+';width:60px">Início</th>';
-    h+='<th style="'+TH+';width:28px;text-align:center">Dias</th>';
-    h+='<th style="'+TH+'">Profissional</th>';
-    h+='<th style="'+TH+'">Obs.</th>';
-    h+='<th style="'+TH+';width:80px;text-align:center">Situação</th>';
-    h+='</tr></thead><tbody>';
+      // Agrupa por tipo — junta andares numa coluna
+      var porTipo={},tiposOrdem2=[];
+      grupo.forEach(function(r){
+        if(!porTipo[r.tipo]){porTipo[r.tipo]={ini:r.ini,fim2:r.fim,dias:r.dias,arquiteto:r.arquiteto,notas:r.notas,andares:[]};tiposOrdem2.push(r.tipo);}
+        porTipo[r.tipo].andares.push(r.andar);
+      });
+      var tiposVistas2={};
+      tiposOrdem2=tiposOrdem2.filter(function(k){if(tiposVistas2[k])return false;tiposVistas2[k]=true;return true;});
 
-    tiposOrdem.forEach(function(tipo){
-      var itens=porTipo[tipo];
-      itens.forEach(function(r,ri){
-        var fc=getFloorColor(r.andar);
-        // Título do tipo: só na primeira linha do grupo de mesmo tipo
-        var tipoCell=ri===0
-          ?'<span style="display:inline-flex;align-items:center;gap:5px"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:'+fc+'"></span><strong style="font-family:var(--font);font-size:11px">'+tipo+'</strong></span>'
-          :'<span style="padding-left:20px;font-size:10px;color:var(--gl)">↳</span>';
-        // Andar na mesma linha (sempre visível)
-        var andarCell='<span style="margin-left:6px;font-size:10.5px;color:#6B7280">'+r.andar+'</span>';
-        h+='<tr style="border-top:'+(ri===0&&tipo!==tiposOrdem[0]?'1px solid #EEF0F4':'none')+'">';
-        h+='<td style="'+TD+'">'+tipoCell+andarCell+'</td>';
-        h+='<td style="'+TD+';font-size:10.5px;color:var(--gl);white-space:nowrap">'+fBR2(r.ini)+'</td>';
-        h+='<td style="'+TD+';text-align:center;font-family:var(--font);font-weight:700;color:var(--tf-dk);font-size:11px">'+r.dias+'d</td>';
-        h+='<td style="'+TD+';font-size:11px">'+r.arquiteto+'</td>';
-        h+='<td style="'+TD+';color:var(--gl);font-style:italic;font-size:10.5px">'+r.notas+'</td>';
-        // Coluna de situação — espaço reservado para controle futuro
-        h+='<td style="'+TD+';text-align:center">';
-        h+='<div style="width:60px;height:20px;border:1px solid #E5E7EB;border-radius:4px;margin:0 auto"></div>';
-        h+='</td>';
+      // Box do kit
+      h+='<div style="border:1.5px solid #D0D5DF;border-radius:8px;margin-bottom:14px;overflow:hidden;page-break-inside:avoid">';
+      // Header do kit
+      h+='<div style="display:flex;align-items:center;gap:10px;padding:7px 12px;background:#F4F5F8;border-bottom:1px solid #D0D5DF">';
+      if(kitNum)h+='<span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#1A2535;color:#fff;font-family:var(--font);font-size:10px;font-weight:700;flex-shrink:0">'+kitNum+'</span>';
+      h+='<span style="font-family:var(--font);font-size:12px;font-weight:700;color:#1A1D23">Entrega · '+fBR2(fim)+'</span>';
+      h+='<span style="margin-left:auto;font-size:10px;color:#9AA0B0;font-family:var(--font)">'+tiposOrdem2.length+' entregável'+(tiposOrdem2.length>1?'is':'')+'</span>';
+      h+='<div style="width:72px;text-align:right;font-size:10px;color:#9AA0B0;font-family:var(--font);letter-spacing:.04em">SITUAÇÃO</div>';
+      h+='</div>';
+
+      // Tabela
+      h+='<table style="width:100%;border-collapse:collapse">';
+      h+='<thead><tr style="background:#F8F9FA">';
+      h+='<th style="'+TH+'">Entregável</th>';
+      h+='<th style="'+TH+';width:72px">Andares</th>';
+      h+='<th style="'+TH+';width:110px">Início – Fim</th>';
+      h+='<th style="'+TH+';width:28px;text-align:center">Dias</th>';
+      h+='<th style="'+TH+'">Profissional</th>';
+      h+='<th style="'+TH+'">Obs.</th>';
+      h+='<th style="'+TH+';width:72px;text-align:center">Situação</th>';
+      h+='</tr></thead><tbody>';
+
+      tiposOrdem2.forEach(function(tipo,ti){
+        var t=porTipo[tipo];
+        var fc=getFloorColor(t.andares[0]);
+        var borderTop=ti>0?'border-top:1px solid #EEF0F4;':'';
+        h+='<tr style="'+borderTop+'">';
+        h+='<td style="'+TD+'"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:'+fc+';margin-right:5px;vertical-align:middle"></span><strong style="font-family:var(--font);font-size:11px">'+tipo+'</strong></td>';
+        h+='<td style="'+TD+';font-size:10.5px;color:#6B7280">'+t.andares.join(', ')+'</td>';
+        h+='<td style="'+TD+';font-size:10.5px;color:var(--gl);white-space:nowrap">'+fBR2(t.ini)+' – '+fBR2(t.fim2)+'</td>';
+        h+='<td style="'+TD+';text-align:center;font-family:var(--font);font-weight:700;color:var(--tf-dk);font-size:11px">'+t.dias+'d</td>';
+        h+='<td style="'+TD+';font-size:11px">'+t.arquiteto+'</td>';
+        h+='<td style="'+TD+';color:var(--gl);font-style:italic;font-size:10.5px">'+t.notas+'</td>';
+        h+='<td style="'+TD+';text-align:center"><div style="width:56px;height:18px;border:1px solid #E5E7EB;border-radius:4px;margin:0 auto"></div></td>';
         h+='</tr>';
       });
-    });
 
-    h+='</tbody></table></div>';
+      h+='</tbody></table></div>';
+    });
   });
   h+='</div>'; // rpt-section
   h+='</div>'; // rpt-doc
