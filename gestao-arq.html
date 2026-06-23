@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- gestao-arq v6.03.91 build:20260622194947-->
+<!-- gestao-arq v6.03.92 build:20260622194947-->
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"/>
@@ -2233,7 +2233,8 @@ function renderRptNova(){
       _pTiposOrdem.forEach(function(tipo,ti){
         var t=_pTipo[tipo];
         var fc=getFloorColor(t.andares[0]);
-        var _pBarData={id:(t.ids&&t.ids[0])||('rpt2_'+tipo+'_'+fim),ids:t.ids&&t.ids.length?t.ids:[(t.ids&&t.ids[0])||''],tipo:tipo,andar:t.andares.join(', '),isAll:t.andares.length>1,andares:t.andares,arquiteto:t.arquiteto,dataInicio:t.ini,dias:t.dias,notas:t.notas,etId:Object.keys(plano).find(function(eid){return(plano[eid]||[]).some(function(a){return t.ids.indexOf(a.id)>=0;});})};
+        var _pBarIds=t.ids&&t.ids.length?t.ids:[];
+        var _pBarData={id:_pBarIds[0]||('rpt2_'+tipo+'_'+fim),ids:_pBarIds,tipo:tipo,andar:t.andares.join(', '),isAll:t.andares.length>1,andares:t.andares,arquiteto:t.arquiteto,dataInicio:t.ini,dias:t.dias,notas:t.notas,etId:etKey};
         var _pBarJson=JSON.stringify(_pBarData).replace(/'/g,"&#39;");
         var borderTop=ti>0?'border-top:1px solid #EEF0F4;':'';
         h+='<tr style="'+borderTop+'cursor:pointer;transition:background .12s" data-bar=\''+_pBarJson+'\' onclick="openBarEdit(event,this)" onmouseover="this.style.background=\'#F0F4FF\'" onmouseout="this.style.background=\'\'">';
