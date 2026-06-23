@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- gestao-arq v6.03.88 build:20260622194947-->
+<!-- gestao-arq v6.03.90 build:20260622194947-->
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"/>
@@ -1985,7 +1985,7 @@ function renderRptNova(){
 
   // CSS inline reutilizável
   var TH='padding:3px 4px;font-family:var(--font);font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--gl);border-bottom:1px solid var(--border);white-space:nowrap;text-align:left';
-  var TD='padding:3px 8px;font-size:11px;border-bottom:1px solid #F2F3F4;vertical-align:middle';
+  var TD='padding:3px 8px;font-size:11px;border-bottom:1px solid #F2F3F4;vertical-align:middle;color:#111';
 
   // ── SEÇÃO 2: Por data de término ──────────────────────────────────────────
   h+='<div class="rpt-sec"><div class="rpt-sec-title">Entregáveis por data de t\xe9rmino</div>';
@@ -2080,8 +2080,8 @@ function renderRptNova(){
         var _rowStyle='cursor:pointer;transition:background .12s';
         h+='<tr style="'+borderTop+_rowStyle+'" data-bar=\''+_barJson+'\' onclick="openBarEdit(event,this)" onmouseover="this.style.background=\'#F0F4FF\'" onmouseout="this.style.background=\'\'">';
         h+='<td style="'+TD+'"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:'+fc+';margin-right:5px;vertical-align:middle"></span><strong style="font-family:var(--font);font-size:11px">'+tipo+'</strong></td>';
-        h+='<td style="'+TD+';color:var(--gl);font-style:italic;font-size:10.5px">'+t.notas+'</td>';
-        h+='<td style="'+TD+';font-size:10.5px;color:#6B7280">'+t.andares.join(', ')+'</td>';
+        h+='<td style="'+TD+';color:#444;font-style:italic;font-size:10.5px">'+t.notas+'</td>';
+        h+='<td style="'+TD+';font-size:10.5px;color:#333">'+t.andares.join(', ')+'</td>';
         h+='<td style="'+TD+';font-size:10.5px;color:var(--gl);white-space:nowrap">'+fBR2(t.ini)+' – '+fBR2(t.fim2)+'</td>';
         h+='<td style="'+TD+';text-align:center;font-family:var(--font);font-weight:700;color:var(--tf-dk);font-size:11px">'+t.dias+'d</td>';
         h+='<td style="'+TD+';font-size:11px">'+t.arquiteto+'</td>';
@@ -2115,11 +2115,13 @@ function renderRptNova(){
 
   todasPessoas.forEach(function(nome){
     var itens=todas.filter(function(r){return r.arquiteto===nome;});
+    if(!itens.length)return; // sem entregas: pula
     itens.sort(function(a,b){return a.ini<b.ini?-1:1;});
 
-    // Numeração global: usa computeKitMap() para números únicos por data de entrega
+    // numMap PESSOAL: só as datas de fim deste colaborador
     var _globalKitMap=computeKitMap();
-    var numMap=_globalKitMap;
+    var _pessoalFims={};
+    itens.forEach(function(r){if(r.fim)_pessoalFims[r.fim]=_globalKitMap[r.fim];});
     itens.forEach(function(r){ r._num=_globalKitMap[r.fim]||'?'; });
 
     var init=nome.split(' ').map(function(w){return w[0];}).slice(0,2).join('');
@@ -2163,62 +2165,90 @@ function renderRptNova(){
     });
     h+='</tr>';
 
-    // Linha 3: marcações
+    // Linha 3: bolinhas apenas dos entregáveis deste colaborador
     h+='<tr style="height:28px">';
     projDias.forEach(function(d){
       var etId=projDiaMap[d]?projDiaMap[d].etId:'';
       var pal=etMap[etId]?etMap[etId].pal:{border:'#ccc',light:'transparent'};
-      var num=numMap[d];
+      var num=_pessoalFims[d]; // só datas deste colaborador
       var isFimEt=etapeFimSet[d]!==undefined;
       var andarColor='';
-      if(num!==undefined){var ri=itens.find(function(r){return r.ini===d;});if(ri)andarColor=getFloorColor(ri.andar);}
+      if(num!==undefined){var ri=itens.find(function(r){return r.fim===d;});if(ri)andarColor=getFloorColor(ri.andar);}
       h+='<td style="text-align:center;border-top:1px solid #eee;border-bottom:1px solid #eee;border-right:'+(isFimEt?'2px solid '+pal.border:'0.5px solid #eee')+';background:'+(num!==undefined?andarColor+'18':'')+';">'
         +(num!==undefined?'<span style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:#111;color:#fff;font-size:8px;font-weight:700;font-family:var(--font)">'+num+'</span>':'')
         +'</td>';
     });
     h+='</tr></thead></table></div>';
 
-    // Tabela de entregáveis
-    h+='<table style="width:100%;border-collapse:collapse"><thead><tr style="background:#F8F9FA">'
-      +'<th style="'+TH+';width:28px;text-align:center">#</th>'
-      +'<th style="'+TH+'">Entregável</th>'
-      +'<th style="'+TH+'">Andar</th>'
-      +'<th style="'+TH+'">Período</th>'
-      +'<th style="'+TH+';text-align:center;width:36px">Dias</th>'
-      +'<th style="'+TH+'">Observação</th>'
-    // Agrupar por data de entrega (r.fim)
-    var gruposFim={},fimsSeq=[];
+        // Tabela por colaborador — mesmo formato da seção 1 (agrupado por data de entrega)
+    var _pFimMap={},_pFimsOrdem=[];
     itens.forEach(function(r){
-      if(!gruposFim[r.fim]){gruposFim[r.fim]=[];fimsSeq.push(r.fim);}
-      gruposFim[r.fim].push(r);
+      if(!_pFimMap[r.fim]){_pFimMap[r.fim]=[];_pFimsOrdem.push(r.fim);}
+      _pFimMap[r.fim].push(r);
     });
-    fimsSeq.sort();
-    var rowIdx=0;
-    var firstGrp=true;
-    fimsSeq.forEach(function(fim){
-      var grp=gruposFim[fim];
-      // Linha separadora entre grupos de entrega (exceto antes do primeiro)
-      if(!firstGrp){
-        h+='<tr><td colspan="6" style="height:8px;padding:0;border-bottom:2px solid #E8EAED"></td></tr>';
-      }
-      firstGrp=false;
-      grp.forEach(function(r,gi){
-        var fc=getFloorColor(r.andar);
-        var bg=rowIdx%2===1?'#FAFBFC':'#fff';
-        h+='<tr style="background:'+bg+'">'
-          +'<td style="'+TD+';text-align:center">'
-            +'<span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#111;color:#fff;font-size:10px;font-weight:700;font-family:var(--font)">'+r._num+'</span>'
-          +'</td>'
-          +'<td style="'+TD+';font-family:var(--font);font-weight:700">'+r.tipo+'</td>'
-          +'<td style="'+TD+'"><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:'+fc+';margin-right:4px;vertical-align:middle"></span>'+r.andar+'</td>'
-          +'<td style="'+TD+';color:var(--gl);font-size:11px;white-space:nowrap">'+fBR2(r.ini)+(r.dias>1?' &rarr; '+fBR2(r.fim):'')+' </td>'
-          +'<td style="'+TD+';text-align:center;font-family:var(--font);font-weight:700;color:var(--tf-dk)">'+r.dias+'d</td>'
-          +'<td style="'+TD+';color:var(--gl);font-style:italic;font-size:10.5px">'+r.notas+'</td>'
-          +'</tr>';
-        rowIdx++;
+    _pFimsOrdem.sort();
+
+    _pFimsOrdem.forEach(function(fim){
+      var pGrupo=_pFimMap[fim];
+      var kitNum=_globalKitMap[fim]||'';
+
+      // Box do kit (mesmo visual da seção 1)
+      h+='<div style="border:1.5px solid #D0D5DF;border-radius:8px;margin:0 12px 12px;overflow:hidden;page-break-inside:avoid">';
+      h+='<div style="display:flex;align-items:center;gap:10px;padding:7px 12px;background:#F4F5F8;border-bottom:1px solid #D0D5DF">';
+      if(kitNum)h+='<span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#1A2535;color:#fff;font-family:var(--font);font-size:10px;font-weight:700;flex-shrink:0">'+kitNum+'</span>';
+      h+='<span style="font-family:var(--font);font-size:12px;font-weight:700;color:#1A1D23">Entrega · '+fBR2(fim)+'</span>';
+      h+='<span style="margin-left:auto;font-size:10px;color:#9AA0B0;font-family:var(--font)">'+pGrupo.length+' item'+(pGrupo.length>1?'s':'')+'</span>';
+      h+='<div style="width:72px;text-align:right;font-size:10px;color:#9AA0B0;font-family:var(--font);letter-spacing:.04em">SITUAÇÃO</div>';
+      h+='</div>';
+
+      // Agrupa por tipo
+      var _pTipo={},_pTiposOrdem=[];
+      pGrupo.forEach(function(r){
+        if(!_pTipo[r.tipo]){_pTipo[r.tipo]={ini:r.ini,fim2:r.fim,dias:r.dias,arquiteto:r.arquiteto,notas:r.notas,andares:[],ids:[]};_pTiposOrdem.push(r.tipo);}
+        _pTipo[r.tipo].andares.push(r.andar);
+        if(r.alocId)_pTipo[r.tipo].ids.push(r.alocId);
       });
+      var _pTV={};_pTiposOrdem=_pTiposOrdem.filter(function(k){if(_pTV[k])return false;_pTV[k]=true;return true;});
+
+      h+='<table class="rpt-kit-tbl" style="width:100%;border-collapse:collapse;table-layout:fixed">';
+      h+='<colgroup>';
+      h+='<col class="col-entregavel" style="width:'+_rptColEnt+'px">';
+      h+='<col class="col-obs" style="width:'+_rptColObs+'px">';
+      h+='<col style="width:72px">';
+      h+='<col style="width:110px">';
+      h+='<col style="width:32px">';
+      h+='<col style="width:120px">';
+      h+='<col style="width:72px">';
+      h+='</colgroup>';
+      h+='<thead><tr style="background:#F8F9FA">';
+      h+='<th style="'+TH+';position:relative;user-select:none">Entregável<div class="col-resize-handle" onmousedown="rptColResizeStart(event)" style="position:absolute;right:-3px;top:0;bottom:0;width:6px;cursor:col-resize;z-index:10;display:flex;align-items:center;justify-content:center"><div style="width:2px;height:12px;background:#D0D5DF;border-radius:1px"></div></div></th>';
+      h+='<th style="'+TH+'">Obs.</th>';
+      h+='<th style="'+TH+'">Andares</th>';
+      h+='<th style="'+TH+'">Início – Fim</th>';
+      h+='<th style="'+TH+';text-align:center">Dias</th>';
+      h+='<th style="'+TH+'">Profissional</th>';
+      h+='<th style="'+TH+';text-align:center">Situação</th>';
+      h+='</tr></thead><tbody>';
+
+      _pTiposOrdem.forEach(function(tipo,ti){
+        var t=_pTipo[tipo];
+        var fc=getFloorColor(t.andares[0]);
+        var _pBarData={id:(t.ids&&t.ids[0])||('rpt2_'+tipo+'_'+fim),ids:t.ids&&t.ids.length?t.ids:[(t.ids&&t.ids[0])||''],tipo:tipo,andar:t.andares.join(', '),isAll:t.andares.length>1,andares:t.andares,arquiteto:t.arquiteto,dataInicio:t.ini,dias:t.dias,notas:t.notas,etId:Object.keys(plano).find(function(eid){return(plano[eid]||[]).some(function(a){return t.ids.indexOf(a.id)>=0;});})};
+        var _pBarJson=JSON.stringify(_pBarData).replace(/'/g,"&#39;");
+        var borderTop=ti>0?'border-top:1px solid #EEF0F4;':'';
+        h+='<tr style="'+borderTop+'cursor:pointer;transition:background .12s" data-bar=\''+_pBarJson+'\' onclick="openBarEdit(event,this)" onmouseover="this.style.background=\'#F0F4FF\'" onmouseout="this.style.background=\'\'">';
+        h+='<td style="'+TD+'"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:'+fc+';margin-right:5px;vertical-align:middle"></span><strong style="font-family:var(--font);font-size:11px">'+tipo+'</strong></td>';
+        h+='<td style="'+TD+';color:#444;font-style:italic;font-size:10.5px">'+t.notas+'</td>';
+        h+='<td style="'+TD+';font-size:10.5px;color:#333">'+t.andares.join(', ')+'</td>';
+        h+='<td style="'+TD+';font-size:10.5px;color:#444;white-space:nowrap">'+fBR2(t.ini)+' – '+fBR2(t.fim2)+'</td>';
+        h+='<td style="'+TD+';text-align:center;font-family:var(--font);font-weight:700;color:var(--tf-dk);font-size:11px">'+t.dias+'d</td>';
+        h+='<td style="'+TD+';font-size:11px;color:#111">'+t.arquiteto+'</td>';
+        h+='<td style="'+TD+';text-align:center"><div style="width:56px;height:18px;border:1px solid #E5E7EB;border-radius:4px;margin:0 auto"></div></td>';
+        h+='</tr>';
+      });
+      h+='</tbody></table></div>';
     });
-    h+='</tbody></table></div>'; // rpt-prof-block
+    h+='</div>'; // rpt-prof-block
   });
   h+='</div>'; // seção 1
   el.innerHTML=h;
