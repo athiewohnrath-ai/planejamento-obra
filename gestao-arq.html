@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- gestao-arq v6.03.84 build:20260622194947-->
+<!-- gestao-arq v6.03.85 build:20260622194947-->
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"/>
@@ -1440,7 +1440,11 @@ function openBarEdit(ev,el){
   try{bar=JSON.parse(el.dataset.bar);}catch(e){return;}
   closeBarEdit();
   _barEditData=bar;_barEditDias=bar.dias;
-  var et=CTX&&CTX.etapas.find(function(e){return e.id===curEt;});
+  if(!_barEditData.ids){_barEditData.ids=[_barEditData.id];} // garante ids[] para confirmBarEdit
+  // Se chamado do relatório, usa etId do bar
+  var _etIdToUse=bar.etId||curEt;
+  if(bar.etId&&bar.etId!==curEt)curEt=bar.etId;
+  var et=CTX&&CTX.etapas.find(function(e){return e.id===_etIdToUse;});
   // Combinar todos: colaboradores (diretor+GAs) + arquitetos
   var todasOpcoes=[];
   var collabOrdem=[];
@@ -1521,12 +1525,14 @@ function confirmBarEdit(){
     if(item){item.dias=_barEditDias;item.arquiteto=novoArq;if(_barEditIso)item.dataInicio=_barEditIso;item.notas=novaNotas;}
   });
   closeBarEdit();salvAloc();renderEnt();renderCal();
+  if(curScr===4)renderRptNova();
   toast('Alocação atualizada');
 }
 function barDelete2(){
   if(!_barEditData||!plano[curEt]){closeBarEdit();return;}
   plano[curEt]=plano[curEt].filter(function(a){return _barEditData.ids.indexOf(a.id)<0;});
   closeBarEdit();salvAloc();renderEnt();renderCal();
+  if(curScr===4)renderRptNova();
 }
 function closeBarEdit(){if(_barEditPop){_barEditPop.remove();_barEditPop=null;}_barEditData=null;}
 
@@ -1997,21 +2003,21 @@ function renderRptNova(){
       // Tabela com larguras fixas para alinhamento consistente entre todos os kits
       h+='<table style="width:100%;border-collapse:collapse;table-layout:fixed">';
       h+='<colgroup>';
-      h+='<col style="width:auto">'; // Entregável
-      h+='<col style="width:80px">';  // Andares
+      h+='<col style="width:auto">';  // Entregável
+      h+='<col style="width:100px">'; // Obs
+      h+='<col style="width:72px">';  // Andares
       h+='<col style="width:110px">'; // Início–Fim
       h+='<col style="width:32px">';  // Dias
-      h+='<col style="width:130px">'; // Profissional
-      h+='<col style="width:80px">';  // Obs
+      h+='<col style="width:120px">'; // Profissional
       h+='<col style="width:72px">';  // Situação
       h+='</colgroup>';
       h+='<thead><tr style="background:#F8F9FA">';
       h+='<th style="'+TH+'">Entregável</th>';
+      h+='<th style="'+TH+'">Obs.</th>';
       h+='<th style="'+TH+'">Andares</th>';
       h+='<th style="'+TH+'">Início – Fim</th>';
       h+='<th style="'+TH+';text-align:center">Dias</th>';
       h+='<th style="'+TH+'">Profissional</th>';
-      h+='<th style="'+TH+'">Obs.</th>';
       h+='<th style="'+TH+';text-align:center">Situação</th>';
       h+='</tr></thead><tbody>';
 
@@ -2019,13 +2025,23 @@ function renderRptNova(){
         var t=porTipo[tipo];
         var fc=getFloorColor(t.andares[0]);
         var borderTop=ti>0?'border-top:1px solid #EEF0F4;':'';
-        h+='<tr style="'+borderTop+'">';
+        // Monta o objeto bar para o openBarEdit (reutiliza o minimodal do passo 3)
+        var _barData={
+          id:t.alocId||('rpt_'+tipo+'_'+fim),
+          tipo:tipo,andar:t.andares.join(', '),
+          isAll:t.andares.length>1,andares:t.andares,
+          arquiteto:t.arquiteto,dataInicio:t.ini,dias:t.dias,notas:t.notas,
+          etId:etKey
+        };
+        var _barJson=JSON.stringify(_barData).replace(/'/g,"&#39;");
+        var _rowStyle='cursor:pointer;transition:background .12s';
+        h+='<tr style="'+borderTop+_rowStyle+'" data-bar=\''+_barJson+'\' onclick="openBarEdit(event,this)" onmouseover="this.style.background=\'#F0F4FF\'" onmouseout="this.style.background=\'\'">';
         h+='<td style="'+TD+'"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:'+fc+';margin-right:5px;vertical-align:middle"></span><strong style="font-family:var(--font);font-size:11px">'+tipo+'</strong></td>';
+        h+='<td style="'+TD+';color:var(--gl);font-style:italic;font-size:10.5px">'+t.notas+'</td>';
         h+='<td style="'+TD+';font-size:10.5px;color:#6B7280">'+t.andares.join(', ')+'</td>';
         h+='<td style="'+TD+';font-size:10.5px;color:var(--gl);white-space:nowrap">'+fBR2(t.ini)+' – '+fBR2(t.fim2)+'</td>';
         h+='<td style="'+TD+';text-align:center;font-family:var(--font);font-weight:700;color:var(--tf-dk);font-size:11px">'+t.dias+'d</td>';
         h+='<td style="'+TD+';font-size:11px">'+t.arquiteto+'</td>';
-        h+='<td style="'+TD+';color:var(--gl);font-style:italic;font-size:10.5px">'+t.notas+'</td>';
         h+='<td style="'+TD+';text-align:center"><div style="width:56px;height:18px;border:1px solid #E5E7EB;border-radius:4px;margin:0 auto"></div></td>';
         h+='</tr>';
       });
