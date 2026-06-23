@@ -1,4 +1,4 @@
-// Planejamento de Obra A|W — v6.03.82
+// Planejamento de Obra A|W — v6.03.83
 const SB_URL='https://ejneanfveoctdlltjnrs.supabase.co';
 const SB_KEY='sb_publishable_vZApDmF_C-heCrm8fXJ_XA_ATmMO3YP';
 const SB_HDR={'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
