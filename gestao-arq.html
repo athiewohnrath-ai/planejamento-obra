@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- gestao-arq v6.03.83 build:20260622194947-->
+<!-- gestao-arq v6.03.84 build:20260622194947-->
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"/>
@@ -1941,7 +1941,7 @@ function renderRptNova(){
 
   // ── SEÇÃO 2: Por data de término ──────────────────────────────────────────
   h+='<div class="rpt-sec"><div class="rpt-sec-title">Entregáveis por data de t\xe9rmino</div>';
-  h+=_calHtml||'';
+  h+='<!--CAL_PLACEHOLDER-->';
   var ordenados=todas.slice().sort(function(a,b){return a.fim<b.fim?-1:a.fim>b.fim?1:a.tipo<b.tipo?-1:1;});
   var porFim={},fimsOrdem=[];
   ordenados.forEach(function(r){if(!porFim[r.fim]){porFim[r.fim]=[];fimsOrdem.push(r.fim);}porFim[r.fim].push(r);});
@@ -2051,6 +2051,8 @@ function renderRptNova(){
   // Salva o calendário para injetar na seção 1
   var _kitMapGlobal=computeKitMap();
   var _calHtml=_renderCalEntregas(etIds,etMap,etGroups,projDias,projDiaMap,etapeFimSet,_kitMapGlobal);
+  // Substitui o placeholder pelo calendário real
+  h=h.replace('<!--CAL_PLACEHOLDER-->',_calHtml);
 
   todasPessoas.forEach(function(nome){
     var itens=todas.filter(function(r){return r.arquiteto===nome;});
