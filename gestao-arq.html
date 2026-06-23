@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- gestao-arq v6.03.86 build:20260622194947-->
+<!-- gestao-arq v6.03.87 build:20260622194947-->
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"/>
@@ -544,6 +544,48 @@ function adjFont(d){_fscale=Math.max(0.7,Math.min(1.8,Math.round((_fscale+d)*10)
 
 
 
+
+
+// ── Resize de colunas do relatório ───────────────────────────────────────────
+var _rptColEnt = 200; // largura inicial da coluna Entregável
+var _rptColObs = 120; // largura inicial da coluna Obs
+var _rptResizing = false;
+var _rptResizeStartX = 0;
+var _rptResizeStartEnt = 0;
+var _rptResizeStartObs = 0;
+
+function rptColResizeStart(e){
+  e.preventDefault();
+  e.stopPropagation();
+  _rptResizing = true;
+  _rptResizeStartX = e.clientX;
+  _rptResizeStartEnt = _rptColEnt;
+  _rptResizeStartObs = _rptColObs;
+  document.addEventListener('mousemove', rptColResizeMove);
+  document.addEventListener('mouseup', rptColResizeEnd);
+  document.body.style.cursor = 'col-resize';
+  document.body.style.userSelect = 'none';
+}
+
+function rptColResizeMove(e){
+  if(!_rptResizing) return;
+  var dx = e.clientX - _rptResizeStartX;
+  _rptColEnt = Math.max(120, _rptResizeStartEnt + dx);
+  _rptColObs = Math.max(60,  _rptResizeStartObs - dx);
+  // Atualiza todas as tabelas do relatório sem re-renderizar
+  var cols = document.querySelectorAll('.rpt-kit-tbl .col-entregavel');
+  cols.forEach(function(c){ c.style.width = _rptColEnt + 'px'; });
+  var colsObs = document.querySelectorAll('.rpt-kit-tbl .col-obs');
+  colsObs.forEach(function(c){ c.style.width = _rptColObs + 'px'; });
+}
+
+function rptColResizeEnd(){
+  _rptResizing = false;
+  document.removeEventListener('mousemove', rptColResizeMove);
+  document.removeEventListener('mouseup', rptColResizeEnd);
+  document.body.style.cursor = '';
+  document.body.style.userSelect = '';
+}
 
 // ── Controle de escala horizontal do Gantt (passo 1) ─────────────────────────
 var _g1Scale = 1.0; // escala atual (1.0 = normal)
@@ -2002,19 +2044,18 @@ function renderRptNova(){
       h+='</div>';
 
       // Tabela com larguras fixas para alinhamento consistente entre todos os kits
-      h+='<table style="width:100%;border-collapse:collapse;table-layout:fixed">';
+      h+='<table class="rpt-kit-tbl" style="width:100%;border-collapse:collapse;table-layout:fixed">';
       h+='<colgroup>';
-      h+='<col style="width:auto">';  // Entregável
-      h+='<col style="width:100px">'; // Obs
-      h+='<col style="width:72px">';  // Andares
-      h+='<col style="width:110px">'; // Início–Fim
-      h+='<col style="width:32px">';  // Dias
-      h+='<col style="width:120px">'; // Profissional
-      h+='<col style="width:72px">';  // Situação
+      h+='<col class="col-entregavel" style="width:'+_rptColEnt+'px">';
+      h+='<col class="col-obs" style="width:'+_rptColObs+'px">';
+      h+='<col style="width:72px">';   // Andares
+      h+='<col style="width:110px">';  // Início–Fim
+      h+='<col style="width:32px">';   // Dias
+      h+='<col style="width:120px">';  // Profissional
+      h+='<col style="width:72px">';   // Situação
       h+='</colgroup>';
       h+='<thead><tr style="background:#F8F9FA">';
-      h+='<th style="'+TH+'">Entregável</th>';
-      h+='<th style="'+TH+'">Obs.</th>';
+      h+='<th style="'+TH+';position:relative;user-select:none">Entregável'        +'<div class="col-resize-handle" onmousedown="rptColResizeStart(event)" '        +'style="position:absolute;right:-3px;top:0;bottom:0;width:6px;cursor:col-resize;z-index:10'        +';display:flex;align-items:center;justify-content:center">'        +'<div style="width:2px;height:12px;background:#D0D5DF;border-radius:1px"></div></div></th>';      h+='<th style="'+TH+'">Obs.</th>';
       h+='<th style="'+TH+'">Andares</th>';
       h+='<th style="'+TH+'">Início – Fim</th>';
       h+='<th style="'+TH+';text-align:center">Dias</th>';
