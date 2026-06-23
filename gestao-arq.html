@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- gestao-arq v6.03.85 build:20260622194947-->
+<!-- gestao-arq v6.03.86 build:20260622194947-->
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"/>
@@ -1869,7 +1869,7 @@ function renderRptNova(){
       todas.push({et:et?et.label||etId:etId,etId:etId,
         tipo:item.tipo,andar:item.andar,arquiteto:item.arquiteto,
         ini:datas[0]||item.dataInicio,fim:datas[datas.length-1]||item.dataInicio,
-        dias:item.dias,notas:item.notas||''});
+        dias:item.dias,notas:item.notas||'',alocId:item.id});
     });
   });
 
@@ -1984,8 +1984,9 @@ function renderRptNova(){
       // Agrupa por tipo — junta andares numa coluna
       var porTipo={},tiposOrdem2=[];
       grupo.forEach(function(r){
-        if(!porTipo[r.tipo]){porTipo[r.tipo]={ini:r.ini,fim2:r.fim,dias:r.dias,arquiteto:r.arquiteto,notas:r.notas,andares:[]};tiposOrdem2.push(r.tipo);}
+        if(!porTipo[r.tipo]){porTipo[r.tipo]={ini:r.ini,fim2:r.fim,dias:r.dias,arquiteto:r.arquiteto,notas:r.notas,andares:[],ids:[]};tiposOrdem2.push(r.tipo);}
         porTipo[r.tipo].andares.push(r.andar);
+        if(r.alocId)porTipo[r.tipo].ids.push(r.alocId);
       });
       var tiposVistas2={};
       tiposOrdem2=tiposOrdem2.filter(function(k){if(tiposVistas2[k])return false;tiposVistas2[k]=true;return true;});
@@ -2027,7 +2028,8 @@ function renderRptNova(){
         var borderTop=ti>0?'border-top:1px solid #EEF0F4;':'';
         // Monta o objeto bar para o openBarEdit (reutiliza o minimodal do passo 3)
         var _barData={
-          id:t.alocId||('rpt_'+tipo+'_'+fim),
+          id:(t.ids&&t.ids[0])||('rpt_'+tipo+'_'+fim),
+          ids:t.ids&&t.ids.length?t.ids:[(t.ids&&t.ids[0])||('rpt_'+tipo+'_'+fim)],
           tipo:tipo,andar:t.andares.join(', '),
           isAll:t.andares.length>1,andares:t.andares,
           arquiteto:t.arquiteto,dataInicio:t.ini,dias:t.dias,notas:t.notas,
