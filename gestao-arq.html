@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- gestao-arq v6.03.93 build:20260623185143 -->
+<!-- gestao-arq v6.03.94 build:20260623185323 -->
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"/>
@@ -2159,7 +2159,7 @@ function renderRptNova(){
       var etId=projDiaMap[d]?projDiaMap[d].etId:'';
       var pal=etMap[etId]?etMap[etId].pal:{txt:'#999',border:'#ccc'};
       var isFimEt=etapeFimSet[d]!==undefined;
-      var hasItem=numMap[d]!==undefined;
+      var hasItem=_pessoalFims[d]!==undefined;
       h+='<td style="padding:2px 0;text-align:center;font-size:7px;color:'+(hasItem?pal.txt:'#bbb')+';'+(isFimEt?'border-right:2px solid '+pal.border+';':'')+'">'
         +d.slice(8)+'</td>';
     });
