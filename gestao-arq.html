@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- gestao-arq v6.03.81 build:20260622194947-->
+<!-- gestao-arq v6.03.82 build:20260622194947-->
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"/>
@@ -1963,10 +1963,6 @@ function renderRptNova(){
   var etapasVistas={};
   etapasOrdem=etapasOrdem.filter(function(k){if(etapasVistas[k])return false;etapasVistas[k]=true;return true;});
 
-  // Calendário global no topo da seção
-  var _kitMapGlobal=computeKitMap();
-  h+=_renderCalEntregas(etIds,etMap,etGroups,projDias,projDiaMap,etapeFimSet,_kitMapGlobal);
-
   etapasOrdem.forEach(function(etKey){
     var etInfo=porEtapa[etKey];
     var fimsDestaEtapa=Object.keys(etInfo.fims).sort();
@@ -2050,6 +2046,11 @@ function renderRptNova(){
   });
   var nCols=projDias.length;
   var pct=(100/Math.max(nCols,1)).toFixed(3)+'%';
+
+  // ── Cabeçalho da seção 1 + calendário global ─────────────────────────────
+  h+='<div class="rpt-sec"><div class="rpt-sec-title">Entregas por data</div>';
+  var _kitMapGlobal=computeKitMap();
+  h+=_renderCalEntregas(etIds,etMap,etGroups,projDias,projDiaMap,etapeFimSet,_kitMapGlobal);
 
   todasPessoas.forEach(function(nome){
     var itens=todas.filter(function(r){return r.arquiteto===nome;});
