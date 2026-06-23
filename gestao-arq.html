@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- gestao-arq v6.03.78 build:20260622194947-->
+<!-- gestao-arq v6.03.79 build:20260622194947-->
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"/>
@@ -1897,33 +1897,71 @@ function renderRptNova(){
   var porFim={},fimsOrdem=[];
   ordenados.forEach(function(r){if(!porFim[r.fim]){porFim[r.fim]=[];fimsOrdem.push(r.fim);}porFim[r.fim].push(r);});
 
-  h+='<table style="width:100%;border-collapse:collapse"><thead><tr style="background:#F8F9FA">'
-    +'<th style="'+TH+';width:80px">Término</th>'
-    +'<th style="'+TH+'">Entregável</th>'
-    +'<th style="'+TH+';width:48px">Andar</th>'
-    +'<th style="'+TH+'">Profissional</th>'
-    +'<th style="'+TH+';width:68px">Início</th>'
-    +'<th style="'+TH+';width:34px;text-align:center">Dias</th>'
-    +'<th style="'+TH+'">Obs.</th>'
-    +'</tr></thead><tbody>';
-
+  // Renderiza cada data de entrega como um box separado
   fimsOrdem.forEach(function(fim,fi){
     var grupo=porFim[fim];
-    grupo.forEach(function(r,ri){
-      var fc=getFloorColor(r.andar);
-      var bg=fi%2===1?'#FAFBFC':'#fff';
-      h+='<tr style="background:'+bg+'">'
-        +'<td style="'+TD+';font-family:var(--font);font-size:11px;white-space:nowrap">'+(ri===0?'<strong>'+fBR2(fim)+'</strong>':'')+'</td>'
-        +'<td style="'+TD+';font-family:var(--font);font-weight:600"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:'+fc+';margin-right:5px;vertical-align:middle"></span>'+r.tipo+'</td>'
-        +'<td style="'+TD+';font-size:10.5px;color:var(--gl)">'+r.andar+'</td>'
-        +'<td style="'+TD+';font-size:11px">'+r.arquiteto+'</td>'
-        +'<td style="'+TD+';color:var(--gl);font-size:10.5px;white-space:nowrap">'+fBR2(r.ini)+'</td>'
-        +'<td style="'+TD+';text-align:center;font-family:var(--font);font-weight:700;color:var(--tf-dk)">'+r.dias+'d</td>'
-        +'<td style="'+TD+';color:var(--gl);font-style:italic;font-size:10.5px">'+r.notas+'</td>'
-        +'</tr>';
+
+    // Agrupa por tipo dentro da mesma data (título único para mesmo tipo)
+    var porTipo={},tiposOrdem=[];
+    grupo.forEach(function(r){
+      if(!porTipo[r.tipo]){porTipo[r.tipo]=[];tiposOrdem.push(r.tipo);}
+      porTipo[r.tipo].push(r);
     });
+
+    // Número do kit
+    var _globalKitMap2=computeKitMap();
+    var kitNum=_globalKitMap2[fim]||'';
+
+    // Box do kit
+    h+='<div style="border:1.5px solid #D0D5DF;border-radius:8px;margin-bottom:16px;overflow:hidden;page-break-inside:avoid">';
+
+    // Header do box
+    h+='<div style="display:flex;align-items:center;gap:10px;padding:8px 14px;background:#F4F5F8;border-bottom:1px solid #D0D5DF">';
+    if(kitNum)h+='<span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:#1A2535;color:#fff;font-family:var(--font);font-size:11px;font-weight:700;flex-shrink:0">'+kitNum+'</span>';
+    h+='<span style="font-family:var(--font);font-size:13px;font-weight:700;color:#1A1D23">Entrega · '+fBR2(fim)+'</span>';
+    h+='<span style="margin-left:auto;font-size:10px;color:#9AA0B0;font-family:var(--font)">'+grupo.length+' item'+(grupo.length>1?'s':'')+'</span>';
+    // Coluna de status futura
+    h+='<div style="width:80px;text-align:right;font-size:10px;color:#9AA0B0;font-family:var(--font);letter-spacing:.04em">STATUS</div>';
+    h+='</div>';
+
+    // Tabela interna
+    h+='<table style="width:100%;border-collapse:collapse">';
+    h+='<thead><tr style="background:#F8F9FA">';
+    h+='<th style="'+TH+'">Entregável</th>';
+    h+='<th style="'+TH+';width:60px">Início</th>';
+    h+='<th style="'+TH+';width:28px;text-align:center">Dias</th>';
+    h+='<th style="'+TH+'">Profissional</th>';
+    h+='<th style="'+TH+'">Obs.</th>';
+    h+='<th style="'+TH+';width:80px;text-align:center">Situação</th>';
+    h+='</tr></thead><tbody>';
+
+    tiposOrdem.forEach(function(tipo){
+      var itens=porTipo[tipo];
+      itens.forEach(function(r,ri){
+        var fc=getFloorColor(r.andar);
+        // Título do tipo: só na primeira linha do grupo de mesmo tipo
+        var tipoCell=ri===0
+          ?'<span style="display:inline-flex;align-items:center;gap:5px"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:'+fc+'"></span><strong style="font-family:var(--font);font-size:11px">'+tipo+'</strong></span>'
+          :'<span style="padding-left:20px;font-size:10px;color:var(--gl)">↳</span>';
+        // Andar na mesma linha (sempre visível)
+        var andarCell='<span style="margin-left:6px;font-size:10.5px;color:#6B7280">'+r.andar+'</span>';
+        h+='<tr style="border-top:'+(ri===0&&tipo!==tiposOrdem[0]?'1px solid #EEF0F4':'none')+'">';
+        h+='<td style="'+TD+'">'+tipoCell+andarCell+'</td>';
+        h+='<td style="'+TD+';font-size:10.5px;color:var(--gl);white-space:nowrap">'+fBR2(r.ini)+'</td>';
+        h+='<td style="'+TD+';text-align:center;font-family:var(--font);font-weight:700;color:var(--tf-dk);font-size:11px">'+r.dias+'d</td>';
+        h+='<td style="'+TD+';font-size:11px">'+r.arquiteto+'</td>';
+        h+='<td style="'+TD+';color:var(--gl);font-style:italic;font-size:10.5px">'+r.notas+'</td>';
+        // Coluna de situação — espaço reservado para controle futuro
+        h+='<td style="'+TD+';text-align:center">';
+        h+='<div style="width:60px;height:20px;border:1px solid #E5E7EB;border-radius:4px;margin:0 auto"></div>';
+        h+='</td>';
+        h+='</tr>';
+      });
+    });
+
+    h+='</tbody></table></div>';
   });
-  h+='</tbody></table></div>';
+  h+='</div>'; // rpt-section
   h+='</div>'; // rpt-doc
 
   // ── SEÇÃO 1: Por profissional ─────────────────────────────────────────────
